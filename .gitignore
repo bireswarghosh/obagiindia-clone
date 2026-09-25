@@ -12,3 +12,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 /Obagi India _ obagi products_files
+
+.vercel
