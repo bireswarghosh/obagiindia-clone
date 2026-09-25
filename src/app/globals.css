@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --obagi-navy: #21275c;
+    --obagi-deep: #0e2238;
+    --obagi-gold: #b1843b;
+    --obagi-canvas: #f8f7f5;
+    --obagi-dark: #1a1c20;
+    --obagi-muted: #86868f;
+    --obagi-border: rgba(0, 0, 0, 0.08);
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--obagi-canvas);
+    color: var(--obagi-dark);
+  }
+
+  body {
+    overflow-x: hidden;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f0ee;
+}
+::-webkit-scrollbar-thumb {
+  background: #21275c;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0e2238;
+}
+
+/* 3D Perspective Utility */
+.perspective-1400 {
+  perspective: 1400px;
+  perspective-origin: center top;
+}

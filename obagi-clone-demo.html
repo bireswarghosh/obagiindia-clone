@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Obagi India - Exact 1:1 Scroll Morph & Sticky Card Stack Clone</title>
+  <title>Obagi India - 1:1 Exact 3D Perspective Card Fold & Scroll Morph</title>
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- GSAP & ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <style>
+    :root {
+      --bg-body: #f7f6f4;
+      --bg-body: #f8f7f5;
+      --navy: #0e2238;
+      --text-dark: #191c21;
+      --text-dark: #1a1c20;
+      --text-muted: #5e6670;
+      --border-card: rgba(0, 0, 0, 0.08);
+      --card-shadow: 0 12px 35px -8px rgba(0, 0, 0, 0.07);
+      --card-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.09);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-body);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text-dark);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Fixed Header / Navbar */
+    /* Fixed Header */
+    .obagi-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 72px;
+      padding: 0 4vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .brand-logo {
+      font-family: 'Cinzel', serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: var(--navy);
+    }
+    .header-tagline {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--navy);
+      text-transform: uppercase;
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+    }
+
+    /* -------------------------------------------------------------
+       PART 1: HERO SCROLL MORPH (Full screen shrinks to circle)
+       1. HERO MORPH SECTION (Shrinks into circle pinpoint)
+       ------------------------------------------------------------- */
+    .hero-container {
+      position: relative;
+      height: 200vh;
+      background: #000;
+      background: #050505;
+    }
+    .hero-sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-image-mask {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      clip-path: circle(75% at 50% 50%);
+      will-change: clip-path;
+    }
+    .hero-image-mask img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: brightness(0.85);
+    }
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      color: #fff;
+      max-width: 1200px;
+      width: 100%;
+      padding: 0 6vw;
+    }
+    .hero-content h1 {
+      font-size: clamp(36px, 5vw, 70px);
+      font-weight: 300;
+      line-height: 1.15;
+      margin-bottom: 16px;
+    }
+    .hero-content p {
+      font-size: clamp(16px, 1.6vw, 22px);
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 300;
+      max-width: 520px;
+    }
+
+    /* Mid Section */
+    /* Intro Statement */
+    .mid-statement {
+      padding: 110px 6vw;
+      padding: 100px 6vw;
+      text-align: center;
+      background: #ffffff;
+    }
+    .mid-statement h2 {
+      font-family: 'Cinzel', serif;
+      font-size: clamp(28px, 3.2vw, 44px);
+      font-size: clamp(26px, 3vw, 42px);
+      color: var(--navy);
+      margin-bottom: 18px;
+      margin-bottom: 16px;
+    }
+    .mid-statement p {
+      font-size: 17px;
+      line-height: 1.8;
+      color: var(--text-muted);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    /* -------------------------------------------------------------
+       PART 2: CARD SYSTEM WITH STICKY EXPANDING CIRCLE BACKGROUND
+       (Exactly as seen on live Obagi India & in user screenshot)
+       2. EXACT 3D PERSPECTIVE FOLDING CARDS + STICKY PINK CIRCLE
+       ------------------------------------------------------------- */
+    .showcase-interactive-section {
+      position: relative;
+      /* Height allows cards to scroll over the sticky circle */
+      padding: 80px 0 140px 0;
+      overflow: visible;
+      background: #f8f7f5;
+      padding-top: 40px;
+      padding-bottom: 180px;
+    }
+
+    /* The Sticky Expanding Circle Background */
+    /* Sticky Expanding Circle Background */
+    .sticky-circle-bg-wrapper {
+      position: sticky;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      margin-bottom: -100vh; /* Keeps it in background under cards */
+      margin-bottom: -100vh;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .expanding-circle-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      clip-path: circle(18% at 50% 50%);
+      will-change: clip-path;
+    }
+
+    .expanding-circle-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: saturate(1.15) brightness(0.96);
+      filter: saturate(1.1) brightness(0.98);
+    }
+
+    /* Cards Wrapper that scrolls OVER the expanding circle */
+    .cards-scroll-container {
+    /* 3D Cards Viewport Container */
+    .cards-perspective-container {
+      position: relative;
+      z-index: 10;
+      max-width: 1240px;
+      max-width: 1260px;
+      margin: 0 auto;
+      padding: 40px 5vw;
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+      padding: 40px 4vw 0 4vw;
+      perspective: 1200px; /* Essential 3D perspective */
+      perspective-origin: center top;
+    }
+
+    /* Card Wrapper: Sticky at top so cards fold in place */
+    .card-fold-wrapper {
+      position: sticky;
+      top: 90px;
+      margin-bottom: 220px; /* Spacing between cards in scroll stream */
+      will-change: transform, opacity;
+      transform-origin: center top;
+      transform-style: preserve-3d;
+    }
+
+    .card-fold-wrapper:last-child {
+      margin-bottom: 40px;
+    }
+
+    /* The Obagi Horizontal Card */
+    .obagi-card {
+      background: #ffffff;
+      border-radius: 24px;
+      border: 1px solid var(--border-card);
+      box-shadow: var(--card-shadow);
+      padding: 44px 48px;
+      padding: 42px 48px;
+      display: grid;
+      grid-template-columns: 80px 1.4fr 320px;
+      grid-template-columns: 80px 1.4fr 340px;
+      align-items: center;
+      gap: 36px;
+      transition: transform 0.35s ease, box-shadow 0.35s ease;
+      will-change: transform;
+      backface-visibility: hidden;
+      transition: box-shadow 0.3s ease;
+    }
+
+    .obagi-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 24px 50px -10px rgba(14, 34, 56, 0.13);
+    }
+
+    /* Card Number */
+    .card-num {
+      font-size: clamp(68px, 6vw, 96px);
+      font-size: clamp(68px, 6.5vw, 100px);
+      font-weight: 200;
+      color: #8c95a0;
+      color: #929ba7;
+      line-height: 1;
+      user-select: none;
+    }
+
+    /* Card Body */
+    .card-body h3 {
+      font-size: clamp(24px, 2.2vw, 34px);
+      color: var(--navy);
+      font-weight: 600;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .card-body .subtitle {
+      font-size: 15px;
+      font-weight: 600;
+      color: #b1843b;
+      margin-bottom: 14px;
+      display: block;
+    }
+    .card-body p {
+      font-size: 15px;
+      line-height: 1.65;
+      color: var(--text-muted);
+    }
+
+    /* Card Image Container */
+    .card-visual {
+      width: 100%;
+      height: 260px;
+      background: #f5f5f7;
+      height: 270px;
+      background: #f4f4f6;
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      padding: 18px;
+    }
+    .card-visual img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      transition: transform 0.4s ease;
+    }
+    .obagi-card:hover .card-visual img {
+      transform: scale(1.05);
+    }
+
+    /* Mobile Responsive */
+    /* Mobile View */
+    @media (max-width: 900px) {
+      .obagi-card {
+        grid-template-columns: 1fr;
+        padding: 30px 22px;
+        gap: 20px;
+        border-radius: 20px;
+      }
+      .card-num {
+        font-size: 48px;
+      }
+      .card-visual {
+        height: 220px;
+      }
+      .cards-scroll-container {
+        gap: 32px;
+        padding: 20px 4vw;
+      .card-fold-wrapper {
+        top: 80px;
+        margin-bottom: 180px;
+      }
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 20;
+      background: #ffffff;
+      padding: 60px 5vw;
+      text-align: center;
+      border-top: 1px solid #e8e8e8;
+      color: #777;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <!-- Header -->
+  <header class="obagi-header">
+    <div class="brand-logo">OBAGI MEDICAL</div>
+    <div class="header-tagline">Transformational Skincare</div>
+    <div class="nav-links">
+      <span>Why Obagi?</span>
+      <span>Skin Concern</span>
+      <span>Product Range</span>
+      <span>Find Obagi</span>
+    </div>
+  </header>
+
+  <!-- 1. HERO MORPH SECTION (Full Screen -> Shrinks to Circle) -->
+  <!-- 1. HERO MORPH SECTION -->
+  <section class="hero-container" id="heroSec">
+    <div class="hero-sticky">
+      <div class="hero-image-mask" id="heroMask">
+        <img src="https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg/v1/fill/w_1920,h_1080,q_90/hero.jpg" alt="Hero Model" onerror="this.src='https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=1920&q=80'" />
+      </div>
+      <div class="hero-content" id="heroText">
+        <h1>Obagi® Medical India</h1>
+        <p>WINNER 2025 Skin Product / Range of the Year - Aesthetic Awards</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Context / Statement -->
+  <!-- Statement -->
+  <section class="mid-statement">
+    <h2>#1 Leading U.S. Physician Recommended Brand*</h2>
+    <p>FOR TOP 3 SKIN CONCERNS: Pigmentation | Fine Lines & Wrinkles | Sagging Skin & Loss of Elasticity. Over 35 years of clinically proven results.</p>
+    <p>FOR TOP 3 SKIN CONCERNS: Pigmentation | Fine Lines & Wrinkles | Sagging Skin & Loss of Elasticity. Over 35 years of clinically proven transformational skincare.</p>
+  </section>
+
+  <!-- 2. CARD SYSTEM + STICKY EXPANDING CIRCLE BACKGROUND -->
+  <!-- Here the pink bubble image is sticky behind the cards, expanding as you scroll through them -->
+  <!-- 2. EXACT 3D PERSPECTIVE FOLDING CARDS + STICKY PINK CIRCLE BACKGROUND -->
+  <section class="showcase-interactive-section" id="interactiveCardSection">
+    
+    <!-- Sticky Circle in the Background -->
+    <div class="sticky-circle-bg-wrapper">
+      <div class="expanding-circle-img" id="circleMorphBg">
+        <img src="https://static.wixstatic.com/media/c837a6_297eb5ebbb894e709a4ae04906201fa2~mv2.jpg/v1/fill/w_1898,h_1000,al_c,q_85/pexels-luu-thanh-truc-335871-9085814.jpg" alt="Microscopic Serum Bubbles" />
+      </div>
+    </div>
+
+    <!-- The 3 Obagi Cards scrolling OVER the expanding pink circle -->
+    <div class="cards-scroll-container">
+    <!-- 3D Perspective Card Stream -->
+    <div class="cards-perspective-container">
+      
+      <!-- Card 1 -->
+      <div class="obagi-card">
+        <div class="card-num">1</div>
+        <div class="card-body">
+          <h3>Obagi Nu-Derm Fx™ Systems</h3>
+          <span class="subtitle">Reveal Younger, Healthier-Looking Skin</span>
+          <p>Ideal for: Age Spots, Hyperpigmentation, Rough Skin, Sallowness, Redness. Complete system formulated to transform skin appearance.</p>
+      <!-- Card 1 Wrapper (Sticky & 3D Folds on scroll) -->
+      <div class="card-fold-wrapper" id="cardFold1">
+        <div class="obagi-card">
+          <div class="card-num">1</div>
+          <div class="card-body">
+            <h3>Obagi Nu-Derm Fx™ Systems</h3>
+            <span class="subtitle">Reveal Younger, Healthier-Looking Skin</span>
+            <p>Ideal for: Age Spots, Hyperpigmentation, Rough Skin, Sallowness, Redness. Complete medical-grade system formulated to accelerate skin renewal.</p>
+          </div>
+          <div class="card-visual">
+            <img src="https://static.wixstatic.com/media/4833d7_b81f1121c3eb4ed6807efe18902fb0a1~mv2.jpg/v1/fill/w_447,h_447,al_c,q_80/obagi-nu-derm-fx-collection.jpg" onerror="this.src='https://images.unsplash.com/photo-1608248597359-2e698889980c?auto=format&fit=crop&w=600&q=80'" alt="Nu-Derm Fx" />
+          </div>
+        </div>
+        <div class="card-visual">
+          <img src="https://static.wixstatic.com/media/4833d7_b81f1121c3eb4ed6807efe18902fb0a1~mv2.jpg/v1/fill/w_447,h_447,al_c,q_80/obagi-nu-derm-fx-collection.jpg" onerror="this.src='https://images.unsplash.com/photo-1608248597359-2e698889980c?auto=format&fit=crop&w=600&q=80'" alt="Nu-Derm Fx" />
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="obagi-card">
+        <div class="card-num">2</div>
+        <div class="card-body">
+          <h3>Obagi Daily Hydro-Drops</h3>
+          <span class="subtitle">Radiance in every drop</span>
+          <p>Daily Hydro-Drops™ are hypoallergenic, non-comedogenic, so won’t block pores, dermatologist and ophthalmologist tested, meaning they are safe for use around the eyes.</p>
+      <!-- Card 2 Wrapper (Sticky & 3D Folds on scroll) -->
+      <div class="card-fold-wrapper" id="cardFold2">
+        <div class="obagi-card">
+          <div class="card-num">2</div>
+          <div class="card-body">
+            <h3>Obagi Daily Hydro-Drops</h3>
+            <span class="subtitle">Radiance in every drop</span>
+            <p>Daily Hydro-Drops™ are hypoallergenic, non-comedogenic, so won’t block pores, dermatologist and ophthalmologist tested, meaning they are safe for use around the eyes.</p>
+          </div>
+          <div class="card-visual">
+            <img src="https://static.wixstatic.com/media/4833d7_0e709d6bf09f449a95982e60334a21d0~mv2.jpg/v1/fill/w_447,h_447,al_c,q_80/hydrate.jpg" onerror="this.src='https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80'" alt="Daily Hydro-Drops" />
+          </div>
+        </div>
+        <div class="card-visual">
+          <img src="https://static.wixstatic.com/media/4833d7_0e709d6bf09f449a95982e60334a21d0~mv2.jpg/v1/fill/w_447,h_447,al_c,q_80/hydrate.jpg" onerror="this.src='https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=600&q=80'" alt="Daily Hydro-Drops" />
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="obagi-card">
+        <div class="card-num">3</div>
+        <div class="card-body">
+          <h3>Obagi Nu-Cil®</h3>
+          <span class="subtitle">Clinically proven hair growth system</span>
+          <p>Address hair thinning on scalp, brows, and lashes with Obagi's proprietary NouriPlex® technology and nourishing active complex.</p>
+      <!-- Card 3 Wrapper (Sticky & 3D Folds on scroll) -->
+      <div class="card-fold-wrapper" id="cardFold3">
+        <div class="obagi-card">
+          <div class="card-num">3</div>
+          <div class="card-body">
+            <h3>Obagi Nu-Cil®</h3>
+            <span class="subtitle">Clinically proven hair growth system</span>
+            <p>Address hair thinning on scalp, brows, and lashes with Obagi's proprietary NouriPlex® technology, peptides, and nourishing bioactive complex.</p>
+          </div>
+          <div class="card-visual">
+            <img src="https://static.wixstatic.com/media/4833d7_e37f8725511940928a31982f09cceeeb~mv2.jpg/v1/fill/w_447,h_447,al_c,q_80/nu-cil.jpg" onerror="this.src='https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=600&q=80'" alt="Nu-Cil" />
+          </div>
+        </div>
+        <div class="card-visual">
+          <img src="https://static.wixstatic.com/media/4833d7_e37f8725511940928a31982f09cceeeb~mv2.jpg/v1/fill/w_447,h_447,al_c,q_80/nu-cil.jpg" onerror="this.src='https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?auto=format&fit=crop&w=600&q=80'" alt="Nu-Cil" />
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    © 2026 Obagi Medical India Clone. Built with 100% precision.
+    © 2026 Obagi Medical India Clone. Built with 1:1 Pixel-Perfect 3D Perspective.
+  </footer>
+
+  <!-- Animation Logic -->
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // 1. HERO MORPH: Full image shrinks into a circle towards top
+    // 1. HERO MORPH: Full image shrinks into circle pinpoint
+    gsap.to("#heroMask", {
+      clipPath: "circle(0% at 50% 10%)",
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#heroSec",
+        start: "top top",
+        end: "bottom top",
+        scrub: 1
+      }
+    });
+
+    gsap.to("#heroText", {
+      opacity: 0,
+      y: -60,
+      ease: "none",
+      scrollTrigger: {
+        trigger: "#heroSec",
+        start: "top top",
+        end: "50% top",
+        scrub: 1
+      }
+    });
+
+    // 2. STICKY BACKGROUND CIRCLE EXPAND:
+    // Starts small circle (18%), expands to full-screen (85%+) as cards scroll over it
+    // 2. STICKY BACKGROUND CIRCLE EXPAND
+    gsap.fromTo("#circleMorphBg", 
+      { clipPath: "circle(16% at 50% 50%)" },
+      { clipPath: "circle(18% at 50% 50%)" },
+      {
+        clipPath: "circle(85% at 50% 50%)",
+        clipPath: "circle(90% at 50% 50%)",
+        ease: "none",
+        scrollTrigger: {
+          trigger: "#interactiveCardSection",
+          start: "top 70%",
+          start: "top 60%",
+          end: "bottom bottom",
+          scrub: 1.2
+        }
+      }
+    );
+
+    // 3. CARDS ENTRANCE ELEVATION
+    gsap.utils.toArray(".obagi-card").forEach((card) => {
+      gsap.from(card, {
+        y: 50,
+        opacity: 0.85,
+        duration: 0.8,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: card,
+          start: "top 85%",
+          toggleActions: "play none none reverse"
+        }
+      });
+    // 3. EXACT 3D PERSPECTIVE FOLD ON X-AXIS:
+    // When each card reaches top, as user scrolls, the card rotates along the X-axis (rotateX: 75deg),
+    // flattening into the 3D horizon while staying solid white, exactly like Obagi live!
+    
+    // Card 1 3D Fold (as Card 2 approaches)
+    gsap.to("#cardFold1", {
+      rotateX: 75,
+      scale: 0.95,
+      transformOrigin: "center top",
+      ease: "power1.inOut",
+      scrollTrigger: {
+        trigger: "#cardFold2",
+        start: "top 85%",
+        end: "top 90px",
+        scrub: 1
+      }
+    });
+
+    // Card 2 3D Fold (as Card 3 approaches)
+    gsap.to("#cardFold2", {
+      rotateX: 75,
+      scale: 0.95,
+      transformOrigin: "center top",
+      ease: "power1.inOut",
+      scrollTrigger: {
+        trigger: "#cardFold3",
+        start: "top 85%",
+        end: "top 90px",
+        scrub: 1
+      }
+    });
+
+    // Card 3 Exit 3D Fold (as section finishes)
+    gsap.to("#cardFold3", {
+      rotateX: 75,
+      scale: 0.95,
+      transformOrigin: "center top",
+      ease: "power1.inOut",
+      scrollTrigger: {
+        trigger: "#cardFold3",
+        start: "top 90px",
+        end: "+=350",
+        scrub: 1
+      }
+    });
+  </script>
+</body>
+</html>
+
