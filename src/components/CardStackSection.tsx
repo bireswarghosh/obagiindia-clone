@@ -32,58 +32,41 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
       if (!sectionRef.current) return;
 
       ctx = gsap.context(() => {
-        // 1. Sticky Pink Serum Circle Background Expansion
+        // Set Initial States
         if (circleRef.current) {
-          gsap.fromTo(
-            circleRef.current,
-            { clipPath: `circle(${stickyCircle.startPercent || 18}% at 50% 50%)` },
-            {
-              clipPath: `circle(${stickyCircle.endPercent || 90}% at 50% 50%)`,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: sectionRef.current,
-                start: 'top 60%',
-                end: 'bottom bottom',
-                scrub: cardsSection.scrubSpeed || 1.2,
-              },
-            }
-          );
+          gsap.set(circleRef.current, { clipPath: `circle(${stickyCircle.startPercent || 18}% at 50% 80%)` });
+        }
+        cardRefs.current.forEach((el) => {
+          if (el) gsap.set(el, { yPercent: 120, opacity: 1 });
+        });
+
+        // Main Scrubbed Timeline
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 1,
+          },
+        });
+
+        // 1. Morphing Bubble Serum (0% - 25%)
+        if (circleRef.current) {
+          tl.to(circleRef.current, {
+            clipPath: `circle(${stickyCircle.endPercent || 120}% at 50% 50%)`,
+            ease: 'power1.inOut',
+            duration: 1,
+          });
         }
 
-        // 2. 3D Perspective Card Folds
+        // 2. Overlapping Cards Stack (25% - 100%)
         displayCards.forEach((_, idx) => {
           const currentCard = cardRefs.current[idx];
-          const nextCard = cardRefs.current[idx + 1];
-
-          if (!currentCard) return;
-
-          if (nextCard) {
-            // Fold as next card arrives
-            gsap.to(currentCard, {
-              rotateX: cardsSection.foldAngle || 78,
-              scale: 0.95,
-              opacity: 0,
-              ease: 'power1.inOut',
-              scrollTrigger: {
-                trigger: nextCard,
-                start: 'top 80%',
-                end: 'top 100px',
-                scrub: 1,
-              },
-            });
-          } else {
-            // Final Card Vanishes at the exact same exit point
-            gsap.to(currentCard, {
-              rotateX: cardsSection.foldAngle || 78,
-              scale: 0.95,
-              opacity: 0,
-              ease: 'power1.inOut',
-              scrollTrigger: {
-                trigger: currentCard,
-                start: 'top 100px',
-                end: '+=380',
-                scrub: 1,
-              },
+          if (currentCard) {
+            tl.to(currentCard, {
+              yPercent: 0,
+              ease: 'power2.out',
+              duration: 1,
             });
           }
         });
@@ -101,14 +84,15 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
     <section
       id="cards"
       ref={sectionRef}
-      className="relative bg-[#f8f7f5] pt-12 pb-48"
+      className="relative h-[350vh] bg-transparent"
     >
-      {/* 1. Sticky Background Circle Wrapper */}
-      <div className="sticky top-0 left-0 w-full h-screen mb-[-100vh] z-0 pointer-events-none overflow-hidden flex items-center justify-center">
+      {/* 1. Sticky 100vh Viewport Container */}
+      <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
+        {/* 2. Background Pink Serum Bubble Layer */}
         <div
           ref={circleRef}
-          className="absolute inset-0 w-full h-full will-change-[clip-path]"
-          style={{ clipPath: `circle(${stickyCircle.startPercent || 18}% at 50% 50%)` }}
+          className="absolute inset-0 w-full h-full will-change-[clip-path] z-0 pointer-events-none"
+          style={{ clipPath: `circle(${stickyCircle.startPercent || 18}% at 50% 80%)` }}
         >
           <img
             src={stickyCircle.imageUrl}
@@ -116,37 +100,23 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             className="w-full h-full object-cover filter saturate-110 brightness-95"
           />
         </div>
-      </div>
 
-      {/* 2. 3D Perspective Cards Stream */}
-      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 perspective-1400">
-        <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
-          <span className="text-xs font-bold uppercase tracking-widest" style={{ color: theme.accentGold }}>
-            Targeted Clinical Regimens
-          </span>
-          <h2 className="font-serif text-3xl sm:text-5xl font-bold tracking-tight" style={{ color: theme.primaryNavy }}>
-            Flagship Product Formulations
-          </h2>
-        </div>
-
-        {/* List of 3D Folding Cards */}
-        <div className="flex flex-col space-y-36">
-          {displayCards.map((card, idx) => (
-            <div
-              key={card.id}
-              ref={(el) => {
-                cardRefs.current[idx] = el;
-              }}
-              className="sticky top-24 will-change-[transform,opacity] transform-gpu origin-top"
-              style={{
-                transformStyle: 'preserve-3d',
-                backfaceVisibility: 'hidden',
-              }}
-            >
+        {/* 3. Cards Layer */}
+        <div className="absolute inset-0 w-full h-full z-10 flex items-center justify-center p-6 sm:p-10 pointer-events-none">
+          <div className="relative w-full max-w-5xl h-[500px]">
+            {displayCards.map((card, idx) => (
               <div
-                className="bg-white rounded-3xl border shadow-xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center transition-all duration-300 hover:shadow-2xl"
-                style={{ borderColor: theme.borderColor }}
+                key={card.id}
+                ref={(el) => {
+                  cardRefs.current[idx] = el;
+                }}
+                className="absolute inset-0 w-full h-full will-change-transform transform-gpu pointer-events-auto"
+                style={{ zIndex: 11 + idx }}
               >
+                <div
+                  className="w-full h-full bg-white rounded-3xl border shadow-2xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center transition-shadow duration-300"
+                  style={{ borderColor: theme.borderColor }}
+                >
                 {/* Number */}
                 <div className="lg:col-span-1 text-center lg:text-left">
                   <span
@@ -204,6 +174,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </section>

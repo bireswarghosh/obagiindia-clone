@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@genkit-ai/mcp": "^1.42.0",
+    "@gsap/react": "^2.1.2",
     "clsx": "^2.1.1",
     "gsap": "^3.12.5",
     "lucide-react": "^0.453.0",
