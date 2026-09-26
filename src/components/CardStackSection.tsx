@@ -34,10 +34,10 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
       ctx = gsap.context(() => {
         // Set Initial States
         if (circleRef.current) {
-          gsap.set(circleRef.current, { clipPath: `circle(${stickyCircle.startPercent || 18}% at 50% 80%)` });
+          gsap.set(circleRef.current, { clipPath: 'inset(18% 22% round 45px)' });
         }
         cardRefs.current.forEach((el) => {
-          if (el) gsap.set(el, { yPercent: 120, opacity: 1 });
+          if (el) gsap.set(el, { yPercent: 120, rotateX: 0, scale: 1, opacity: 1 });
         });
 
         // Main Scrubbed Timeline
@@ -46,30 +46,47 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             trigger: sectionRef.current,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: 1,
+            scrub: 0.5,
           },
         });
 
-        // 1. Morphing Bubble Serum (0% - 25%)
+        // 1. Morphing Bubble Serum (0.00 - 0.20)
         if (circleRef.current) {
           tl.to(circleRef.current, {
-            clipPath: `circle(${stickyCircle.endPercent || 120}% at 50% 50%)`,
+            clipPath: 'inset(0% 0% round 0px)',
             ease: 'power1.inOut',
-            duration: 1,
-          });
+            duration: 0.20,
+          }, 0);
         }
 
-        // 2. Overlapping Cards Stack (25% - 100%)
-        displayCards.forEach((_, idx) => {
-          const currentCard = cardRefs.current[idx];
-          if (currentCard) {
-            tl.to(currentCard, {
+        // 2. 3D Folding Cards Timeline
+        const total = displayCards.length;
+        if (total > 0) {
+          displayCards.forEach((_, idx) => {
+            const card = cardRefs.current[idx];
+            if (!card) return;
+
+            // Enter phase
+            const enterStart = 0.20 + (idx * 0.18);
+            tl.to(card, {
               yPercent: 0,
               ease: 'power2.out',
-              duration: 1,
-            });
-          }
-        });
+              duration: 0.18,
+            }, enterStart);
+
+            // Fold back phase (if not last card)
+            if (idx < total - 1) {
+              const foldStart = enterStart + 0.18;
+              tl.to(card, {
+                rotateX: 75,
+                scale: 0.95,
+                opacity: 0,
+                ease: 'power2.in',
+                duration: 0.18,
+              }, foldStart);
+            }
+          });
+        }
       }, sectionRef);
     }
 
@@ -92,7 +109,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         <div
           ref={circleRef}
           className="absolute inset-0 w-full h-full will-change-[clip-path] z-0 pointer-events-none"
-          style={{ clipPath: `circle(${stickyCircle.startPercent || 18}% at 50% 80%)` }}
+          style={{ clipPath: 'inset(18% 22% round 45px)' }}
         >
           <img
             src={stickyCircle.imageUrl}
@@ -102,8 +119,14 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         </div>
 
         {/* 3. Cards Layer */}
-        <div className="absolute inset-0 w-full h-full z-10 flex items-center justify-center p-6 sm:p-10 pointer-events-none">
-          <div className="relative w-full max-w-5xl h-[500px]">
+        <div
+          className="absolute inset-0 w-full h-full z-10 flex items-center justify-center p-6 sm:p-10 pointer-events-none"
+          style={{ perspective: '1400px', perspectiveOrigin: 'center top' }}
+        >
+          <div
+            className="relative w-full max-w-5xl h-[500px]"
+            style={{ perspective: '1400px', perspectiveOrigin: 'center top', transformStyle: 'preserve-3d' }}
+          >
             {displayCards.map((card, idx) => (
               <div
                 key={card.id}
@@ -111,7 +134,12 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                   cardRefs.current[idx] = el;
                 }}
                 className="absolute inset-0 w-full h-full will-change-transform transform-gpu pointer-events-auto"
-                style={{ zIndex: 11 + idx }}
+                style={{
+                  zIndex: 11 + idx,
+                  transformOrigin: 'center top',
+                  transformStyle: 'preserve-3d',
+                  backfaceVisibility: 'hidden',
+                }}
               >
                 <div
                   className="w-full h-full bg-white rounded-3xl border shadow-2xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center transition-shadow duration-300"

@@ -5492,6 +5492,10 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
+    will-change: clip-path !important;
+    /* Initial Barrel / Rounded Pill shape matching official Obagi India */
+    clip-path: inset(18% 22% round 45px);
+    transition: none !important;
   }
 
   #comp-lwrlbohf .YX2qkL,
@@ -5506,7 +5510,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     display: block !important;
   }
 
-  /* 4. Cards Overlay Layer */
+  /* 4. Cards Overlay Layer with 3D Perspective */
   #comp-lwrmnbmd {
     position: absolute !important;
     top: 0 !important;
@@ -5523,6 +5527,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     pointer-events: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    perspective: 1400px !important;
   }
 
   #comp-lwrmnbmd > .comp-lwrmnbmd-container {
@@ -5535,6 +5540,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     padding-top: 50px !important;
     margin: 0 !important;
     box-sizing: border-box !important;
+    perspective: 1400px !important;
   }
 
   #comp-lwsw0td7 {
@@ -5544,6 +5550,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     position: relative !important;
     display: block !important;
     margin: auto !important;
+    perspective: 1400px !important;
+    perspective-origin: center top !important;
+    transform-style: preserve-3d !important;
   }
 
   #comp-lwsw0td7 > .comp-lwsw0td7-container {
@@ -5553,9 +5562,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     display: block !important;
     margin: 0 !important;
     padding: 0 !important;
+    perspective: 1400px !important;
+    perspective-origin: center top !important;
+    transform-style: preserve-3d !important;
   }
 
-  /* 5. Each Individual Overlapping Card */
+  /* 5. Each Individual Overlapping Card with 3D Perspective Fold */
   #comp-lwsw0td95__item1,
   #comp-lwsw0td95__item-j9ples3e,
   #comp-lwsw0td95__item-j9plerjk {
@@ -5573,6 +5585,10 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     overflow: hidden !important;
     display: block !important;
     margin: 0 !important;
+    transform-origin: center top !important;
+    transform-style: preserve-3d !important;
+    backface-visibility: hidden !important;
+    will-change: transform, opacity !important;
   }
 
   #comp-lwsw0td95__item1 { z-index: 11 !important; }
@@ -5612,7 +5628,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     if (heroBox && heroSec) {
       var d = window.__OBAGI_DATA__;
       var enabled = !d || !d.hero || d.hero.morphEnabled !== false;
-      var speed = (d && d.hero && d.hero.morphSpeed) || 1;
+      var speed = (d && d.hero && d.hero.morphSpeed) || 0.5;
       if (enabled) {
         gsap.fromTo(heroBox,
           { clipPath: 'circle(75% at 50% 50%)' },
@@ -5630,8 +5646,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
     }
 
-    // 2. Exact Obagi India Scroll Animation:
-    // Morphing Bubble Serum + Overlapping Stack Cards + Zero Gap Video Transition
+    // 2. Exact Obagi India Flagship Scroll Animation:
+    // Morphing Barrel Serum + 3D Folding Cards + Zero Gap Video Transition
     var cardSec = document.querySelector('#comp-lwrl9iel');
     var pinkImg = document.querySelector('#comp-lwrlbohf');
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
@@ -5639,52 +5655,121 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     var card3 = document.querySelector('#comp-lwsw0td95__item-j9plerjk');
 
     if (cardSec && pinkImg && card1 && card2 && card3) {
-      // Set Initial States
-      gsap.set(pinkImg, { clipPath: 'circle(18% at 50% 80%)' });
-      gsap.set(card1, { yPercent: 120, opacity: 1 });
-      gsap.set(card2, { yPercent: 120, opacity: 1 });
-      gsap.set(card3, { yPercent: 120, opacity: 1 });
+      // Set Initial States matching exact reference screenshots:
+      // Initial barrel shape (flat top/bottom, curved sides)
+      gsap.set(pinkImg, { clipPath: 'inset(18% 22% round 45px)' });
+      gsap.set(card1, { yPercent: 120, rotateX: 0, scale: 1, opacity: 1 });
+      gsap.set(card2, { yPercent: 120, rotateX: 0, scale: 1, opacity: 1 });
+      gsap.set(card3, { yPercent: 120, rotateX: 0, scale: 1, opacity: 1 });
 
       var tl = gsap.timeline({
         scrollTrigger: {
           trigger: cardSec,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1
+          scrub: 0.5
         }
       });
 
-      // Phase 1 (0% - 25%): Bubble liquid morphs from bottom circle to full-screen cover
+      // Phase 1 (0.0 - 0.20): Morph wide barrel into full-screen cover
       tl.to(pinkImg, {
-        clipPath: 'circle(120% at 50% 50%)',
+        clipPath: 'inset(0% 0% round 0px)',
         ease: 'power1.inOut',
-        duration: 1
-      });
+        duration: 0.20
+      }, 0);
 
-      // Phase 2 (25% - 50%): Card 1 rises smoothly and rests centered
+      // Phase 2 (0.20 - 0.38): Card 1 rises vertically into center
       tl.to(card1, {
         yPercent: 0,
         ease: 'power2.out',
-        duration: 1
-      });
+        duration: 0.18
+      }, 0.20);
 
-      // Phase 3 (50% - 75%): Card 2 rises and overlaps Card 1 directly
+      // Phase 3 (0.38 - 0.56): Card 1 tilts back along X-axis (rotateX: 75deg) & vanishes
+      // while Card 2 rises to center
+      tl.to(card1, {
+        rotateX: 75,
+        scale: 0.95,
+        opacity: 0,
+        ease: 'power2.in',
+        duration: 0.18
+      }, 0.38);
+
       tl.to(card2, {
         yPercent: 0,
         ease: 'power2.out',
-        duration: 1
-      });
+        duration: 0.18
+      }, 0.38);
 
-      // Phase 4 (75% - 100%): Card 3 rises and overlaps Card 2 directly
+      // Phase 4 (0.56 - 0.74): Card 2 tilts back along X-axis (rotateX: 75deg) & vanishes
+      // while Card 3 rises to center
+      tl.to(card2, {
+        rotateX: 75,
+        scale: 0.95,
+        opacity: 0,
+        ease: 'power2.in',
+        duration: 0.18
+      }, 0.56);
+
       tl.to(card3, {
         yPercent: 0,
         ease: 'power2.out',
-        duration: 1
-      });
+        duration: 0.18
+      }, 0.56);
+
+      // Phase 5 (0.74 - 1.00): Card 3 rests in center view, smoothly yielding to next section
+      tl.to(card3, {
+        yPercent: 0,
+        duration: 0.26
+      }, 0.74);
+    }
+
+    // 3. Our History: Left to Right animation
+    var historyItems = document.querySelectorAll('#comp-lwz20l0d11, #comp-lwz20l0g2, #comp-lwz20l0f16, #comp-lwz23869');
+    var historyContainer = document.querySelector('#comp-lwz20kzt') || document.querySelector('#comp-lwqg8022');
+    if (historyItems.length > 0 && historyContainer) {
+      gsap.fromTo(historyItems,
+        { x: -80, opacity: 0 },
+        {
+          x: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: historyContainer,
+            start: 'top 85%',
+            end: 'center center',
+            scrub: 0.5
+          }
+        }
+      );
+    }
+
+    // 4. Our Approach to Innovation / Process / Standards: Bottom to Top animation
+    var approachItems = document.querySelectorAll('#comp-mlqlfcyr6__item1, #comp-mlqlfcyr6__item-j9ples3e, #comp-mlqlfcyr6__item-j9plerjk');
+    var approachContainer = document.querySelector('#comp-mlqlfcyi') || document.querySelector('#comp-mlqlfcyr6');
+    if (approachItems.length > 0 && approachContainer) {
+      gsap.fromTo(approachItems,
+        { y: 80, opacity: 0 },
+        {
+          y: 0,
+          opacity: 1,
+          duration: 0.8,
+          stagger: 0.15,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: approachContainer,
+            start: 'top 85%',
+            end: 'center center',
+            scrub: 0.5
+          }
+        }
+      );
     }
 
     ScrollTrigger.refresh();
-    console.log('[OBAGI] Successfully initialized scroll animations.');
+    console.log('[OBAGI] Successfully initialized 3D card perspective & fast scroll animations.');
   }
 
   if (document.readyState === 'loading') {
