@@ -5434,11 +5434,11 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     transform-origin: center top !important;
   }
 
-  /* 2. Flagship Pinned Scroll Track (350vh) & Sticky Viewport (100vh) */
+  /* 2. Flagship Pinned Scroll Track (420vh) & Sticky Viewport (100vh) */
   #comp-lwrl9iel {
     position: relative !important;
-    height: 350vh !important;
-    min-height: 350vh !important;
+    height: 420vh !important;
+    min-height: 420vh !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
@@ -5602,12 +5602,18 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
   }
 
-  /* 6. Seamless Next Section: Zero Gap / Instant Video Attachment */
+  /* 6. Seamless Award Video Section - Rolls Over Pink Track with Zero Gap */
   #comp-mlau06ju {
     position: relative !important;
-    z-index: 20 !important;
+    z-index: 30 !important;
     margin-top: 0 !important;
     background: #ffffff !important;
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.06) !important;
+  }
+
+  #comp-lx8nvywg {
+    position: relative !important;
+    z-index: 30 !important;
   }
 </style>
 
@@ -5647,7 +5653,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
 
     // 2. Exact Obagi India Flagship Scroll Animation:
-    // Morphing Barrel Serum + 3D Folding Cards + Zero Gap Video Transition
+    // Morphing Barrel Serum + Top-Shelf 3D Folding Cards + Zero Gap Video Transition
     var cardSec = document.querySelector('#comp-lwrl9iel');
     var pinkImg = document.querySelector('#comp-lwrlbohf');
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
@@ -5656,7 +5662,6 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
     if (cardSec && pinkImg && card1 && card2 && card3) {
       // Set Initial States matching exact reference screenshots:
-      // Initial barrel shape (flat top/bottom, curved sides)
       gsap.set(pinkImg, { clipPath: 'inset(18% 22% round 45px)' });
       gsap.set(card1, { yPercent: 120, rotateX: 0, scale: 1, opacity: 1 });
       gsap.set(card2, { yPercent: 120, rotateX: 0, scale: 1, opacity: 1 });
@@ -5667,61 +5672,68 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           trigger: cardSec,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.5
+          scrub: 0.6
         }
       });
 
-      // Phase 1 (0.0 - 0.20): Morph wide barrel into full-screen cover
+      // Phase 1 (0.00 - 0.18): Morph wide barrel into full-screen cover
       tl.to(pinkImg, {
         clipPath: 'inset(0% 0% round 0px)',
         ease: 'power1.inOut',
-        duration: 0.20
+        duration: 0.18
       }, 0);
 
-      // Phase 2 (0.20 - 0.38): Card 1 rises vertically into center
+      // Phase 2 (0.15 - 0.35): Card 1 rises vertically into center resting position
       tl.to(card1, {
         yPercent: 0,
         ease: 'power2.out',
-        duration: 0.18
-      }, 0.20);
+        duration: 0.20
+      }, 0.15);
 
-      // Phase 3 (0.38 - 0.56): Card 1 tilts back along X-axis (rotateX: 75deg) & vanishes
-      // while Card 2 rises to center
+      // Phase 3 (0.35 - 0.55):
+      // Card 1 travels UP (-28% y) and tilts backward along top edge (rotateX: 75deg)
+      // WHILE Card 2 rises from below into center (0% y)
+      // Card 1 sits cleanly below navbar at top shelf, Card 2 in center -> ZERO collision!
       tl.to(card1, {
+        yPercent: -28,
         rotateX: 75,
-        scale: 0.95,
+        scale: 0.92,
         opacity: 0,
         ease: 'power2.in',
-        duration: 0.18
-      }, 0.38);
+        duration: 0.20
+      }, 0.35);
 
       tl.to(card2, {
         yPercent: 0,
         ease: 'power2.out',
-        duration: 0.18
-      }, 0.38);
+        duration: 0.20
+      }, 0.35);
 
-      // Phase 4 (0.56 - 0.74): Card 2 tilts back along X-axis (rotateX: 75deg) & vanishes
-      // while Card 3 rises to center
+      // Phase 4 (0.55 - 0.75):
+      // Card 2 travels UP (-28% y) and tilts backward along top edge (rotateX: 75deg)
+      // WHILE Card 3 rises from below into center (0% y)
       tl.to(card2, {
+        yPercent: -28,
         rotateX: 75,
-        scale: 0.95,
+        scale: 0.92,
         opacity: 0,
         ease: 'power2.in',
-        duration: 0.18
-      }, 0.56);
+        duration: 0.20
+      }, 0.55);
 
       tl.to(card3, {
         yPercent: 0,
         ease: 'power2.out',
-        duration: 0.18
-      }, 0.56);
+        duration: 0.20
+      }, 0.55);
 
-      // Phase 5 (0.74 - 1.00): Card 3 rests in center view, smoothly yielding to next section
+      // Phase 5 (0.75 - 0.88): Card 3 rests in center view, then moves up to -25%
+      // as the Award Video rolls in from below
       tl.to(card3, {
-        yPercent: 0,
-        duration: 0.26
-      }, 0.74);
+        yPercent: -25,
+        ease: 'power1.in',
+        duration: 0.13
+      }, 0.75);
     }
 
     // 3. Our History: Left to Right animation

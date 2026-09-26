@@ -46,16 +46,16 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             trigger: sectionRef.current,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: 0.5,
+            scrub: 0.6,
           },
         });
 
-        // 1. Morphing Bubble Serum (0.00 - 0.20)
+        // 1. Morphing Bubble Serum (0.00 - 0.18)
         if (circleRef.current) {
           tl.to(circleRef.current, {
             clipPath: 'inset(0% 0% round 0px)',
             ease: 'power1.inOut',
-            duration: 0.20,
+            duration: 0.18,
           }, 0);
         }
 
@@ -66,24 +66,35 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             const card = cardRefs.current[idx];
             if (!card) return;
 
-            // Enter phase
-            const enterStart = 0.20 + (idx * 0.18);
+            // Enter phase: Card rises into center (yPercent: 0)
+            const enterStart = 0.15 + (idx * 0.20);
             tl.to(card, {
               yPercent: 0,
               ease: 'power2.out',
-              duration: 0.18,
+              duration: 0.20,
             }, enterStart);
 
-            // Fold back phase (if not last card)
+            // Top-shelf fold phase (if not last card):
+            // Card moves UP to -28% and tilts backward along top edge (rotateX: 75deg)
+            // WHILE next card rises to center (0%) -> ZERO text collision!
             if (idx < total - 1) {
-              const foldStart = enterStart + 0.18;
+              const foldStart = enterStart + 0.20;
               tl.to(card, {
+                yPercent: -28,
                 rotateX: 75,
-                scale: 0.95,
+                scale: 0.92,
                 opacity: 0,
                 ease: 'power2.in',
-                duration: 0.18,
+                duration: 0.20,
               }, foldStart);
+            } else {
+              // Last card rests in center, then shifts up slightly as next section rolls in
+              const exitStart = enterStart + 0.20;
+              tl.to(card, {
+                yPercent: -25,
+                ease: 'power1.in',
+                duration: 0.13,
+              }, exitStart);
             }
           });
         }
@@ -101,7 +112,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
     <section
       id="cards"
       ref={sectionRef}
-      className="relative h-[350vh] bg-transparent"
+      className="relative h-[420vh] bg-transparent"
     >
       {/* 1. Sticky 100vh Viewport Container */}
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
