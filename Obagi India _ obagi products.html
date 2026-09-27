@@ -5437,8 +5437,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   /* 2. Flagship Pinned Scroll Track & Sticky Viewport (100vh) */
   #comp-lwrl9iel {
     position: relative !important;
-    height: 400vh !important;
-    min-height: 400vh !important;
+    height: 320vh !important;
+    min-height: 320vh !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
@@ -5584,7 +5584,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     display: block !important;
     margin: 0 !important;
     transform-style: preserve-3d !important;
-    transform-origin: top center !important;
+    transform-origin: center center !important;
     backface-visibility: hidden !important;
     will-change: transform, opacity !important;
   }
@@ -5603,8 +5603,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   #comp-mlau06ju {
     position: relative !important;
     z-index: 20 !important;
-    margin-top: 0 !important;
+    margin-top: -8vh !important;
     background: #ffffff !important;
+    will-change: transform, opacity !important;
   }
 </style>
 
@@ -5662,39 +5663,44 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       );
     }
 
-    // 3. 3D Perspective Card Flip & Scroll Transition (Fluid rise on card lift + instant video transition)
+    // 3. 3D Perspective Card Flip & Scroll Transition (Outward flip towards user + instant video reveal)
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
     var card2 = document.querySelector('#comp-lwsw0td95__item-j9ples3e');
     var card3 = document.querySelector('#comp-lwsw0td95__item-j9plerjk');
+    var videoSec = document.querySelector('#comp-mlau06ju');
 
     if (cardSec && card1 && card2 && card3) {
       // Initial States:
-      // Card 1 starts flat under header (rotateX: 0, opacity: 1, scale: 1, yPercent: 0)
+      // Card 1 starts flat facing user (rotateX: 0, opacity: 1, scale: 1, yPercent: 0)
       // Cards 2 & 3 start below and invisible (yPercent: 110, opacity: 0)
-      gsap.set(card1, { yPercent: 0, rotateX: 0, opacity: 1, scale: 1 });
-      gsap.set(card2, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1 });
-      gsap.set(card3, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1 });
+      gsap.set(card1, { yPercent: 0, rotateX: 0, opacity: 1, scale: 1, transformPerspective: 1200 });
+      gsap.set(card2, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1, transformPerspective: 1200 });
+      gsap.set(card3, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1, transformPerspective: 1200 });
+
+      if (videoSec) {
+        gsap.set(videoSec, { y: 60, opacity: 0.85 });
+      }
 
       var tl = gsap.timeline({
         scrollTrigger: {
           trigger: cardSec,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 1
+          scrub: 1.2
         }
       });
 
-      // --- PHASE 1: Card 1 lifts and folds up backward into 3D horizon ---
+      // --- PHASE 1: Card 1 flips OUTWARD towards user face into horizontal level and fades ---
       tl.to(card1, {
-        rotateX: 76,
+        rotateX: -80,
         opacity: 0,
-        scale: 0.94,
-        yPercent: -35,
+        scale: 1.03,
+        yPercent: -28,
         ease: 'power2.inOut',
         duration: 1.0
       }, 0);
 
-      // --- As Card 1 lifts a little bit (at 0.35s), Card 2 starts becoming visible and rising from below ---
+      // --- As Card 1 lifts and flips outward (at 0.35s), Card 2 starts becoming visible and rising from below ---
       tl.to(card2, {
         yPercent: 0,
         rotateX: 0,
@@ -5704,17 +5710,17 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         duration: 1.0
       }, 0.35);
 
-      // --- PHASE 2: Card 2 lifts and folds up backward into 3D horizon ---
+      // --- PHASE 2: Card 2 flips OUTWARD towards user face into horizontal level and fades ---
       tl.to(card2, {
-        rotateX: 76,
+        rotateX: -80,
         opacity: 0,
-        scale: 0.94,
-        yPercent: -35,
+        scale: 1.03,
+        yPercent: -28,
         ease: 'power2.inOut',
         duration: 1.0
       }, 1.7);
 
-      // --- As Card 2 lifts a little bit (at 2.05s), Card 3 starts becoming visible and rising from below ---
+      // --- As Card 2 lifts and flips outward (at 2.05s), Card 3 starts becoming visible and rising from below ---
       tl.to(card3, {
         yPercent: 0,
         rotateX: 0,
@@ -5724,16 +5730,26 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         duration: 1.0
       }, 2.05);
 
-      // --- PHASE 3: Last card (Card 3) lifts and folds up backward into 3D horizon ---
-      // As Card 3 folds away, the pin finishes and next video section immediately arrives
+      // --- PHASE 3: Last card (Card 3) flips OUTWARD towards user face and starts vanishing ---
       tl.to(card3, {
-        rotateX: 76,
+        rotateX: -80,
         opacity: 0,
-        scale: 0.94,
-        yPercent: -35,
+        scale: 1.03,
+        yPercent: -28,
         ease: 'power2.inOut',
         duration: 1.0
       }, 3.4);
+
+      // --- PARALLEL OVERLAP: As soon as Card 3 starts becoming invisible (at 3.6s, <0.2 into card 3),
+      // the video section starts coming up simultaneously! Zero white screen! ---
+      if (videoSec) {
+        tl.to(videoSec, {
+          y: 0,
+          opacity: 1,
+          ease: 'power2.out',
+          duration: 1.0
+        }, 3.6);
+      }
     }
 
     ScrollTrigger.refresh();

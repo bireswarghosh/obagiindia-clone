@@ -60,7 +60,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             rotateX: 0,
             opacity: i === 0 ? 1 : 0,
             scale: 1,
-            transformOrigin: 'top center',
+            transformOrigin: 'center center',
             transformStyle: 'preserve-3d',
             backfaceVisibility: 'hidden',
           });
@@ -71,7 +71,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             trigger: sectionRef.current,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: 1,
+            scrub: 1.2,
           },
         });
 
@@ -83,14 +83,14 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
           const foldTime = idx * 1.7;
 
-          // 1. Current card lifts and folds backward in 3D perspective
+          // 1. Current card flips OUTWARD towards user face into horizontal level and fades
           tl.to(
             current,
             {
-              rotateX: 76,
+              rotateX: -80,
               opacity: 0,
-              scale: 0.94,
-              yPercent: -35,
+              scale: 1.03,
+              yPercent: -28,
               ease: 'power2.inOut',
               duration: 1.0,
             },
@@ -166,7 +166,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                 style={{
                   zIndex: 10 + (displayCards.length - idx),
                   transformStyle: 'preserve-3d',
-                  transformOrigin: 'top center',
+                  transformOrigin: 'center center',
                 }}
               >
                 <div
