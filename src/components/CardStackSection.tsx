@@ -52,11 +52,11 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
         // Set initial card states
         // Card 1 starts flat under header (rotateX: 0, opacity: 1, yPercent: 0)
-        // Cards 2 & 3 start below (yPercent: 125, opacity: 0)
+        // Cards 2 & 3 start below (yPercent: 110, opacity: 0)
         cardRefs.current.forEach((el, i) => {
           if (!el) return;
           gsap.set(el, {
-            yPercent: i === 0 ? 0 : 125,
+            yPercent: i === 0 ? 0 : 110,
             rotateX: 0,
             opacity: i === 0 ? 1 : 0,
             scale: 1,
@@ -75,29 +75,29 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
           },
         });
 
-        // Loop through cards for sequential 3D fold without overlap
+        // Loop through cards for smooth rising on card lift
         displayCards.forEach((_, idx) => {
           const current = cardRefs.current[idx];
           const next = cardRefs.current[idx + 1];
           if (!current) return;
 
-          const foldTime = idx * 2.4;
+          const foldTime = idx * 1.7;
 
-          // 1. Current card folds backward in 3D perspective and disappears completely on its own
+          // 1. Current card lifts and folds backward in 3D perspective
           tl.to(
             current,
             {
               rotateX: 76,
               opacity: 0,
               scale: 0.94,
-              yPercent: -20,
+              yPercent: -35,
               ease: 'power2.inOut',
               duration: 1.0,
             },
             foldTime
           );
 
-          // 2. Next card only rises AFTER current card has completely disappeared
+          // 2. Next card starts becoming visible and rising as current card lifts slightly
           if (next) {
             tl.to(
               next,
@@ -109,7 +109,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                 ease: 'power2.out',
                 duration: 1.0,
               },
-              foldTime + 1.1
+              foldTime + 0.35
             );
           }
         });

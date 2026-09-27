@@ -5662,18 +5662,18 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       );
     }
 
-    // 3. 3D Perspective Card Flip & Scroll Transition (Sequential, zero text overlap)
+    // 3. 3D Perspective Card Flip & Scroll Transition (Fluid rise on card lift + instant video transition)
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
     var card2 = document.querySelector('#comp-lwsw0td95__item-j9ples3e');
     var card3 = document.querySelector('#comp-lwsw0td95__item-j9plerjk');
 
     if (cardSec && card1 && card2 && card3) {
       // Initial States:
-      // Card 1 is in place under header (flat, rotateX: 0, opacity: 1, scale: 1)
-      // Card 2 & Card 3 start completely below and invisible (yPercent: 125, opacity: 0)
+      // Card 1 starts flat under header (rotateX: 0, opacity: 1, scale: 1, yPercent: 0)
+      // Cards 2 & 3 start below and invisible (yPercent: 110, opacity: 0)
       gsap.set(card1, { yPercent: 0, rotateX: 0, opacity: 1, scale: 1 });
-      gsap.set(card2, { yPercent: 125, rotateX: 0, opacity: 0, scale: 1 });
-      gsap.set(card3, { yPercent: 125, rotateX: 0, opacity: 0, scale: 1 });
+      gsap.set(card2, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1 });
+      gsap.set(card3, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1 });
 
       var tl = gsap.timeline({
         scrollTrigger: {
@@ -5684,17 +5684,17 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         }
       });
 
-      // --- PHASE 1: Card 1 folds backward in 3D perspective and vanishes completely on its own ---
+      // --- PHASE 1: Card 1 lifts and folds up backward into 3D horizon ---
       tl.to(card1, {
         rotateX: 76,
         opacity: 0,
         scale: 0.94,
-        yPercent: -20,
+        yPercent: -35,
         ease: 'power2.inOut',
         duration: 1.0
       }, 0);
 
-      // --- PHASE 2: ONLY AFTER Card 1 is completely invisible, Card 2 rises from below ---
+      // --- As Card 1 lifts a little bit (at 0.35s), Card 2 starts becoming visible and rising from below ---
       tl.to(card2, {
         yPercent: 0,
         rotateX: 0,
@@ -5702,19 +5702,19 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         scale: 1,
         ease: 'power2.out',
         duration: 1.0
-      }, 1.1);
+      }, 0.35);
 
-      // --- PHASE 3: Card 2 folds backward in 3D perspective and vanishes completely on its own ---
+      // --- PHASE 2: Card 2 lifts and folds up backward into 3D horizon ---
       tl.to(card2, {
         rotateX: 76,
         opacity: 0,
         scale: 0.94,
-        yPercent: -20,
+        yPercent: -35,
         ease: 'power2.inOut',
         duration: 1.0
-      }, 2.4);
+      }, 1.7);
 
-      // --- PHASE 4: ONLY AFTER Card 2 is completely invisible, Card 3 rises from below ---
+      // --- As Card 2 lifts a little bit (at 2.05s), Card 3 starts becoming visible and rising from below ---
       tl.to(card3, {
         yPercent: 0,
         rotateX: 0,
@@ -5722,17 +5722,18 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         scale: 1,
         ease: 'power2.out',
         duration: 1.0
-      }, 3.5);
+      }, 2.05);
 
-      // --- PHASE 5: Card 3 folds backward in 3D perspective and vanishes into next section ---
+      // --- PHASE 3: Last card (Card 3) lifts and folds up backward into 3D horizon ---
+      // As Card 3 folds away, the pin finishes and next video section immediately arrives
       tl.to(card3, {
         rotateX: 76,
         opacity: 0,
         scale: 0.94,
-        yPercent: -20,
+        yPercent: -35,
         ease: 'power2.inOut',
         duration: 1.0
-      }, 4.8);
+      }, 3.4);
     }
 
     ScrollTrigger.refresh();
