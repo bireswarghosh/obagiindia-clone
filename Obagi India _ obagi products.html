@@ -5434,11 +5434,11 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     transform-origin: center top !important;
   }
 
-  /* 2. Flagship Pinned Scroll Track (350vh) & Sticky Viewport (100vh) */
+  /* 2. Flagship Pinned Scroll Track & Sticky Viewport (100vh) */
   #comp-lwrl9iel {
     position: relative !important;
-    height: 350vh !important;
-    min-height: 350vh !important;
+    height: 400vh !important;
+    min-height: 400vh !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
@@ -5460,21 +5460,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 10 !important;
   }
 
-  /* 3. Pink Bubble Serum Background Layer */
+  /* 3. Pink Serum Background: Full-width top 45-50% (Exact Image 1) */
   #comp-lwrmnb3j {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
-    bottom: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    grid-area: 1 / 1 / 2 / 2 !important;
     z-index: 1 !important;
-    overflow: hidden !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
     pointer-events: none !important;
     margin: 0 !important;
     padding: 0 !important;
@@ -5484,29 +5478,25 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
     width: 100% !important;
     height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    display: block !important;
   }
 
-  /* Pink bubble starts as a PILL and morphs to full-screen */
   #comp-lwrlbohf {
     position: absolute !important;
-    width: 40% !important;
-    height: 120px !important;
-    border-radius: 100px !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    will-change: width, height, border-radius, top, left !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 48vh !important;
+    border-radius: 0px !important;
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
+    z-index: 1 !important;
+    transform: none !important;
   }
 
   #comp-lwrlbohf .YX2qkL,
@@ -5517,11 +5507,11 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
-    object-position: center center !important;
+    object-position: center top !important;
     display: block !important;
   }
 
-  /* 4. Cards Overlay Layer */
+  /* 4. Cards Overlay Stage (Positioned below header with 3D perspective) */
   #comp-lwrmnbmd {
     position: absolute !important;
     top: 0 !important;
@@ -5530,7 +5520,6 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     bottom: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    grid-area: 1 / 1 / 2 / 2 !important;
     z-index: 10 !important;
     display: flex !important;
     align-items: center !important;
@@ -5538,6 +5527,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     pointer-events: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    perspective: 1400px !important;
+    perspective-origin: 50% 35% !important;
   }
 
   #comp-lwrmnbmd > .comp-lwrmnbmd-container {
@@ -5546,19 +5537,20 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    padding: 24px !important;
-    padding-top: 50px !important;
+    padding: 16px !important;
+    padding-top: 85px !important; /* Leave gap below logo & Brought to you text */
     margin: 0 !important;
     box-sizing: border-box !important;
   }
 
   #comp-lwsw0td7 {
     width: 100% !important;
-    max-width: 1120px !important;
-    height: 500px !important;
+    max-width: 1140px !important;
+    height: 520px !important;
     position: relative !important;
     display: block !important;
     margin: auto !important;
+    transform-style: preserve-3d !important;
   }
 
   #comp-lwsw0td7 > .comp-lwsw0td7-container {
@@ -5568,9 +5560,10 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     display: block !important;
     margin: 0 !important;
     padding: 0 !important;
+    transform-style: preserve-3d !important;
   }
 
-  /* 5. Each Individual Overlapping Card */
+  /* 5. 3D Flip Card Items (Exact Image 2) */
   #comp-lwsw0td95__item1,
   #comp-lwsw0td95__item-j9ples3e,
   #comp-lwsw0td95__item-j9plerjk {
@@ -5583,25 +5576,28 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     height: 100% !important;
     border-radius: 28px !important;
     background: #ffffff !important;
-    box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.22) !important;
+    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.22) !important;
     pointer-events: auto !important;
     overflow: hidden !important;
     display: block !important;
     margin: 0 !important;
+    transform-style: preserve-3d !important;
+    transform-origin: top center !important;
+    backface-visibility: hidden !important;
+    will-change: transform, opacity !important;
   }
 
-  #comp-lwsw0td95__item1 { z-index: 11 !important; }
+  #comp-lwsw0td95__item1 { z-index: 13 !important; }
   #comp-lwsw0td95__item-j9ples3e { z-index: 12 !important; }
-  #comp-lwsw0td95__item-j9plerjk { z-index: 13 !important; }
+  #comp-lwsw0td95__item-j9plerjk { z-index: 11 !important; }
 
-  @media (max-height: 700px) {
+  @media (max-height: 750px) {
     #comp-lwsw0td7 {
-      height: 420px !important;
-      transform: scale(0.92) !important;
+      height: 450px !important;
     }
   }
 
-  /* 6. Seamless Next Section: Zero Gap / Instant Video Attachment */
+  /* 6. Seamless Next Section: Instant Transition (Exact Image 3) */
   #comp-mlau06ju {
     position: relative !important;
     z-index: 20 !important;
@@ -5645,78 +5641,84 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
     }
 
-    // 2. Exact Obagi India Scroll Animation:
-    // Morphing Bubble Serum + Overlapping Stack Cards + Zero Gap Video Transition
+    // 2. 3D Perspective Card Flip & Scroll Transition (Exact 1:1 match with user images)
     var cardSec = document.querySelector('#comp-lwrl9iel');
-    var pinkImg = document.querySelector('#comp-lwrlbohf');
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
     var card2 = document.querySelector('#comp-lwsw0td95__item-j9ples3e');
     var card3 = document.querySelector('#comp-lwsw0td95__item-j9plerjk');
 
-    if (cardSec && pinkImg && card1 && card2 && card3) {
-      // PILL initial state — GSAP controls transforms, so clear CSS transform and use xPercent/yPercent
-      gsap.set(pinkImg, {
-        position: 'absolute',
-        width: '40%',
-        height: '120px',
-        borderRadius: '100px',
-        top: '50%',
-        left: '50%',
-        xPercent: -50,
-        yPercent: -50,
-        transformOrigin: 'center center',
-        overflow: 'hidden'
-      });
-      gsap.set(card1, { yPercent: 120, opacity: 1 });
-      gsap.set(card2, { yPercent: 120, opacity: 1 });
-      gsap.set(card3, { yPercent: 120, opacity: 1 });
+    if (cardSec && card1 && card2 && card3) {
+      // Initial States:
+      // Card 1 is in place under header (flat, rotateX: 0, opacity: 1)
+      // Card 2 & Card 3 start below (yPercent: 110, rotateX: 0)
+      gsap.set(card1, { yPercent: 0, rotateX: 0, opacity: 1, scale: 1 });
+      gsap.set(card2, { yPercent: 115, rotateX: 0, opacity: 1, scale: 1 });
+      gsap.set(card3, { yPercent: 115, rotateX: 0, opacity: 1, scale: 1 });
 
       var tl = gsap.timeline({
         scrollTrigger: {
           trigger: cardSec,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.8
+          scrub: 1
         }
       });
 
-      // Phase 1 (0-25%): PILL expands to full-screen background
-      tl.to(pinkImg, {
-        width: '100%',
-        height: '100%',
-        borderRadius: '0px',
-        top: '0%',
-        left: '0%',
-        xPercent: 0,
-        yPercent: 0,
-        ease: 'power1.inOut',
-        duration: 1
-      });
-
-      // Phase 2 (25-50%): Card 1 rises smoothly and rests centered
+      // --- PHASE 1: Card 1 flips backward in 3D perspective and vanishes ---
+      // (As in Image 2: top edge recedes away, rotateX: 75deg, vanishes)
+      // Simultaneously, Card 2 rises from below and takes Card 1's place flat.
       tl.to(card1, {
-        yPercent: 0,
-        ease: 'power2.out',
+        rotateX: 76,
+        opacity: 0,
+        scale: 0.94,
+        yPercent: -15,
+        ease: 'power2.in',
         duration: 1
-      });
+      }, 0);
 
-      // Phase 3 (50-75%): Card 2 rises and overlaps Card 1
       tl.to(card2, {
         yPercent: 0,
+        rotateX: 0,
+        opacity: 1,
+        scale: 1,
         ease: 'power2.out',
         duration: 1
-      });
+      }, 0.15); // Smooth overlap
 
-      // Phase 4 (75-100%): Card 3 rises and overlaps Card 2
+      // --- PHASE 2: Card 2 flips backward in 3D perspective and vanishes ---
+      // Simultaneously, Card 3 rises from below and takes Card 2's place flat.
+      tl.to(card2, {
+        rotateX: 76,
+        opacity: 0,
+        scale: 0.94,
+        yPercent: -15,
+        ease: 'power2.in',
+        duration: 1
+      }, 1.2);
+
       tl.to(card3, {
         yPercent: 0,
+        rotateX: 0,
+        opacity: 1,
+        scale: 1,
         ease: 'power2.out',
         duration: 1
-      });
+      }, 1.35); // Smooth overlap
+
+      // --- PHASE 3: Card 3 flips backward in 3D perspective and vanishes ---
+      // Immediately as Card 3 vanishes, the pin releases and next section (Image 3) comes.
+      tl.to(card3, {
+        rotateX: 76,
+        opacity: 0,
+        scale: 0.94,
+        yPercent: -15,
+        ease: 'power2.in',
+        duration: 1
+      }, 2.4);
     }
 
     ScrollTrigger.refresh();
-    console.log('[OBAGI] Successfully initialized scroll animations.');
+    console.log('[OBAGI] Successfully initialized 3D card flip & scroll animations.');
   }
 
   if (document.readyState === 'loading') {

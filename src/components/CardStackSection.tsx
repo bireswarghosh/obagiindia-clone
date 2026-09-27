@@ -13,7 +13,6 @@ interface CardStackProps {
 export default function CardStackSection({ cardsSection, stickyCircle, theme }: CardStackProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
-  const circleRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const displayCards = cardsSection.cards.slice(0, cardsSection.cardCount || 3);
@@ -32,109 +31,69 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
       if (!sectionRef.current || !stickyRef.current) return;
 
       ctx = gsap.context(() => {
-        const totalCards = cardRefs.current.filter(Boolean).length;
-        // Each card gets equal scroll real-estate
-        const segmentSize = 1 / totalCards;
-
-        // ── Initial state: all cards start below viewport ──
+        // Set initial card states
+        // Card 1 starts flat under header (rotateX: 0, opacity: 1, yPercent: 0)
+        // Cards 2 & 3 start below (yPercent: 115)
         cardRefs.current.forEach((el, i) => {
           if (!el) return;
-          // First card is already at center, rest start below
           gsap.set(el, {
-            y: i === 0 ? '0%' : '110%',
-            x: '0%',
-            opacity: i === 0 ? 1 : 0,
+            yPercent: i === 0 ? 0 : 115,
+            rotateX: 0,
+            opacity: 1,
             scale: 1,
+            transformOrigin: 'top center',
+            transformStyle: 'preserve-3d',
+            backfaceVisibility: 'hidden',
           });
         });
 
-        // ── Pink serum bubble expands as section enters ──
-        if (circleRef.current) {
-          gsap.fromTo(
-            circleRef.current,
-            { clipPath: `circle(${stickyCircle.startPercent ?? 18}% at 50% 80%)` },
-            {
-              clipPath: `circle(${stickyCircle.endPercent ?? 90}% at 50% 50%)`,
-              ease: 'none',
-              scrollTrigger: {
-                trigger: sectionRef.current,
-                start: 'top top',
-                end: 'bottom bottom',
-                scrub: 1.5,
-              },
-            }
-          );
-        }
+        const tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 1,
+          },
+        });
 
-        // ── Card sequence animation ──
-        // For each card: at the right scroll position →
-        //   1. Current card: rises up Y → slides to x:0 center → fades out
-        //   2. Next card: enters from yPercent:110 → slides in
+        // Loop through cards for 3D flip + overlap transition
         displayCards.forEach((_, idx) => {
           const current = cardRefs.current[idx];
           const next = cardRefs.current[idx + 1];
           if (!current) return;
 
-          // Progress window for this card's EXIT
-          // Card idx exits between (idx/total) and ((idx+1)/total) of total scroll
-          const exitStart = idx / totalCards;       // 0, 0.33, 0.66
-          const exitEnd = (idx + 1) / totalCards;   // 0.33, 0.66, 1.0
+          const timeOffset = idx * 1.2;
 
-          // Timeline for: current card exits + next card enters simultaneously
-          const tl = gsap.timeline({
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: `${exitStart * 100}% top`,
-              end: `${exitEnd * 100}% top`,
-              scrub: 1,
-            },
-          });
-
-          // Phase 1 (0% → 50% of this window): current card rises UP along Y
+          // Current card flips backward into 3D perspective and vanishes (Image 2)
           tl.to(
             current,
             {
-              y: '-35%',
-              x: '0%',
-              opacity: 1,
-              scale: 1,
-              ease: 'power2.inOut',
-              duration: 0.5,
-            },
-            0
-          );
-
-          // Phase 2 (50% → 100%): current card holds Y position & vanishes (scale + opacity)
-          tl.to(
-            current,
-            {
-              y: '-35%',
+              rotateX: 76,
               opacity: 0,
-              scale: 0.88,
+              scale: 0.94,
+              yPercent: -15,
               ease: 'power2.in',
-              duration: 0.5,
+              duration: 1,
             },
-            0.5
+            timeOffset
           );
 
-          // Simultaneously from 40%: next card rises in from below
+          // Next card rises from below and takes current card's spot flat under header
           if (next) {
-            // Next card fades in starting from middle of window
-            tl.fromTo(
+            tl.to(
               next,
-              { y: '110%', opacity: 0, scale: 1 },
               {
-                y: '0%',
+                yPercent: 0,
+                rotateX: 0,
                 opacity: 1,
                 scale: 1,
                 ease: 'power2.out',
-                duration: 0.6,
+                duration: 1,
               },
-              0.4 // starts slightly before current card fully disappears → seamless overlap
+              timeOffset + 0.15
             );
           }
         });
-
       }, sectionRef);
     }
 
@@ -145,44 +104,49 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
   }, [cardsSection, stickyCircle, displayCards.length]);
 
   return (
-    /*
-      Outer section: tall scroll container — height = 100vh (sticky) + (n cards × 100vh exit travel)
-      This gives each card its own "scroll page" to exit through.
-    */
     <section
       id="cards"
       ref={sectionRef}
       style={{ height: `${(displayCards.length + 1) * 100}vh` }}
-      className="relative"
+      className="relative w-full bg-[#f8f7f5]"
     >
-      {/* Sticky viewport that pins for the full scroll duration */}
+      {/* Sticky 100vh Viewport Container */}
       <div
         ref={stickyRef}
         className="sticky top-0 left-0 w-full h-screen overflow-hidden"
       >
-        {/* Pink serum bubble — sits behind cards */}
+        {/* 1. Pink Serum Background: Top 45-50% Full-Width (Image 1) */}
         <div
-          ref={circleRef}
-          className="absolute inset-0 w-full h-full will-change-[clip-path] z-0 pointer-events-none"
-          style={{ clipPath: `circle(${stickyCircle.startPercent ?? 18}% at 50% 80%)` }}
+          className="absolute top-0 left-0 w-full h-[48vh] z-0 overflow-hidden pointer-events-none"
         >
           <img
-            src={stickyCircle.imageUrl}
-            alt="Microscopic Serum Texture"
-            className="w-full h-full object-cover filter saturate-110 brightness-95"
+            src={stickyCircle.imageUrl || cardsSection.pinkSerumImage}
+            alt="Pink Serum Texture"
+            className="w-full h-full object-cover object-top filter saturate-110 brightness-95"
           />
         </div>
 
-        {/* Card stage — centered in sticky viewport */}
-        <div className="absolute inset-0 w-full h-full z-10 flex items-center justify-center p-6 sm:p-10">
-          {/* Fixed-size stage — all cards are absolute inside here */}
-          <div className="relative w-full max-w-5xl" style={{ height: 'min(520px, 80vh)' }}>
+        {/* 2. Card Stage Container (Positioned below header with 3D perspective) */}
+        <div
+          className="absolute inset-0 w-full h-full z-10 flex items-center justify-center p-4 sm:p-8 pt-20 sm:pt-28 pointer-events-none"
+          style={{ perspective: '1400px', perspectiveOrigin: '50% 35%' }}
+        >
+          <div
+            className="relative w-full max-w-5xl h-[520px] pointer-events-auto"
+            style={{ transformStyle: 'preserve-3d' }}
+          >
             {displayCards.map((card, idx) => (
               <div
                 key={card.id}
-                ref={(el) => { cardRefs.current[idx] = el; }}
+                ref={(el) => {
+                  cardRefs.current[idx] = el;
+                }}
                 className="absolute inset-0 w-full h-full will-change-transform transform-gpu"
-                style={{ zIndex: 10 + idx }}
+                style={{
+                  zIndex: 10 + (displayCards.length - idx),
+                  transformStyle: 'preserve-3d',
+                  transformOrigin: 'top center',
+                }}
               >
                 <div
                   className="w-full h-full bg-white rounded-3xl border shadow-2xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
