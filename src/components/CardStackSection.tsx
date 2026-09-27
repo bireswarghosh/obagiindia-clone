@@ -34,10 +34,10 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
       ctx = gsap.context(() => {
         // Set Initial States
         if (circleRef.current) {
-          gsap.set(circleRef.current, { clipPath: 'inset(18% 22% round 45px)' });
+          gsap.set(circleRef.current, { clipPath: `circle(${stickyCircle.startPercent || 18}% at 50% 80%)` });
         }
         cardRefs.current.forEach((el) => {
-          if (el) gsap.set(el, { yPercent: 120, rotateX: 0, scale: 1, opacity: 1 });
+          if (el) gsap.set(el, { yPercent: 120, opacity: 1 });
         });
 
         // Main Scrubbed Timeline
@@ -46,58 +46,30 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             trigger: sectionRef.current,
             start: 'top top',
             end: 'bottom bottom',
-            scrub: 0.6,
+            scrub: 1,
           },
         });
 
-        // 1. Morphing Bubble Serum (0.00 - 0.18)
+        // 1. Morphing Bubble Serum (0% - 25%)
         if (circleRef.current) {
           tl.to(circleRef.current, {
-            clipPath: 'inset(0% 0% round 0px)',
+            clipPath: `circle(${stickyCircle.endPercent || 120}% at 50% 50%)`,
             ease: 'power1.inOut',
-            duration: 0.18,
-          }, 0);
-        }
-
-        // 2. 3D Folding Cards Timeline
-        const total = displayCards.length;
-        if (total > 0) {
-          displayCards.forEach((_, idx) => {
-            const card = cardRefs.current[idx];
-            if (!card) return;
-
-            // Enter phase: Card rises into center (yPercent: 0)
-            const enterStart = 0.15 + (idx * 0.20);
-            tl.to(card, {
-              yPercent: 0,
-              ease: 'power2.out',
-              duration: 0.20,
-            }, enterStart);
-
-            // Top-shelf fold phase (if not last card):
-            // Card moves UP to -28% and tilts backward along top edge (rotateX: 75deg)
-            // WHILE next card rises to center (0%) -> ZERO text collision!
-            if (idx < total - 1) {
-              const foldStart = enterStart + 0.20;
-              tl.to(card, {
-                yPercent: -28,
-                rotateX: 75,
-                scale: 0.92,
-                opacity: 0,
-                ease: 'power2.in',
-                duration: 0.20,
-              }, foldStart);
-            } else {
-              // Last card rests in center, then shifts up slightly as next section rolls in
-              const exitStart = enterStart + 0.20;
-              tl.to(card, {
-                yPercent: -25,
-                ease: 'power1.in',
-                duration: 0.13,
-              }, exitStart);
-            }
+            duration: 1,
           });
         }
+
+        // 2. Overlapping Cards Stack (25% - 100%)
+        displayCards.forEach((_, idx) => {
+          const currentCard = cardRefs.current[idx];
+          if (currentCard) {
+            tl.to(currentCard, {
+              yPercent: 0,
+              ease: 'power2.out',
+              duration: 1,
+            });
+          }
+        });
       }, sectionRef);
     }
 
@@ -112,7 +84,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
     <section
       id="cards"
       ref={sectionRef}
-      className="relative h-[420vh] bg-transparent"
+      className="relative h-[350vh] bg-transparent"
     >
       {/* 1. Sticky 100vh Viewport Container */}
       <div className="sticky top-0 left-0 w-full h-screen overflow-hidden">
@@ -120,7 +92,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         <div
           ref={circleRef}
           className="absolute inset-0 w-full h-full will-change-[clip-path] z-0 pointer-events-none"
-          style={{ clipPath: 'inset(18% 22% round 45px)' }}
+          style={{ clipPath: `circle(${stickyCircle.startPercent || 18}% at 50% 80%)` }}
         >
           <img
             src={stickyCircle.imageUrl}
@@ -130,14 +102,8 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         </div>
 
         {/* 3. Cards Layer */}
-        <div
-          className="absolute inset-0 w-full h-full z-10 flex items-center justify-center p-6 sm:p-10 pointer-events-none"
-          style={{ perspective: '1400px', perspectiveOrigin: 'center top' }}
-        >
-          <div
-            className="relative w-full max-w-5xl h-[500px]"
-            style={{ perspective: '1400px', perspectiveOrigin: 'center top', transformStyle: 'preserve-3d' }}
-          >
+        <div className="absolute inset-0 w-full h-full z-10 flex items-center justify-center p-6 sm:p-10 pointer-events-none">
+          <div className="relative w-full max-w-5xl h-[500px]">
             {displayCards.map((card, idx) => (
               <div
                 key={card.id}
@@ -145,12 +111,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                   cardRefs.current[idx] = el;
                 }}
                 className="absolute inset-0 w-full h-full will-change-transform transform-gpu pointer-events-auto"
-                style={{
-                  zIndex: 11 + idx,
-                  transformOrigin: 'center top',
-                  transformStyle: 'preserve-3d',
-                  backfaceVisibility: 'hidden',
-                }}
+                style={{ zIndex: 11 + idx }}
               >
                 <div
                   className="w-full h-full bg-white rounded-3xl border shadow-2xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center transition-shadow duration-300"
