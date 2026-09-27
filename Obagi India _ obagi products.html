@@ -5497,6 +5497,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     display: block !important;
     z-index: 1 !important;
     transform: none !important;
+    will-change: clip-path !important;
+    clip-path: ellipse(42% 32% at 50% 50%);
   }
 
   #comp-lwrlbohf .YX2qkL,
@@ -5641,19 +5643,37 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
     }
 
-    // 2. 3D Perspective Card Flip & Scroll Transition (Exact 1:1 match with user images)
+    // 2. Middle Section: Sticky Pink Bubbles Expanding Circle / Bubble
+    var pinkImg = document.querySelector('#comp-lwrlbohf');
     var cardSec = document.querySelector('#comp-lwrl9iel');
+    if (pinkImg && cardSec) {
+      gsap.fromTo(pinkImg,
+        { clipPath: 'ellipse(42% 32% at 50% 50%)' },
+        {
+          clipPath: 'ellipse(100% 100% at 50% 50%)',
+          ease: 'power1.out',
+          scrollTrigger: {
+            trigger: cardSec,
+            start: 'top 85%',
+            end: 'top top',
+            scrub: 1
+          }
+        }
+      );
+    }
+
+    // 3. 3D Perspective Card Flip & Scroll Transition (Sequential, zero text overlap)
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
     var card2 = document.querySelector('#comp-lwsw0td95__item-j9ples3e');
     var card3 = document.querySelector('#comp-lwsw0td95__item-j9plerjk');
 
     if (cardSec && card1 && card2 && card3) {
       // Initial States:
-      // Card 1 is in place under header (flat, rotateX: 0, opacity: 1)
-      // Card 2 & Card 3 start below (yPercent: 110, rotateX: 0)
+      // Card 1 is in place under header (flat, rotateX: 0, opacity: 1, scale: 1)
+      // Card 2 & Card 3 start completely below and invisible (yPercent: 125, opacity: 0)
       gsap.set(card1, { yPercent: 0, rotateX: 0, opacity: 1, scale: 1 });
-      gsap.set(card2, { yPercent: 115, rotateX: 0, opacity: 1, scale: 1 });
-      gsap.set(card3, { yPercent: 115, rotateX: 0, opacity: 1, scale: 1 });
+      gsap.set(card2, { yPercent: 125, rotateX: 0, opacity: 0, scale: 1 });
+      gsap.set(card3, { yPercent: 125, rotateX: 0, opacity: 0, scale: 1 });
 
       var tl = gsap.timeline({
         scrollTrigger: {
@@ -5664,57 +5684,55 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         }
       });
 
-      // --- PHASE 1: Card 1 flips backward in 3D perspective and vanishes ---
-      // (As in Image 2: top edge recedes away, rotateX: 75deg, vanishes)
-      // Simultaneously, Card 2 rises from below and takes Card 1's place flat.
+      // --- PHASE 1: Card 1 folds backward in 3D perspective and vanishes completely on its own ---
       tl.to(card1, {
         rotateX: 76,
         opacity: 0,
         scale: 0.94,
-        yPercent: -15,
-        ease: 'power2.in',
-        duration: 1
+        yPercent: -20,
+        ease: 'power2.inOut',
+        duration: 1.0
       }, 0);
 
+      // --- PHASE 2: ONLY AFTER Card 1 is completely invisible, Card 2 rises from below ---
       tl.to(card2, {
         yPercent: 0,
         rotateX: 0,
         opacity: 1,
         scale: 1,
         ease: 'power2.out',
-        duration: 1
-      }, 0.15); // Smooth overlap
+        duration: 1.0
+      }, 1.1);
 
-      // --- PHASE 2: Card 2 flips backward in 3D perspective and vanishes ---
-      // Simultaneously, Card 3 rises from below and takes Card 2's place flat.
+      // --- PHASE 3: Card 2 folds backward in 3D perspective and vanishes completely on its own ---
       tl.to(card2, {
         rotateX: 76,
         opacity: 0,
         scale: 0.94,
-        yPercent: -15,
-        ease: 'power2.in',
-        duration: 1
-      }, 1.2);
-
-      tl.to(card3, {
-        yPercent: 0,
-        rotateX: 0,
-        opacity: 1,
-        scale: 1,
-        ease: 'power2.out',
-        duration: 1
-      }, 1.35); // Smooth overlap
-
-      // --- PHASE 3: Card 3 flips backward in 3D perspective and vanishes ---
-      // Immediately as Card 3 vanishes, the pin releases and next section (Image 3) comes.
-      tl.to(card3, {
-        rotateX: 76,
-        opacity: 0,
-        scale: 0.94,
-        yPercent: -15,
-        ease: 'power2.in',
-        duration: 1
+        yPercent: -20,
+        ease: 'power2.inOut',
+        duration: 1.0
       }, 2.4);
+
+      // --- PHASE 4: ONLY AFTER Card 2 is completely invisible, Card 3 rises from below ---
+      tl.to(card3, {
+        yPercent: 0,
+        rotateX: 0,
+        opacity: 1,
+        scale: 1,
+        ease: 'power2.out',
+        duration: 1.0
+      }, 3.5);
+
+      // --- PHASE 5: Card 3 folds backward in 3D perspective and vanishes into next section ---
+      tl.to(card3, {
+        rotateX: 76,
+        opacity: 0,
+        scale: 0.94,
+        yPercent: -20,
+        ease: 'power2.inOut',
+        duration: 1.0
+      }, 4.8);
     }
 
     ScrollTrigger.refresh();

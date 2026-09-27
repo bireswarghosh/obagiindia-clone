@@ -12,6 +12,7 @@ interface CardStackProps {
 
 export default function CardStackSection({ cardsSection, stickyCircle, theme }: CardStackProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const pinkRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -31,15 +32,33 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
       if (!sectionRef.current || !stickyRef.current) return;
 
       ctx = gsap.context(() => {
+        // Pink bubble expanding animation as section enters
+        if (pinkRef.current) {
+          gsap.fromTo(
+            pinkRef.current,
+            { clipPath: 'ellipse(42% 32% at 50% 50%)' },
+            {
+              clipPath: 'ellipse(100% 100% at 50% 50%)',
+              ease: 'power1.out',
+              scrollTrigger: {
+                trigger: sectionRef.current,
+                start: 'top 85%',
+                end: 'top top',
+                scrub: 1,
+              },
+            }
+          );
+        }
+
         // Set initial card states
         // Card 1 starts flat under header (rotateX: 0, opacity: 1, yPercent: 0)
-        // Cards 2 & 3 start below (yPercent: 115)
+        // Cards 2 & 3 start below (yPercent: 125, opacity: 0)
         cardRefs.current.forEach((el, i) => {
           if (!el) return;
           gsap.set(el, {
-            yPercent: i === 0 ? 0 : 115,
+            yPercent: i === 0 ? 0 : 125,
             rotateX: 0,
-            opacity: 1,
+            opacity: i === 0 ? 1 : 0,
             scale: 1,
             transformOrigin: 'top center',
             transformStyle: 'preserve-3d',
@@ -56,29 +75,29 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
           },
         });
 
-        // Loop through cards for 3D flip + overlap transition
+        // Loop through cards for sequential 3D fold without overlap
         displayCards.forEach((_, idx) => {
           const current = cardRefs.current[idx];
           const next = cardRefs.current[idx + 1];
           if (!current) return;
 
-          const timeOffset = idx * 1.2;
+          const foldTime = idx * 2.4;
 
-          // Current card flips backward into 3D perspective and vanishes (Image 2)
+          // 1. Current card folds backward in 3D perspective and disappears completely on its own
           tl.to(
             current,
             {
               rotateX: 76,
               opacity: 0,
               scale: 0.94,
-              yPercent: -15,
-              ease: 'power2.in',
-              duration: 1,
+              yPercent: -20,
+              ease: 'power2.inOut',
+              duration: 1.0,
             },
-            timeOffset
+            foldTime
           );
 
-          // Next card rises from below and takes current card's spot flat under header
+          // 2. Next card only rises AFTER current card has completely disappeared
           if (next) {
             tl.to(
               next,
@@ -88,9 +107,9 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                 opacity: 1,
                 scale: 1,
                 ease: 'power2.out',
-                duration: 1,
+                duration: 1.0,
               },
-              timeOffset + 0.15
+              foldTime + 1.1
             );
           }
         });
@@ -115,9 +134,11 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         ref={stickyRef}
         className="sticky top-0 left-0 w-full h-screen overflow-hidden"
       >
-        {/* 1. Pink Serum Background: Top 45-50% Full-Width (Image 1) */}
+        {/* 1. Pink Serum Background: Expanding bubble to full width top 48vh */}
         <div
-          className="absolute top-0 left-0 w-full h-[48vh] z-0 overflow-hidden pointer-events-none"
+          ref={pinkRef}
+          className="absolute top-0 left-0 w-full h-[48vh] z-0 overflow-hidden pointer-events-none will-change-[clip-path]"
+          style={{ clipPath: 'ellipse(42% 32% at 50% 50%)' }}
         >
           <img
             src={stickyCircle.imageUrl || cardsSection.pinkSerumImage}
