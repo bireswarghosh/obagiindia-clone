@@ -475,6 +475,115 @@ export async function GET() {
 `;
     html = html.replace('</head>', `${dynamicStyles}\n</head>`);
 
+    // =========================================================================
+    // CARD STACK SCROLL ANIMATION — Injected HTML + Script at </body>
+    // =========================================================================
+    const cardsSectionData = data.cardsSection || {};
+    const visibleCards = (cardsSectionData.cards || []).filter((c: any) => c.visible !== false).slice(0, 3);
+    const serumBg = cardsSectionData.pinkSerumImage || 'https://static.wixstatic.com/media/c837a6_297eb5ebbb894e709a4ae04906201fa2~mv2.jpg/v1/fill/w_1898,h_353,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/pexels-luu-thanh-truc-335871-9085814.jpg';
+    const approachTabs = (data.approach?.tabs || []) as any[];
+
+    const renderedCards = visibleCards.map((card: any, i: number) => `
+<div class="obagi-deck-card" id="obagi-deck-card-${i}" style="position:absolute;left:50%;bottom:0;transform:translateX(-50%) translateY(100%);width:90%;max-width:1100px;background:#fff;border-radius:24px 24px 0 0;box-shadow:0 -8px 60px rgba(0,0,0,0.18);z-index:${20 + i};will-change:transform;overflow:hidden;display:grid;grid-template-columns:72px 1fr 320px;min-height:360px;">
+  <div style="display:flex;align-items:center;justify-content:center;padding:40px 16px;border-right:1px solid #f0f0f0;">
+    <span style="font-family:'Georgia',serif;font-size:5rem;font-weight:300;color:#e0e0e6;line-height:1;">${card.number || (i + 1)}</span>
+  </div>
+  <div style="padding:48px 40px;display:flex;flex-direction:column;justify-content:center;gap:14px;">
+    <span style="display:inline-block;padding:4px 14px;border-radius:100px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;background:#21275c;color:#fff;width:fit-content;">Medical System</span>
+    <h3 style="font-family:'Georgia',serif;font-size:2.2rem;font-weight:700;color:#0e2238;line-height:1.2;margin:0;">${card.title || ''}</h3>
+    <p style="font-size:.9rem;font-weight:600;color:#b1843b;margin:0;">${card.subtitle || ''}</p>
+    <p style="font-size:.85rem;color:#555;line-height:1.7;margin:0;max-width:520px;">${card.description || ''}</p>
+    <a href="${card.linkUrl || '#'}" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#21275c;text-decoration:none;margin-top:4px;">Explore Formulation Science &rarr;</a>
+  </div>
+  <div style="background:#f8f7f5;display:flex;align-items:center;justify-content:center;padding:28px;border-left:1px solid #f0f0f0;">
+    <img src="${card.imageUrl || ''}" alt="${card.title || ''}" style="max-height:240px;max-width:100%;object-fit:contain;" loading="lazy">
+  </div>
+</div>`).join('\n');
+
+    const tab0 = approachTabs[0] || {};
+    const tab1 = approachTabs[1] || {};
+    const tab2 = approachTabs[2] || {};
+
+    const cardAnimBlock = `
+<style>
+  #comp-mlqlfcyi,#comp-lwrl9iel{display:none!important}
+  #obagi-card-stage{background:#f8f7f5}
+  #obagi-approach-cols{display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid rgba(0,0,0,.08);background:#f8f7f5;position:relative;z-index:2}
+  #obagi-approach-cols .oa-col{padding:56px 40px;border-right:1px solid rgba(0,0,0,.08)}
+  #obagi-approach-cols .oa-col:last-child{border-right:none}
+  #obagi-approach-cols .oa-col img{width:100%;height:280px;object-fit:cover;border-radius:12px;margin-bottom:24px}
+  #obagi-approach-cols .oa-col h3{font-family:'Georgia',serif;font-size:1.45rem;font-weight:700;color:#0e2238;margin:0 0 12px;line-height:1.3}
+  #obagi-approach-cols .oa-col p{font-size:.875rem;color:#666;line-height:1.7;margin:0}
+  #obagi-sticky-scene{height:400vh;position:relative}
+  #obagi-sticky-vp{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;align-items:flex-end;justify-content:center}
+  #obagi-pink-pill{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);overflow:hidden;will-change:width,height,border-radius,top;z-index:1}
+  #obagi-pink-pill img{width:100%;height:100%;object-fit:cover;display:block}
+  #obagi-cards-wrap{position:absolute;bottom:0;left:0;right:0;height:100%;pointer-events:none}
+  .obagi-deck-card{pointer-events:auto}
+  @media(max-width:800px){
+    #obagi-approach-cols{grid-template-columns:1fr}
+    .oa-col{border-right:none!important;border-bottom:1px solid rgba(0,0,0,.08);padding:32px 24px!important}
+    .obagi-deck-card{grid-template-columns:1fr!important}
+    .obagi-deck-card>div:first-child,.obagi-deck-card>div:last-child{display:none!important}
+  }
+</style>
+<div id="obagi-card-stage">
+  <div id="obagi-approach-cols">
+    <div class="oa-col">
+      <img src="${tab0.image || 'https://static.wixstatic.com/media/4833d7_8df05a975c034ffe9ab6011eff353dc0~mv2.webp/v1/fill/w_564,h_728,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/scientist-pouring-red-liquid_2560x.webp'}" alt="Approach" loading="lazy">
+      <h3>${tab0.title || 'Our Approach to Innovation'}</h3>
+      <p>${tab0.desc || 'At Obagi, breakthrough innovation begins with a deep understanding of skin biology.'}</p>
+    </div>
+    <div class="oa-col">
+      <img src="${tab1.image || 'https://static.wixstatic.com/media/4833d7_89f2940aeb7f44dd80b03fba406941b4~mv2.webp/v1/fill/w_496,h_640,al_c,q_80,enc_avif,quality_auto/woman-scientist-doing-experiment_960x.webp'}" alt="Process" loading="lazy">
+      <h3>${tab1.title || 'Our Process'}</h3>
+      <p>${tab1.desc || 'Our rigorous product development process leaves no stone left unturned.'}</p>
+    </div>
+    <div class="oa-col">
+      <img src="${tab2.image || 'https://static.wixstatic.com/media/4833d7_58d317fb587b4fe99de2c8ee9ed76531~mv2.webp/v1/fill/w_496,h_640,al_c,q_80,enc_avif,quality_auto/science-research-lab-microscope_960x.webp'}" alt="Standards" loading="lazy">
+      <h3>${tab2.title || 'Our Standards'}</h3>
+      <p>${tab2.desc || 'Genuine Obagi — committed to the highest product testing standards.'}</p>
+    </div>
+  </div>
+  <div id="obagi-sticky-scene">
+    <div id="obagi-sticky-vp">
+      <div id="obagi-pink-pill"><img src="${serumBg}" alt="Serum" loading="lazy"></div>
+      <div id="obagi-cards-wrap">${renderedCards}</div>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  function loadScript(src,cb){var s=document.createElement('script');s.src=src;s.async=true;s.onload=cb;document.head.appendChild(s);}
+  function run(){
+    var gsap=window.gsap,ST=window.ScrollTrigger;
+    gsap.registerPlugin(ST);
+    var pill=document.getElementById('obagi-pink-pill');
+    var scene=document.getElementById('obagi-sticky-scene');
+    var cards=[].slice.call(document.querySelectorAll('.obagi-deck-card'));
+    if(!pill||!scene||!cards.length)return;
+    var vw=window.innerWidth,vh=window.innerHeight;
+    gsap.set(pill,{width:Math.round(vw*0.40),height:120,borderRadius:100,xPercent:-50,yPercent:-50,left:'50%',top:'50%'});
+    cards.forEach(function(c){gsap.set(c,{y:'100%'});});
+    var tl=gsap.timeline({scrollTrigger:{trigger:scene,start:'top top',end:'bottom bottom',scrub:0.8,anticipatePin:1}});
+    tl.to(pill,{width:vw,height:vh,borderRadius:0,top:'0%',yPercent:0,ease:'power2.inOut',duration:3},0);
+    tl.to(cards[0],{y:0,ease:'power3.out',duration:2},2.5);
+    if(cards[1])tl.to(cards[1],{y:0,ease:'power3.out',duration:2},4.5);
+    if(cards[2])tl.to(cards[2],{y:0,ease:'power3.out',duration:2},6.5);
+    window.addEventListener('resize',function(){vw=window.innerWidth;vh=window.innerHeight;ST.refresh();});
+  }
+  function boot(){
+    if(window.gsap&&window.ScrollTrigger){run();return;}
+    loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js',function(){
+      loadScript('https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js',run);
+    });
+  }
+  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',boot);}else{boot();}
+})();
+</script>`;
+
+    html = html.replace('</body>', `${cardAnimBlock}\n</body>`);
+
     return new Response(html, {
       status: 200,
       headers: {
