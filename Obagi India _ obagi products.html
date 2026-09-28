@@ -5599,13 +5599,26 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
   }
 
-  /* 6. Seamless Next Section: Instant Transition (Exact Image 3) */
+  /* 6. Seamless Next Section: 1-2 Finger Gap, Natural Video Height, No Overlap */
   #comp-mlau06ju {
     position: relative !important;
-    z-index: 20 !important;
-    margin-top: -65vh !important;
-    background: #ffffff !important;
-    will-change: transform, opacity !important;
+    z-index: 2 !important;
+    overflow: hidden !important;
+    will-change: transform !important;
+  }
+
+  @media (min-width: 769px) {
+    #comp-mlau06ju {
+      height: 200px !important;
+      max-height: 200px !important;
+    }
+  }
+
+  @media (max-width: 768px) {
+    #comp-mlau06ju {
+      height: 130px !important;
+      max-height: 130px !important;
+    }
   }
 </style>
 
@@ -5749,6 +5762,21 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           }, startTime);
         }
       });
+
+      var videoSec = document.querySelector('#comp-mlau06ju');
+      if (videoSec) {
+        function adjustVideoMargin() {
+          var isMobile = window.innerWidth <= 768;
+          var gap = isMobile ? 24 : 32;
+          var cardBox = document.querySelector('#comp-lwsw0td7');
+          var cardBoxBottom = cardBox ? (cardBox.offsetTop + cardBox.offsetHeight) : (isMobile ? 530 : 605);
+          var neededMargin = -(window.innerHeight - (cardBoxBottom + gap));
+          if (neededMargin > 0) neededMargin = 0;
+          videoSec.style.setProperty('margin-top', neededMargin + 'px', 'important');
+        }
+        adjustVideoMargin();
+        window.addEventListener('resize', adjustVideoMargin);
+      }
     }
 
     ScrollTrigger.refresh();
