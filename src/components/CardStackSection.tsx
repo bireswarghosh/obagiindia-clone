@@ -17,6 +17,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const displayCards = cardsSection.cards.slice(0, cardsSection.cardCount || 3);
+  const totalTrackVh = 100 + (displayCards.length - 1) * 65 + 35;
 
   useEffect(() => {
     let ctx: any;
@@ -32,30 +33,25 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
       if (!sectionRef.current || !stickyRef.current) return;
 
       ctx = gsap.context(() => {
-        // Pink card rolling up and spreading left-right
+        // 1. Pink Serum Background: Top-fixed ellipse, spreading symmetrically left-right (X+ and X-) to 100%
         if (pinkRef.current) {
           gsap.fromTo(
             pinkRef.current,
-            { width: '18%', y: 150, xPercent: -50, borderRadius: '100px' },
+            { clipPath: 'ellipse(42% 35% at 50% 50%)' },
             {
-              width: '100%',
-              y: 0,
-              xPercent: -50,
-              borderRadius: '24px',
-              ease: 'none',
+              clipPath: 'ellipse(100% 100% at 50% 50%)',
+              ease: 'power1.out',
               scrollTrigger: {
                 trigger: sectionRef.current,
-                start: 'top 75%',
-                end: 'top 10%',
-                scrub: 1.5,
+                start: 'top 85%',
+                end: 'top top',
+                scrub: 1.2,
               },
             }
           );
         }
 
-        // Set initial card states (all stay opacity: 1, fully visible mode throughout)
-        // Card 1 starts flat under header (rotateX: 0, opacity: 1, yPercent: 0)
-        // Cards 2 & 3 start below (yPercent: 110, opacity: 1)
+        // 2. Initial card states: All opacity: 1 (fully visible mode throughout, no opacity fade)
         cardRefs.current.forEach((el, i) => {
           if (!el) return;
           gsap.set(el, {
@@ -64,6 +60,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             rotateX: 0,
             opacity: 1,
             scale: 1,
+            transformPerspective: 1200,
             transformOrigin: 'top center',
             transformStyle: 'preserve-3d',
             backfaceVisibility: 'hidden',
@@ -79,40 +76,61 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
           },
         });
 
-        // Loop through cards for smooth rising on card lift
+        const stepDuration = 1.0;
+        const overlap = 0.35;
+        const stepGap = 1.6;
+
         displayCards.forEach((_, idx) => {
           const current = cardRefs.current[idx];
           const next = cardRefs.current[idx + 1];
           if (!current) return;
 
-          const foldTime = idx * 1.7;
+          const isLast = idx === displayCards.length - 1;
+          const startTime = idx * stepGap;
 
-          // 1. Current card flips from INSIDE to OUTSIDE (positive rotateX: 78) and floats away upwards (NO OPACITY 0)
-          tl.to(
-            current,
-            {
-              rotateX: 78,
-              scale: 0.95,
-              y: -320,
-              ease: 'power2.inOut',
-              duration: 1.0,
-            },
-            foldTime
-          );
-
-          // 2. Next card starts rising as current card lifts slightly
-          if (next) {
+          if (!isLast) {
+            // Non-last card flips from inside to outside and floats upwards
             tl.to(
-              next,
+              current,
               {
-                yPercent: 0,
-                y: 0,
-                rotateX: 0,
-                scale: 1,
-                ease: 'power2.out',
-                duration: 1.0,
+                rotateX: 78,
+                scale: 0.95,
+                y: -320,
+                ease: 'power2.inOut',
+                duration: stepDuration,
               },
-              foldTime + 0.35
+              startTime
+            );
+
+            // Next card rises from below smoothly
+            if (next) {
+              tl.to(
+                next,
+                {
+                  yPercent: 0,
+                  y: 0,
+                  rotateX: 0,
+                  scale: 1,
+                  ease: 'power2.out',
+                  duration: stepDuration,
+                },
+                startTime + overlap
+              );
+            }
+          } else {
+            // LAST card (dynamic: 3rd, 5th, etc.):
+            // As soon as last card lifts and reaches half-way, the pin ends so natural page scroll brings up rest of page seamlessly
+            tl.to(
+              current,
+              {
+                rotateX: 78,
+                scale: 0.95,
+                yPercent: -50,
+                y: -160,
+                ease: 'power2.inOut',
+                duration: stepDuration,
+              },
+              startTime
             );
           }
         });
@@ -129,7 +147,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
     <section
       id="cards"
       ref={sectionRef}
-      style={{ height: `${(displayCards.length + 1) * 100}vh` }}
+      style={{ height: `${totalTrackVh}vh` }}
       className="relative w-full bg-[#f8f7f5]"
     >
       {/* Sticky 100vh Viewport Container */}
@@ -137,10 +155,11 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         ref={stickyRef}
         className="sticky top-0 left-0 w-full h-screen overflow-hidden"
       >
-        {/* 1. Pink Serum Background: Rolling up and spreading left-right */}
+        {/* 1. Pink Serum Background: Top-fixed, spreading symmetrically left-right */}
         <div
           ref={pinkRef}
-          className="absolute top-0 left-1/2 w-[18%] h-[48vh] rounded-[100px] z-0 overflow-hidden pointer-events-none will-change-[transform,width,border-radius]"
+          className="absolute top-0 left-0 w-full h-[48vh] z-0 overflow-hidden pointer-events-none will-change-[clip-path]"
+          style={{ clipPath: 'ellipse(42% 35% at 50% 50%)' }}
         >
           <img
             src={stickyCircle.imageUrl || cardsSection.pinkSerumImage}
