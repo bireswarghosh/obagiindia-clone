@@ -17,7 +17,10 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const displayCards = cardsSection.cards.slice(0, cardsSection.cardCount || 3);
-  const totalTrackVh = 100 + (displayCards.length - 1) * 55 + 25;
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+  const totalTrackVh = isMobile
+    ? 100 + (displayCards.length - 1) * 95 + 40
+    : 100 + (displayCards.length - 1) * 85 + 35;
 
   useEffect(() => {
     let ctx: any;
@@ -32,11 +35,11 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
       if (!sectionRef.current || !stickyRef.current) return;
 
-      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-      const startClip = isMobile ? 'ellipse(38% 38% at 50% 50%)' : 'ellipse(24% 42% at 50% 50%)';
+      const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
+      const startClip = isMobileDevice ? 'ellipse(42% 42% at 50% 50%)' : 'ellipse(24% 42% at 50% 50%)';
 
       ctx = gsap.context(() => {
-        // 1. Pink Serum Background: Slow scrub from half-screen (top 60%) until touching header (top 70px)
+        // 1. Pink Serum Background: Starts early on mobile (top 95%), smooth linear spread
         if (pinkRef.current) {
           gsap.fromTo(
             pinkRef.current,
@@ -46,9 +49,9 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
               ease: 'none',
               scrollTrigger: {
                 trigger: sectionRef.current,
-                start: 'top 60%',
-                end: 'top 70px',
-                scrub: 1.5,
+                start: isMobileDevice ? 'top 95%' : 'top 60%',
+                end: isMobileDevice ? 'top 15%' : 'top 70px',
+                scrub: isMobileDevice ? 1.0 : 1.5,
               },
             }
           );
@@ -81,7 +84,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
         const stepDuration = 1.0;
         const overlap = 0.35;
-        const stepGap = 1.5;
+        const stepGap = 1.8;
 
         displayCards.forEach((_, idx) => {
           const current = cardRefs.current[idx];
@@ -177,7 +180,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
           style={{ perspective: '1400px', perspectiveOrigin: '50% 35%' }}
         >
           <div
-            className="relative w-full max-w-5xl h-[520px] pointer-events-auto"
+            className="relative w-full max-w-[280px] sm:max-w-5xl h-[480px] sm:h-[340px] pointer-events-auto"
             style={{ transformStyle: 'preserve-3d' }}
           >
             {displayCards.map((card, idx) => (
@@ -194,13 +197,13 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                 }}
               >
                 <div
-                  className="w-full h-full bg-white rounded-3xl border shadow-2xl p-8 sm:p-12 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
+                  className="w-full h-full bg-white rounded-xl sm:rounded-2xl border shadow-xl p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center"
                   style={{ borderColor: theme.borderColor }}
                 >
                   {/* Number */}
                   <div className="lg:col-span-1 text-center lg:text-left">
                     <span
-                      className="font-serif text-7xl sm:text-8xl font-light leading-none select-none"
+                      className="font-serif text-6xl sm:text-7xl font-light leading-none select-none"
                       style={{ color: theme.textMuted }}
                     >
                       {card.number}

@@ -5546,13 +5546,31 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   }
 
   #comp-lwsw0td7 {
-    width: 100% !important;
-    max-width: 1140px !important;
-    height: 520px !important;
+    width: 92% !important;
+    max-width: 1224px !important;
+    height: 324px !important;
     position: relative !important;
     display: block !important;
     margin: auto !important;
     transform-style: preserve-3d !important;
+  }
+
+  @media (max-width: 768px) {
+    #comp-lwsw0td7 {
+      width: 280px !important;
+      max-width: 280px !important;
+      height: 480px !important;
+      margin: 0 auto !important;
+    }
+
+    #comp-lwsw0td7 [data-testid="imageX"] img,
+    #comp-lwsw0td7 wow-image img,
+    #comp-lwsw0td7 .comp-lwtcg9jk img {
+      max-width: 263px !important;
+      max-height: 165px !important;
+      object-fit: contain !important;
+      margin: 0 auto !important;
+    }
   }
 
   #comp-lwsw0td7 > .comp-lwsw0td7-container {
@@ -5565,7 +5583,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     transform-style: preserve-3d !important;
   }
 
-  /* 5. 3D Flip Card Items (Exact Image 2) */
+  /* 5. 3D Flip Card Items (Official 1:1 Scale) */
   #comp-lwsw0td95__item1,
   #comp-lwsw0td95__item-j9ples3e,
   #comp-lwsw0td95__item-j9plerjk {
@@ -5576,9 +5594,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     bottom: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    border-radius: 28px !important;
+    border-radius: 12px !important;
     background: #ffffff !important;
-    box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.22) !important;
+    box-shadow: 0 15px 35px -8px rgba(0, 0, 0, 0.15) !important;
     pointer-events: auto !important;
     overflow: hidden !important;
     display: block !important;
@@ -5589,15 +5607,18 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     will-change: transform, opacity !important;
   }
 
+  @media (max-width: 768px) {
+    #comp-lwsw0td95__item1,
+    #comp-lwsw0td95__item-j9ples3e,
+    #comp-lwsw0td95__item-j9plerjk {
+      border-radius: 8px !important;
+      box-shadow: 0 10px 25px -6px rgba(0, 0, 0, 0.12) !important;
+    }
+  }
+
   #comp-lwsw0td95__item1 { z-index: 13 !important; }
   #comp-lwsw0td95__item-j9ples3e { z-index: 12 !important; }
   #comp-lwsw0td95__item-j9plerjk { z-index: 11 !important; }
-
-  @media (max-height: 750px) {
-    #comp-lwsw0td7 {
-      height: 450px !important;
-    }
-  }
 
   /* 6. Seamless Next Section: 1-2 Finger Gap, Natural Video Height, No Overlap */
   #comp-mlau06ju {
@@ -5644,7 +5665,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         gsap.fromTo(heroBox,
           { clipPath: 'circle(75% at 50% 50%)' },
           {
-            clipPath: 'circle(0% at 50% 12%)',
+            clipPath: 'circle(0% at 50% 50%)',
             ease: 'none',
             scrollTrigger: {
               trigger: heroSec,
@@ -5662,7 +5683,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     var cardSec = document.querySelector('#comp-lwrl9iel');
     if (pinkImg && cardSec) {
       var isMobile = window.innerWidth <= 768;
-      var startClip = isMobile ? 'ellipse(38% 38% at 50% 50%)' : 'ellipse(24% 42% at 50% 50%)';
+      var startClip = isMobile ? 'ellipse(42% 42% at 50% 50%)' : 'ellipse(24% 42% at 50% 50%)';
       gsap.fromTo(pinkImg,
         { clipPath: startClip },
         {
@@ -5670,9 +5691,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           ease: 'none',
           scrollTrigger: {
             trigger: cardSec,
-            start: 'top 60%',
-            end: 'top 70px',
-            scrub: 1.5
+            start: isMobile ? 'top 95%' : 'top 60%',
+            end: isMobile ? 'top 15%' : 'top 70px',
+            scrub: isMobile ? 1.0 : 1.5
           }
         }
       );
@@ -5696,7 +5717,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     });
 
     if (cardSec && cardItems.length > 0) {
-      var totalTrackVh = 100 + (cardItems.length - 1) * 55 + 25;
+      var isMobile = window.innerWidth <= 768;
+      var totalTrackVh = isMobile ? (100 + (cardItems.length - 1) * 95 + 40) : (100 + (cardItems.length - 1) * 85 + 35);
       cardSec.style.setProperty('height', totalTrackVh + 'vh', 'important');
       cardSec.style.setProperty('min-height', totalTrackVh + 'vh', 'important');
 
@@ -5723,7 +5745,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
       var stepDuration = 1.0;
       var overlap = 0.35;
-      var stepGap = 1.5;
+      var stepGap = 1.8;
 
       cardItems.forEach(function(card, idx) {
         var isLast = (idx === cardItems.length - 1);
