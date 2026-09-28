@@ -5437,8 +5437,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   /* 2. Flagship Pinned Scroll Track & Sticky Viewport (100vh) */
   #comp-lwrl9iel {
     position: relative !important;
-    height: 320vh !important;
-    min-height: 320vh !important;
+    height: 260vh !important;
+    min-height: 260vh !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
@@ -5489,7 +5489,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
-    height: 48vh !important;
+    height: 54vh !important;
     border-radius: 0px !important;
     overflow: hidden !important;
     margin: 0 !important;
@@ -5498,7 +5498,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 1 !important;
     transform: none !important;
     will-change: clip-path !important;
-    clip-path: ellipse(42% 35% at 50% 50%);
+    clip-path: ellipse(28% 42% at 50% 50%);
   }
 
   #comp-lwrlbohf .YX2qkL,
@@ -5603,7 +5603,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   #comp-mlau06ju {
     position: relative !important;
     z-index: 20 !important;
-    margin-top: -8vh !important;
+    margin-top: 0 !important;
     background: #ffffff !important;
     will-change: transform, opacity !important;
   }
@@ -5649,15 +5649,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     var cardSec = document.querySelector('#comp-lwrl9iel');
     if (pinkImg && cardSec) {
       gsap.fromTo(pinkImg,
-        { clipPath: 'ellipse(42% 35% at 50% 50%)' },
+        { clipPath: 'ellipse(28% 42% at 50% 50%)' },
         {
           clipPath: 'ellipse(100% 100% at 50% 50%)',
-          ease: 'power1.out',
+          ease: 'none',
           scrollTrigger: {
             trigger: cardSec,
-            start: 'top 85%',
-            end: 'top top',
-            scrub: 1.2
+            start: 'top bottom',
+            end: 'top 80px',
+            scrub: 1
           }
         }
       );
@@ -5667,6 +5667,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
     var card2 = document.querySelector('#comp-lwsw0td95__item-j9ples3e');
     var card3 = document.querySelector('#comp-lwsw0td95__item-j9plerjk');
+    var videoSec = document.querySelector('#comp-mlau06ju');
 
     var cardItems = [];
     if (card1) cardItems.push(card1);
@@ -5681,9 +5682,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     });
 
     if (cardSec && cardItems.length > 0) {
-      var totalTrackVh = 100 + (cardItems.length - 1) * 65 + 35;
-      cardSec.style.height = totalTrackVh + 'vh';
-      cardSec.style.minHeight = totalTrackVh + 'vh';
+      var totalTrackVh = 100 + (cardItems.length - 1) * 65 + 30;
+      cardSec.style.setProperty('height', totalTrackVh + 'vh', 'important');
+      cardSec.style.setProperty('min-height', totalTrackVh + 'vh', 'important');
 
       cardItems.forEach(function(card, idx) {
         gsap.set(card, {
@@ -5696,6 +5697,10 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           transformOrigin: 'top center'
         });
       });
+
+      if (videoSec) {
+        gsap.set(videoSec, { yPercent: 75 });
+      }
 
       var tl = gsap.timeline({
         scrollTrigger: {
@@ -5735,14 +5740,24 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
             }, startTime + overlap);
           }
         } else {
+          // Last card lifts up towards pink level
           tl.to(card, {
             rotateX: 78,
             scale: 0.95,
-            yPercent: -50,
-            y: -160,
+            y: -320,
             ease: 'power2.inOut',
             duration: stepDuration
           }, startTime);
+
+          // Simultaneous: As soon as last card starts lifting up,
+          // the video section and newsletter rise up smoothly from below, eliminating white screen completely!
+          if (videoSec) {
+            tl.to(videoSec, {
+              yPercent: 0,
+              ease: 'power2.out',
+              duration: stepDuration
+            }, startTime);
+          }
         }
       });
     }

@@ -17,7 +17,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const displayCards = cardsSection.cards.slice(0, cardsSection.cardCount || 3);
-  const totalTrackVh = 100 + (displayCards.length - 1) * 65 + 35;
+  const totalTrackVh = 100 + (displayCards.length - 1) * 65 + 30;
 
   useEffect(() => {
     let ctx: any;
@@ -37,15 +37,15 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         if (pinkRef.current) {
           gsap.fromTo(
             pinkRef.current,
-            { clipPath: 'ellipse(42% 35% at 50% 50%)' },
+            { clipPath: 'ellipse(28% 42% at 50% 50%)' },
             {
               clipPath: 'ellipse(100% 100% at 50% 50%)',
-              ease: 'power1.out',
+              ease: 'none',
               scrollTrigger: {
                 trigger: sectionRef.current,
-                start: 'top 85%',
-                end: 'top top',
-                scrub: 1.2,
+                start: 'top bottom',
+                end: 'top 80px',
+                scrub: 1,
               },
             }
           );
@@ -119,14 +119,13 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             }
           } else {
             // LAST card (dynamic: 3rd, 5th, etc.):
-            // As soon as last card lifts and reaches half-way, the pin ends so natural page scroll brings up rest of page seamlessly
+            // Lifts up towards pink level
             tl.to(
               current,
               {
                 rotateX: 78,
                 scale: 0.95,
-                yPercent: -50,
-                y: -160,
+                y: -320,
                 ease: 'power2.inOut',
                 duration: stepDuration,
               },
@@ -158,8 +157,8 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         {/* 1. Pink Serum Background: Top-fixed, spreading symmetrically left-right */}
         <div
           ref={pinkRef}
-          className="absolute top-0 left-0 w-full h-[48vh] z-0 overflow-hidden pointer-events-none will-change-[clip-path]"
-          style={{ clipPath: 'ellipse(42% 35% at 50% 50%)' }}
+          className="absolute top-0 left-0 w-full h-[54vh] z-0 overflow-hidden pointer-events-none will-change-[clip-path]"
+          style={{ clipPath: 'ellipse(28% 42% at 50% 50%)' }}
         >
           <img
             src={stickyCircle.imageUrl || cardsSection.pinkSerumImage}
