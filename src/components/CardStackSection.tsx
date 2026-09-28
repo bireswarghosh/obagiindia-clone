@@ -32,34 +32,37 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
       if (!sectionRef.current || !stickyRef.current) return;
 
       ctx = gsap.context(() => {
-        // Pink card slow scrubbed expansion from small pill to full width
+        // Pink card rolling up and spreading left-right
         if (pinkRef.current) {
           gsap.fromTo(
             pinkRef.current,
-            { width: '12%', borderRadius: '999px' },
+            { width: '18%', y: 150, xPercent: -50, borderRadius: '100px' },
             {
               width: '100%',
-              borderRadius: '0px',
+              y: 0,
+              xPercent: -50,
+              borderRadius: '24px',
               ease: 'none',
               scrollTrigger: {
                 trigger: sectionRef.current,
-                start: 'top bottom',
-                end: 'top top',
+                start: 'top 75%',
+                end: 'top 10%',
                 scrub: 1.5,
               },
             }
           );
         }
 
-        // Set initial card states
+        // Set initial card states (all stay opacity: 1, fully visible mode throughout)
         // Card 1 starts flat under header (rotateX: 0, opacity: 1, yPercent: 0)
-        // Cards 2 & 3 start below (yPercent: 110, opacity: 0)
+        // Cards 2 & 3 start below (yPercent: 110, opacity: 1)
         cardRefs.current.forEach((el, i) => {
           if (!el) return;
           gsap.set(el, {
             yPercent: i === 0 ? 0 : 110,
+            y: 0,
             rotateX: 0,
-            opacity: i === 0 ? 1 : 0,
+            opacity: 1,
             scale: 1,
             transformOrigin: 'top center',
             transformStyle: 'preserve-3d',
@@ -84,28 +87,27 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
           const foldTime = idx * 1.7;
 
-          // 1. Current card flips from INSIDE to OUTSIDE (positive rotateX: 78) towards pink shelf and fades
+          // 1. Current card flips from INSIDE to OUTSIDE (positive rotateX: 78) and floats away upwards (NO OPACITY 0)
           tl.to(
             current,
             {
               rotateX: 78,
-              opacity: 0,
               scale: 0.95,
-              yPercent: -30,
+              y: -320,
               ease: 'power2.inOut',
               duration: 1.0,
             },
             foldTime
           );
 
-          // 2. Next card starts becoming visible and rising as current card lifts slightly
+          // 2. Next card starts rising as current card lifts slightly
           if (next) {
             tl.to(
               next,
               {
                 yPercent: 0,
+                y: 0,
                 rotateX: 0,
-                opacity: 1,
                 scale: 1,
                 ease: 'power2.out',
                 duration: 1.0,
@@ -135,10 +137,10 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         ref={stickyRef}
         className="sticky top-0 left-0 w-full h-screen overflow-hidden"
       >
-        {/* 1. Pink Serum Background: Expanding pill from 12% to full width top 48vh */}
+        {/* 1. Pink Serum Background: Rolling up and spreading left-right */}
         <div
           ref={pinkRef}
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[12%] h-[48vh] rounded-full z-0 overflow-hidden pointer-events-none will-change-[width,border-radius]"
+          className="absolute top-0 left-1/2 w-[18%] h-[48vh] rounded-[100px] z-0 overflow-hidden pointer-events-none will-change-[transform,width,border-radius]"
         >
           <img
             src={stickyCircle.imageUrl || cardsSection.pinkSerumImage}
