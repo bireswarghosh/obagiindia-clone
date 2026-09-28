@@ -32,19 +32,20 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
       if (!sectionRef.current || !stickyRef.current) return;
 
       ctx = gsap.context(() => {
-        // Pink bubble expanding animation as section enters
+        // Pink card slow scrubbed expansion from small pill to full width
         if (pinkRef.current) {
           gsap.fromTo(
             pinkRef.current,
-            { clipPath: 'ellipse(42% 32% at 50% 50%)' },
+            { width: '12%', borderRadius: '999px' },
             {
-              clipPath: 'ellipse(100% 100% at 50% 50%)',
-              ease: 'power1.out',
+              width: '100%',
+              borderRadius: '0px',
+              ease: 'none',
               scrollTrigger: {
                 trigger: sectionRef.current,
-                start: 'top 85%',
+                start: 'top bottom',
                 end: 'top top',
-                scrub: 1,
+                scrub: 1.5,
               },
             }
           );
@@ -60,7 +61,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
             rotateX: 0,
             opacity: i === 0 ? 1 : 0,
             scale: 1,
-            transformOrigin: 'center center',
+            transformOrigin: 'top center',
             transformStyle: 'preserve-3d',
             backfaceVisibility: 'hidden',
           });
@@ -83,14 +84,14 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
           const foldTime = idx * 1.7;
 
-          // 1. Current card flips OUTWARD towards user face into horizontal level and fades
+          // 1. Current card flips from INSIDE to OUTSIDE (positive rotateX: 78) towards pink shelf and fades
           tl.to(
             current,
             {
-              rotateX: -80,
+              rotateX: 78,
               opacity: 0,
-              scale: 1.03,
-              yPercent: -28,
+              scale: 0.95,
+              yPercent: -30,
               ease: 'power2.inOut',
               duration: 1.0,
             },
@@ -134,11 +135,10 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         ref={stickyRef}
         className="sticky top-0 left-0 w-full h-screen overflow-hidden"
       >
-        {/* 1. Pink Serum Background: Expanding bubble to full width top 48vh */}
+        {/* 1. Pink Serum Background: Expanding pill from 12% to full width top 48vh */}
         <div
           ref={pinkRef}
-          className="absolute top-0 left-0 w-full h-[48vh] z-0 overflow-hidden pointer-events-none will-change-[clip-path]"
-          style={{ clipPath: 'ellipse(42% 32% at 50% 50%)' }}
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[12%] h-[48vh] rounded-full z-0 overflow-hidden pointer-events-none will-change-[width,border-radius]"
         >
           <img
             src={stickyCircle.imageUrl || cardsSection.pinkSerumImage}
@@ -166,7 +166,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                 style={{
                   zIndex: 10 + (displayCards.length - idx),
                   transformStyle: 'preserve-3d',
-                  transformOrigin: 'center center',
+                  transformOrigin: 'top center',
                 }}
               >
                 <div

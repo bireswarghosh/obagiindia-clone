@@ -5487,18 +5487,17 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   #comp-lwrlbohf {
     position: absolute !important;
     top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 12% !important;
     height: 48vh !important;
-    border-radius: 0px !important;
+    border-radius: 999px !important;
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
     z-index: 1 !important;
-    transform: none !important;
-    will-change: clip-path !important;
-    clip-path: ellipse(42% 32% at 50% 50%);
+    will-change: width, border-radius !important;
   }
 
   #comp-lwrlbohf .YX2qkL,
@@ -5584,7 +5583,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     display: block !important;
     margin: 0 !important;
     transform-style: preserve-3d !important;
-    transform-origin: center center !important;
+    transform-origin: top center !important;
     backface-visibility: hidden !important;
     will-change: transform, opacity !important;
   }
@@ -5644,26 +5643,27 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
     }
 
-    // 2. Middle Section: Sticky Pink Bubbles Expanding Circle / Bubble
+    // 2. Middle Section: Pink Card Width Expansion (Slow, scroll-scrubbed symmetrical expansion)
     var pinkImg = document.querySelector('#comp-lwrlbohf');
     var cardSec = document.querySelector('#comp-lwrl9iel');
     if (pinkImg && cardSec) {
       gsap.fromTo(pinkImg,
-        { clipPath: 'ellipse(42% 32% at 50% 50%)' },
+        { width: '12%', borderRadius: '999px' },
         {
-          clipPath: 'ellipse(100% 100% at 50% 50%)',
-          ease: 'power1.out',
+          width: '100%',
+          borderRadius: '0px',
+          ease: 'none',
           scrollTrigger: {
             trigger: cardSec,
-            start: 'top 85%',
+            start: 'top bottom',
             end: 'top top',
-            scrub: 1
+            scrub: 1.5
           }
         }
       );
     }
 
-    // 3. 3D Perspective Card Flip & Scroll Transition (Outward flip towards user + instant video reveal)
+    // 3. 3D Perspective Card Flip & Scroll Transition (Inside-to-outside outward flip + zero white screen video reveal)
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
     var card2 = document.querySelector('#comp-lwsw0td95__item-j9ples3e');
     var card3 = document.querySelector('#comp-lwsw0td95__item-j9plerjk');
@@ -5673,9 +5673,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       // Initial States:
       // Card 1 starts flat facing user (rotateX: 0, opacity: 1, scale: 1, yPercent: 0)
       // Cards 2 & 3 start below and invisible (yPercent: 110, opacity: 0)
-      gsap.set(card1, { yPercent: 0, rotateX: 0, opacity: 1, scale: 1, transformPerspective: 1200 });
-      gsap.set(card2, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1, transformPerspective: 1200 });
-      gsap.set(card3, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1, transformPerspective: 1200 });
+      gsap.set(card1, { yPercent: 0, rotateX: 0, opacity: 1, scale: 1, transformPerspective: 1200, transformOrigin: 'top center' });
+      gsap.set(card2, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1, transformPerspective: 1200, transformOrigin: 'top center' });
+      gsap.set(card3, { yPercent: 110, rotateX: 0, opacity: 0, scale: 1, transformPerspective: 1200, transformOrigin: 'top center' });
 
       if (videoSec) {
         gsap.set(videoSec, { y: 60, opacity: 0.85 });
@@ -5690,12 +5690,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         }
       });
 
-      // --- PHASE 1: Card 1 flips OUTWARD towards user face into horizontal level and fades ---
+      // --- PHASE 1: Card 1 flips from INSIDE to OUTSIDE (rotateX: 78) towards pink shelf and fades ---
       tl.to(card1, {
-        rotateX: -80,
+        rotateX: 78,
         opacity: 0,
-        scale: 1.03,
-        yPercent: -28,
+        scale: 0.95,
+        yPercent: -30,
         ease: 'power2.inOut',
         duration: 1.0
       }, 0);
@@ -5710,12 +5710,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         duration: 1.0
       }, 0.35);
 
-      // --- PHASE 2: Card 2 flips OUTWARD towards user face into horizontal level and fades ---
+      // --- PHASE 2: Card 2 flips from INSIDE to OUTSIDE (rotateX: 78) towards pink shelf and fades ---
       tl.to(card2, {
-        rotateX: -80,
+        rotateX: 78,
         opacity: 0,
-        scale: 1.03,
-        yPercent: -28,
+        scale: 0.95,
+        yPercent: -30,
         ease: 'power2.inOut',
         duration: 1.0
       }, 1.7);
@@ -5730,12 +5730,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         duration: 1.0
       }, 2.05);
 
-      // --- PHASE 3: Last card (Card 3) flips OUTWARD towards user face and starts vanishing ---
+      // --- PHASE 3: Last card (Card 3) flips from INSIDE to OUTSIDE and starts vanishing ---
       tl.to(card3, {
-        rotateX: -80,
+        rotateX: 78,
         opacity: 0,
-        scale: 1.03,
-        yPercent: -28,
+        scale: 0.95,
+        yPercent: -30,
         ease: 'power2.inOut',
         duration: 1.0
       }, 3.4);
