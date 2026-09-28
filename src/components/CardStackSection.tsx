@@ -17,7 +17,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const displayCards = cardsSection.cards.slice(0, cardsSection.cardCount || 3);
-  const totalTrackVh = 100 + (displayCards.length - 1) * 65 + 30;
+  const totalTrackVh = 100 + (displayCards.length - 1) * 55 + 25;
 
   useEffect(() => {
     let ctx: any;
@@ -32,20 +32,23 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
       if (!sectionRef.current || !stickyRef.current) return;
 
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+      const startClip = isMobile ? 'ellipse(38% 38% at 50% 50%)' : 'ellipse(24% 42% at 50% 50%)';
+
       ctx = gsap.context(() => {
-        // 1. Pink Serum Background: Top-fixed ellipse, spreading symmetrically left-right (X+ and X-) to 100%
+        // 1. Pink Serum Background: Slow scrub from half-screen (top 60%) until touching header (top 70px)
         if (pinkRef.current) {
           gsap.fromTo(
             pinkRef.current,
-            { clipPath: 'ellipse(28% 42% at 50% 50%)' },
+            { clipPath: startClip },
             {
               clipPath: 'ellipse(100% 100% at 50% 50%)',
               ease: 'none',
               scrollTrigger: {
                 trigger: sectionRef.current,
-                start: 'top bottom',
-                end: 'top 80px',
-                scrub: 1,
+                start: 'top 60%',
+                end: 'top 70px',
+                scrub: 1.5,
               },
             }
           );
@@ -78,7 +81,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
         const stepDuration = 1.0;
         const overlap = 0.35;
-        const stepGap = 1.6;
+        const stepGap = 1.5;
 
         displayCards.forEach((_, idx) => {
           const current = cardRefs.current[idx];
@@ -118,14 +121,15 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
               );
             }
           } else {
-            // LAST card (dynamic: 3rd, 5th, etc.):
-            // Lifts up towards pink level
+            // LAST card (Exact Image 2):
+            // Tilts back into shelf perspective - DOES NOT DISAPPEAR OR FLY OFF!
             tl.to(
               current,
               {
-                rotateX: 78,
+                rotateX: 72,
                 scale: 0.95,
-                y: -320,
+                yPercent: -20,
+                y: 0,
                 ease: 'power2.inOut',
                 duration: stepDuration,
               },
@@ -158,7 +162,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         <div
           ref={pinkRef}
           className="absolute top-0 left-0 w-full h-[54vh] z-0 overflow-hidden pointer-events-none will-change-[clip-path]"
-          style={{ clipPath: 'ellipse(28% 42% at 50% 50%)' }}
+          style={{ clipPath: 'ellipse(24% 42% at 50% 50%)' }}
         >
           <img
             src={stickyCircle.imageUrl || cardsSection.pinkSerumImage}
