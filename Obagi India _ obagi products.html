@@ -5498,7 +5498,13 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 1 !important;
     transform: none !important;
     will-change: clip-path !important;
-    clip-path: ellipse(28% 42% at 50% 50%);
+    clip-path: circle(22% at 50% 55%);
+  }
+
+  @media (max-width: 768px) {
+    #comp-lwrlbohf {
+      clip-path: circle(18% at 50% 70%) !important;
+    }
   }
 
   #comp-lwrlbohf .YX2qkL,
@@ -5515,20 +5521,17 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   /* 4. Cards Overlay Stage (Positioned below header with 3D perspective) */
   #comp-lwrmnbmd {
-    position: absolute !important;
-    top: 0 !important;
+    position: sticky !important;
+    top: 0px !important;
     left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
     width: 100% !important;
-    height: 100% !important;
+    height: 100vh !important;
     z-index: 10 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     pointer-events: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    margin-top: -100vh !important;
     perspective: 1400px !important;
     perspective-origin: 50% 35% !important;
   }
@@ -5678,22 +5681,28 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
     }
 
-    // 2. Middle Section: Sticky Pink Serum Background Spreading Left-Right
+    // 2. Middle Section: Sticky Pink Serum Circle Spreading
     var pinkImg = document.querySelector('#comp-lwrlbohf');
     var cardSec = document.querySelector('#comp-lwrl9iel');
     if (pinkImg && cardSec) {
       var isMobile = window.innerWidth <= 768;
-      var startClip = isMobile ? 'ellipse(42% 42% at 50% 50%)' : 'ellipse(24% 42% at 50% 50%)';
+      var startClip = isMobile ? 'circle(18% at 50% 70%)' : 'circle(22% at 50% 55%)';
+      var endClip = isMobile ? 'circle(125% at 50% 50%)' : 'circle(115% at 50% 50%)';
+
+      // Pink circle starts expanding as cardSec enters viewport (while #1 Leading... scrolls up)
+      // and continues expanding while Card 1 enters, finishing when Card 1 settles in place
       gsap.fromTo(pinkImg,
         { clipPath: startClip },
         {
-          clipPath: 'ellipse(100% 100% at 50% 50%)',
-          ease: 'none',
+          clipPath: endClip,
+          ease: 'power1.out',
           scrollTrigger: {
             trigger: cardSec,
-            start: isMobile ? 'top 95%' : 'top 60%',
-            end: isMobile ? 'top 15%' : 'top 70px',
-            scrub: isMobile ? 1.0 : 1.5
+            start: isMobile ? 'top 95%' : 'top 65%',
+            end: function() {
+              return '+=' + (window.innerHeight * (isMobile ? 1.45 : 1.25));
+            },
+            scrub: 1.0
           }
         }
       );
@@ -5718,13 +5727,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
     if (cardSec && cardItems.length > 0) {
       var isMobile = window.innerWidth <= 768;
-      var totalTrackVh = isMobile ? (100 + (cardItems.length - 1) * 95 + 40) : (100 + (cardItems.length - 1) * 85 + 35);
+      var totalTrackVh = isMobile ? (100 + (cardItems.length) * 80) : (100 + (cardItems.length) * 70);
       cardSec.style.setProperty('height', totalTrackVh + 'vh', 'important');
       cardSec.style.setProperty('min-height', totalTrackVh + 'vh', 'important');
 
+      // All cards start below the viewport
       cardItems.forEach(function(card, idx) {
         gsap.set(card, {
-          yPercent: idx === 0 ? 0 : 110,
+          yPercent: 110,
           y: 0,
           rotateX: 0,
           opacity: 1,
@@ -5744,23 +5754,33 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       });
 
       var stepDuration = 1.0;
-      var overlap = 0.35;
       var stepGap = 1.8;
 
-      cardItems.forEach(function(card, idx) {
-        var isLast = (idx === cardItems.length - 1);
-        var startTime = idx * stepGap;
+      // Card 1 rises smoothly from below as pinning begins
+      tl.to(cardItems[0], {
+        yPercent: 0,
+        y: 0,
+        ease: 'power2.out',
+        duration: stepDuration
+      }, 0);
+
+      // Card 1 stays visible, then at 1.8 Card 1 flips back and Card 2 enters
+      // Then Card 2 flips back and Card 3 enters
+      for (var i = 0; i < cardItems.length; i++) {
+        var currentCard = cardItems[i];
+        var isLast = (i === cardItems.length - 1);
+        var flipStartTime = (i + 1) * stepGap;
 
         if (!isLast) {
-          tl.to(card, {
+          tl.to(currentCard, {
             rotateX: 78,
             scale: 0.95,
             y: -320,
             ease: 'power2.inOut',
             duration: stepDuration
-          }, startTime);
+          }, flipStartTime);
 
-          var nextCard = cardItems[idx + 1];
+          var nextCard = cardItems[i + 1];
           if (nextCard) {
             tl.to(nextCard, {
               yPercent: 0,
@@ -5769,21 +5789,20 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
               scale: 1,
               ease: 'power2.out',
               duration: stepDuration
-            }, startTime + overlap);
+            }, flipStartTime + 0.35);
           }
         } else {
-          // LAST CARD (Exact Image 2):
-          // Tilts back into shelf perspective - DOES NOT DISAPPEAR OR FLY OFF!
-          tl.to(card, {
+          // LAST CARD: Tilts back into shelf perspective - DOES NOT DISAPPEAR OR FLY OFF!
+          tl.to(currentCard, {
             rotateX: 72,
             scale: 0.95,
             yPercent: -20,
             y: 0,
             ease: 'power2.inOut',
             duration: stepDuration
-          }, startTime);
+          }, flipStartTime);
         }
-      });
+      }
 
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {

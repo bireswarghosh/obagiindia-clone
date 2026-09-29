@@ -18,9 +18,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
   const displayCards = cardsSection.cards.slice(0, cardsSection.cardCount || 3);
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
-  const totalTrackVh = isMobile
-    ? 100 + (displayCards.length - 1) * 95 + 40
-    : 100 + (displayCards.length - 1) * 85 + 35;
+  const totalTrackVh = isMobile ? (100 + displayCards.length * 80) : (100 + displayCards.length * 70);
 
   useEffect(() => {
     let ctx: any;
@@ -35,33 +33,34 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
 
       if (!sectionRef.current || !stickyRef.current) return;
 
-      const isMobileDevice = typeof window !== 'undefined' && window.innerWidth <= 768;
-      const startClip = isMobileDevice ? 'ellipse(42% 42% at 50% 50%)' : 'ellipse(24% 42% at 50% 50%)';
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+      const startClip = isMobile ? 'circle(18% at 50% 70%)' : 'circle(22% at 50% 55%)';
+      const endClip = isMobile ? 'circle(125% at 50% 50%)' : 'circle(115% at 50% 50%)';
 
       ctx = gsap.context(() => {
-        // 1. Pink Serum Background: Starts early on mobile (top 95%), smooth linear spread
+        // 1. Pink Serum Circle: Starts early (top 95% mobile), expands continuously while Card 1 enters
         if (pinkRef.current) {
           gsap.fromTo(
             pinkRef.current,
             { clipPath: startClip },
             {
-              clipPath: 'ellipse(100% 100% at 50% 50%)',
-              ease: 'none',
+              clipPath: endClip,
+              ease: 'power1.out',
               scrollTrigger: {
                 trigger: sectionRef.current,
-                start: isMobileDevice ? 'top 95%' : 'top 60%',
-                end: isMobileDevice ? 'top 15%' : 'top 70px',
-                scrub: isMobileDevice ? 1.0 : 1.5,
+                start: isMobile ? 'top 95%' : 'top 65%',
+                end: () => '+=' + (window.innerHeight * (isMobile ? 1.45 : 1.25)),
+                scrub: 1.0,
               },
             }
           );
         }
 
-        // 2. Initial card states: All opacity: 1 (fully visible mode throughout, no opacity fade)
-        cardRefs.current.forEach((el, i) => {
+        // 2. Initial card states: All cards start below viewport
+        cardRefs.current.forEach((el) => {
           if (!el) return;
           gsap.set(el, {
-            yPercent: i === 0 ? 0 : 110,
+            yPercent: 110,
             y: 0,
             rotateX: 0,
             opacity: 1,
@@ -83,8 +82,21 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
         });
 
         const stepDuration = 1.0;
-        const overlap = 0.35;
         const stepGap = 1.8;
+
+        // Card 1 enters smoothly from below right as pinning begins
+        if (cardRefs.current[0]) {
+          tl.to(
+            cardRefs.current[0],
+            {
+              yPercent: 0,
+              y: 0,
+              ease: 'power2.out',
+              duration: stepDuration,
+            },
+            0
+          );
+        }
 
         displayCards.forEach((_, idx) => {
           const current = cardRefs.current[idx];
@@ -92,10 +104,10 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
           if (!current) return;
 
           const isLast = idx === displayCards.length - 1;
-          const startTime = idx * stepGap;
+          const flipStartTime = (idx + 1) * stepGap;
 
           if (!isLast) {
-            // Non-last card flips from inside to outside and floats upwards
+            // Non-last card flips upward and backward
             tl.to(
               current,
               {
@@ -105,10 +117,10 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                 ease: 'power2.inOut',
                 duration: stepDuration,
               },
-              startTime
+              flipStartTime
             );
 
-            // Next card rises from below smoothly
+            // Next card rises from below
             if (next) {
               tl.to(
                 next,
@@ -120,12 +132,11 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                   ease: 'power2.out',
                   duration: stepDuration,
                 },
-                startTime + overlap
+                flipStartTime + 0.35
               );
             }
           } else {
-            // LAST card (Exact Image 2):
-            // Tilts back into shelf perspective - DOES NOT DISAPPEAR OR FLY OFF!
+            // LAST card: Tilts back into shelf perspective
             tl.to(
               current,
               {
@@ -136,7 +147,7 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                 ease: 'power2.inOut',
                 duration: stepDuration,
               },
-              startTime
+              flipStartTime
             );
           }
         });
