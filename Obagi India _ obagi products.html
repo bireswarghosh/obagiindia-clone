@@ -5503,7 +5503,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   @media (max-width: 768px) {
     #comp-lwrlbohf {
-      clip-path: circle(18% at 50% 70%) !important;
+      clip-path: circle(18% at 50% 70%);
     }
   }
 
@@ -5633,8 +5633,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   @media (min-width: 769px) {
     #comp-mlau06ju {
-      height: 200px !important;
-      max-height: 200px !important;
+      height: 225px !important;
+      max-height: 225px !important;
     }
   }
 
@@ -5695,12 +5695,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         { clipPath: startClip },
         {
           clipPath: endClip,
-          ease: 'power1.out',
+          ease: isMobile ? 'none' : 'power1.out',
           scrollTrigger: {
             trigger: cardSec,
             start: isMobile ? 'top 95%' : 'top 65%',
             end: function() {
-              return '+=' + (window.innerHeight * (isMobile ? 1.45 : 1.25));
+              return '+=' + (window.innerHeight * (isMobile ? 1.45 : 1.4));
             },
             scrub: 1.0
           }
@@ -5730,6 +5730,20 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       var totalTrackVh = isMobile ? (100 + (cardItems.length) * 80) : (100 + (cardItems.length) * 70);
       cardSec.style.setProperty('height', totalTrackVh + 'vh', 'important');
       cardSec.style.setProperty('min-height', totalTrackVh + 'vh', 'important');
+
+      // Desktop: fit card box to tallest card content (live site sizes by content)
+      if (!isMobile) {
+        var fitBox = document.querySelector('#comp-lwsw0td7');
+        var doFit = function() {
+          if (!fitBox || !cardItems.length) return;
+          var fitH = 324, i;
+          for (i = 0; i < cardItems.length; i++) fitH = Math.max(fitH, cardItems[i].scrollHeight);
+          fitBox.style.setProperty('height', fitH + 'px', 'important');
+        };
+        doFit();
+        window.addEventListener('load', function() { doFit(); if (window.ScrollTrigger) ScrollTrigger.refresh(); });
+        window.addEventListener('resize', doFit);
+      }
 
       // All cards start below the viewport
       cardItems.forEach(function(card, idx) {
@@ -5808,15 +5822,27 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       if (videoSec) {
         function adjustVideoMargin() {
           var isMobile = window.innerWidth <= 768;
-          var gap = isMobile ? 24 : 32;
-          var cardBox = document.querySelector('#comp-lwsw0td7');
-          var cardBoxBottom = cardBox ? (cardBox.offsetTop + cardBox.offsetHeight) : (isMobile ? 530 : 605);
-          var neededMargin = -(window.innerHeight - (cardBoxBottom + gap));
-          if (neededMargin > 0) neededMargin = 0;
-          videoSec.style.setProperty('margin-top', neededMargin + 'px', 'important');
+          if (isMobile) {
+            var trackEnd = cardSec.getBoundingClientRect().bottom + window.scrollY;
+            var bH = videoSec.getBoundingClientRect().height || 130;
+            var curTop = videoSec.getBoundingClientRect().top + window.scrollY;
+            var curMargin = parseFloat(getComputedStyle(videoSec).marginTop) || 0;
+            var targetMargin = trackEnd - bH - (curTop - curMargin);
+            if (targetMargin > 0) targetMargin = 0;
+            videoSec.style.setProperty('margin-top', targetMargin + 'px', 'important');
+          } else {
+            var gap = 53;
+            var cardBox = document.querySelector('#comp-lwsw0td7');
+            var cardBoxBottom = cardBox ? (cardBox.offsetTop + cardBox.offsetHeight) : 605;
+            var neededMargin = -(window.innerHeight - (cardBoxBottom + gap));
+            if (neededMargin > 0) neededMargin = 0;
+            videoSec.style.setProperty('margin-top', neededMargin + 'px', 'important');
+          }
         }
         adjustVideoMargin();
         window.addEventListener('resize', adjustVideoMargin);
+        window.addEventListener('load', adjustVideoMargin);
+        setTimeout(adjustVideoMargin, 800);
       }
     }
 
