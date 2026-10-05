@@ -389,43 +389,9 @@ const CLINICAL_INSIGHTS: InsightArticle[] = [
   }
 ];
 
-// ==========================================
-// REFERENCE LIBRARY DATA
-// ==========================================
-
-interface LibraryArea {
-  id: string;
-  slug: string;
-  name: string;
-  count: number;
-  highlightTopics: string[];
-}
-
-const LIBRARY_AREAS: LibraryArea[] = [
-  { id: 'acne', slug: 'acne', name: 'Acne', count: 12, highlightTopics: ['Acne Vulgaris', 'Comedonal Acne', 'Inflammatory Acne', 'Nodulocystic Acne', 'Topical Retinoids', 'Benzoyl Peroxide', 'Isotretinoin'] },
-  { id: 'fungal', slug: 'fungal-infections', name: 'Fungal Infections', count: 14, highlightTopics: ['Dermatophytosis', 'Tinea Corporis', 'Tinea Cruris', 'Tinea Pedis', 'Onychomycosis', 'Topical Antifungals', 'Systemic Antifungals'] },
-  { id: 'bacterial', slug: 'bacterial-infections', name: 'Bacterial Infections', count: 10, highlightTopics: ['Impetigo', 'Folliculitis', 'Furunculosis', 'Ecthyma', 'Topical Antibiotics', 'Antimicrobial Stewardship'] },
-  { id: 'inflammatory', slug: 'inflammatory-dermatoses', name: 'Inflammatory Dermatoses', count: 11, highlightTopics: ['Atopic Dermatitis', 'Contact Dermatitis', 'Seborrhoeic Dermatitis', 'Psoriasis', 'Steroid Potency', 'Calcineurin Inhibitors'] },
-  { id: 'allergy', slug: 'allergy-and-pruritus', name: 'Allergy & Pruritus', count: 10, highlightTopics: ['Urticaria', 'Chronic Urticaria', 'Dermatographism', 'Generalised Pruritus', 'Antihistamines', 'Chronic Itch Approach'] },
-  { id: 'hair', slug: 'hair-and-scalp', name: 'Hair & Scalp', count: 11, highlightTopics: ['Androgenetic Alopecia', 'Telogen Effluvium', 'Alopecia Areata', 'Dandruff', 'Minoxidil', 'Finasteride'] },
-  { id: 'pigmentation', slug: 'pigmentation', name: 'Pigmentation', count: 10, highlightTopics: ['Melasma', 'PIH', 'Facial Hypermelanosis', 'Vitiligo Overview', 'Hydroquinone', 'Photoprotection'] },
-  { id: 'immunomodulatory', slug: 'immunomodulatory-dermatology', name: 'Immunomodulatory Dermatology', count: 8, highlightTopics: ['Topical Tacrolimus', 'Calcineurin Inhibitors', 'JAK Inhibitors', 'Tofacitinib Reference', 'Monitoring'] },
-  { id: 'parasitic', slug: 'parasitic-conditions', name: 'Parasitic Conditions', count: 7, highlightTopics: ['Classical Scabies', 'Crusted Scabies', 'Pediculosis', 'Permethrin', 'Contact Management', 'Reinfection Prevention'] },
-  { id: 'skincare', slug: 'skin-care', name: 'Skin Care', count: 12, highlightTopics: ['Skin Barrier', 'Xerosis', 'Emollients', 'Sensitive Skin', 'Sunscreen Photoprotection', 'Ceramides'] }
-];
-
 export default function TherapeuticResourcesPage() {
   const [activeGuideModal, setActiveGuideModal] = useState<GuideItem | null>(null);
   const [activeArticleModal, setActiveArticleModal] = useState<InsightArticle | null>(null);
-  const [activeLibraryModal, setActiveLibraryModal] = useState<LibraryArea | null>(null);
-  const [libraryFilterTab, setLibraryFilterTab] = useState<'condition' | 'therapeutic' | 'ingredient' | 'anatomy'>('condition');
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // Filtered reference topics
-  const filteredAreas = LIBRARY_AREAS.filter(area => 
-    area.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    area.highlightTopics.some(t => t.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">
@@ -475,7 +441,7 @@ export default function TherapeuticResourcesPage() {
                   <ArrowRight className="w-3.5 h-3.5" />
                 </a>
                 <a
-                  href="#reference-library"
+                  href="/for-doctors/reference-library"
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-white hover:bg-teal-50 border border-teal-200 text-[#006070] text-xs font-bold uppercase tracking-wider shadow-xs transition-all"
                 >
                   Reference Library
@@ -547,7 +513,7 @@ export default function TherapeuticResourcesPage() {
               Prescribing Information
             </a>
             <a
-              href="#reference-library"
+              href="/for-doctors/reference-library"
               className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-[#006070] whitespace-nowrap transition"
             >
               <Library className="w-4 h-4 text-[#00768a]" />
@@ -821,139 +787,7 @@ export default function TherapeuticResourcesPage() {
         </div>
       </section>
 
-      {/* ========================================================= */}
-      {/* 6. SECTION: DERMATOLOGY REFERENCE LIBRARY (Detailed)      */}
-      {/* ========================================================= */}
-      <section id="reference-library" className="py-16 bg-[#eef7f9]/60 border-t border-teal-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-10">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-[#003d4d] tracking-tight uppercase">
-              Dermatology Reference Library
-            </h2>
-            <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-              A structured professional reference covering common dermatological conditions, clinical presentations, diagnostic considerations and management principles across key areas of skin, hair and scalp health.
-            </p>
 
-            {/* Search Bar */}
-            <div className="mt-6 relative max-w-xl mx-auto">
-              <input
-                type="text"
-                placeholder="Search conditions, therapeutic classes or topics..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-full bg-white border border-teal-200 text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00768a] shadow-sm transition"
-              />
-              <Search className="w-4 h-4 text-teal-600 absolute left-4 top-1/2 -translate-y-1/2" />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Filter Pills */}
-            <div className="mt-5 flex items-center justify-center gap-2 flex-wrap text-xs font-semibold">
-              <span className="text-slate-400 mr-1 text-[11px] uppercase tracking-wider font-bold">Browse By:</span>
-              <button
-                onClick={() => setLibraryFilterTab('condition')}
-                className={`px-3 py-1.5 rounded-full transition ${
-                  libraryFilterTab === 'condition'
-                    ? 'bg-[#00768a] text-white'
-                    : 'bg-white text-slate-600 hover:bg-teal-50 border border-teal-100'
-                }`}
-              >
-                By Condition
-              </button>
-              <button
-                onClick={() => setLibraryFilterTab('therapeutic')}
-                className={`px-3 py-1.5 rounded-full transition ${
-                  libraryFilterTab === 'therapeutic'
-                    ? 'bg-[#00768a] text-white'
-                    : 'bg-white text-slate-600 hover:bg-teal-50 border border-teal-100'
-                }`}
-              >
-                By Therapeutic Class
-              </button>
-              <button
-                onClick={() => setLibraryFilterTab('ingredient')}
-                className={`px-3 py-1.5 rounded-full transition ${
-                  libraryFilterTab === 'ingredient'
-                    ? 'bg-[#00768a] text-white'
-                    : 'bg-white text-slate-600 hover:bg-teal-50 border border-teal-100'
-                }`}
-              >
-                By Active Ingredient
-              </button>
-              <button
-                onClick={() => setLibraryFilterTab('anatomy')}
-                className={`px-3 py-1.5 rounded-full transition ${
-                  libraryFilterTab === 'anatomy'
-                    ? 'bg-[#00768a] text-white'
-                    : 'bg-white text-slate-600 hover:bg-teal-50 border border-teal-100'
-                }`}
-              >
-                By Anatomical Area
-              </button>
-            </div>
-          </div>
-
-          {/* 10 Category Cards */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
-            {filteredAreas.map((area) => (
-              <a
-                key={area.id}
-                href={`/for-doctors/reference-library/${area.slug}`}
-                className="bg-white rounded-xl p-4 border border-teal-100/90 shadow-2xs hover:shadow-md hover:border-[#00768a] hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-1 mb-2">
-                    <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-full">
-                      {area.count} References
-                    </span>
-                    <Sparkles className="w-3 h-3 text-teal-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <h3 className="font-bold text-xs sm:text-sm text-slate-800 group-hover:text-[#00768a] transition-colors leading-tight">
-                    {area.name}
-                  </h3>
-                  <div className="text-[10.5px] text-slate-400 mt-2 line-clamp-2 leading-relaxed">
-                    {area.highlightTopics.slice(0, 3).join(' • ')}
-                  </div>
-                </div>
-
-                <div className="pt-3 mt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-bold text-[#00768a]">
-                  <span>Explore</span>
-                  <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                </div>
-              </a>
-            ))}
-          </div>
-
-          {/* Quick Cross-Reference Filters Bar */}
-          <div className="mt-10 p-5 rounded-2xl bg-white border border-teal-100 shadow-xs">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-              <div>
-                <span className="font-bold text-[#006070] block uppercase tracking-wider text-[11px] mb-1">BY CONDITION</span>
-                <p className="text-slate-500 leading-relaxed text-[11.5px]">Acne, Psoriasis, Melasma, Tinea, Alopecia, Urticaria...</p>
-              </div>
-              <div>
-                <span className="font-bold text-[#006070] block uppercase tracking-wider text-[11px] mb-1">BY THERAPEUTIC CLASS</span>
-                <p className="text-slate-500 leading-relaxed text-[11.5px]">Antifungals, Corticosteroids, Antihistamines, Retinoids...</p>
-              </div>
-              <div>
-                <span className="font-bold text-[#006070] block uppercase tracking-wider text-[11px] mb-1">BY ACTIVE INGREDIENT</span>
-                <p className="text-slate-500 leading-relaxed text-[11.5px]">Ketoconazole, Luliconazole, Clobetasol, Adapalene, Tacrolimus...</p>
-              </div>
-              <div>
-                <span className="font-bold text-[#006070] block uppercase tracking-wider text-[11px] mb-1">BY ANATOMICAL AREA</span>
-                <p className="text-slate-500 leading-relaxed text-[11.5px]">Face | Scalp | Hair | Body | Intertriginous | Nails</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ========================================================= */}
       {/* 7. MODALS: INTERACTIVE DEEP DIVE READERS                  */}
@@ -1176,68 +1010,6 @@ export default function TherapeuticResourcesPage() {
                 className="px-4 py-2 rounded-lg bg-[#00768a] text-white font-semibold hover:bg-[#005f70] transition"
               >
                 Close Article
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* C. REFERENCE LIBRARY TOPIC MODAL (11-Point Structure) */}
-      {activeLibraryModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-fade-in border border-teal-100">
-            <div className="p-5 sm:p-6 bg-gradient-to-r from-[#003d4d] to-[#006070] text-white flex items-start justify-between gap-4">
-              <div>
-                <span className="text-[10px] font-bold tracking-widest text-teal-200 uppercase">
-                  DERMATOLOGY REFERENCE LIBRARY • {activeLibraryModal.count} TOPICS
-                </span>
-                <h3 className="text-lg sm:text-2xl font-extrabold">{activeLibraryModal.name}</h3>
-              </div>
-              <button
-                onClick={() => setActiveLibraryModal(null)}
-                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm text-slate-700">
-              <div className="bg-teal-50/50 p-4 rounded-xl border border-teal-100">
-                <h4 className="font-bold text-[#004f5e] uppercase text-xs mb-2">11-Point Standard Clinical Reference Structure</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-slate-600">
-                  <div>01 | Overview</div>
-                  <div>02 | Clinical Presentation</div>
-                  <div>03 | Common Causative Organisms</div>
-                  <div>04 | Risk Factors</div>
-                  <div>05 | Diagnostic Considerations</div>
-                  <div>06 | Differential Diagnosis</div>
-                  <div>07 | Management Principles</div>
-                  <div>08 | Topical Therapy</div>
-                  <div>09 | Systemic Therapy</div>
-                  <div>10 | Recurrence & Prevention</div>
-                  <div className="sm:col-span-2">11 | Professional References & Guidelines</div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-bold text-slate-900 text-xs uppercase mb-2">Available Condition References in this Module:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {activeLibraryModal.highlightTopics.map((topic, i) => (
-                    <span key={i} className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-teal-50 hover:text-[#00768a] border border-slate-200 text-xs font-semibold cursor-pointer transition">
-                      {topic} →
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span className="text-slate-400">Ryan Dermatology Reference Repository</span>
-              <button
-                onClick={() => setActiveLibraryModal(null)}
-                className="px-4 py-2 rounded-lg bg-[#00768a] text-white font-semibold hover:bg-[#005f70] transition"
-              >
-                Close Library View
               </button>
             </div>
           </div>

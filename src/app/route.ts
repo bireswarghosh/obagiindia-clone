@@ -475,6 +475,22 @@ export async function GET() {
 `;
     html = html.replace('</head>', `${dynamicStyles}\n</head>`);
 
+    const ryanTopBanner = `
+<div style="background: linear-gradient(90deg, #003d4d, #00768a); color: white; padding: 10px 16px; font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: 13px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; z-index: 9999999; position: relative; border-bottom: 2px solid #00a3be; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <span style="background: #00a3be; color: white; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 10px; letter-spacing: 0.5px; text-transform: uppercase;">SPECIALIZED DIVISION</span>
+    <strong style="letter-spacing: 0.5px; font-weight: 800; font-size: 14px;">RYAN DERMACEUTICS</strong>
+    <span style="color: #cffafe; font-size: 12px; opacity: 0.9;">(Division of Ethics Medinova Pvt. Ltd.)</span>
+  </div>
+  <div style="display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 12px;">
+    <a href="/home" style="color: white; text-decoration: none; padding: 5px 12px; background: rgba(255,255,255,0.15); border-radius: 6px; border: 1px solid rgba(255,255,255,0.25);">Home</a>
+    <a href="/about" style="color: white; text-decoration: none; padding: 5px 12px; background: rgba(255,255,255,0.15); border-radius: 6px; border: 1px solid rgba(255,255,255,0.25);">About Ryan</a>
+    <a href="/products" style="color: white; text-decoration: none; padding: 5px 12px; background: rgba(255,255,255,0.15); border-radius: 6px; border: 1px solid rgba(255,255,255,0.25);">Products (53)</a>
+    <a href="/for-doctors/therapeutic-resources" style="color: #003d4d; background: #cffafe; text-decoration: none; padding: 5px 14px; border-radius: 6px; font-weight: 800; box-shadow: 0 2px 6px rgba(0,0,0,0.1);">Doctor Portal &rarr;</a>
+  </div>
+</div>`;
+    html = html.replace(/<body([^>]*)>/i, `<body$1>\n${ryanTopBanner}`);
+
     return new Response(html, {
       status: 200,
       headers: {
