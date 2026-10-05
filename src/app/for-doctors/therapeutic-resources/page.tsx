@@ -31,6 +31,7 @@ import {
 
 interface GuideItem {
   id: string;
+  slug: string;
   title: string;
   subtitle: string;
   image: string;
@@ -54,6 +55,7 @@ interface GuideItem {
 const THERAPEUTIC_GUIDES: GuideItem[] = [
   {
     id: 'acne',
+    slug: 'acne-and-acne-management',
     title: 'Acne & Acne Management',
     subtitle: 'Clinical overview, management options and treatment considerations.',
     image: '/ryan/guide-acne.jpg',
@@ -84,6 +86,7 @@ const THERAPEUTIC_GUIDES: GuideItem[] = [
   },
   {
     id: 'fungal',
+    slug: 'fungal-skin-conditions',
     title: 'Fungal Skin Conditions',
     subtitle: 'Types, clinical features, treatment approaches and prevention.',
     image: '/ryan/guide-fungal.jpg',
@@ -112,6 +115,7 @@ const THERAPEUTIC_GUIDES: GuideItem[] = [
   },
   {
     id: 'inflammatory',
+    slug: 'inflammatory-dermatoses',
     title: 'Inflammatory Dermatoses',
     subtitle: 'Overview, therapeutic approaches and treatment considerations.',
     image: '/ryan/guide-inflammatory.jpg',
@@ -140,6 +144,7 @@ const THERAPEUTIC_GUIDES: GuideItem[] = [
   },
   {
     id: 'allergy',
+    slug: 'allergy-and-pruritus',
     title: 'Allergy & Pruritus',
     subtitle: 'Common conditions, management strategies and patient counselling.',
     image: '/ryan/guide-allergy.jpg',
@@ -167,6 +172,7 @@ const THERAPEUTIC_GUIDES: GuideItem[] = [
   },
   {
     id: 'hair',
+    slug: 'hair-and-scalp-disorders',
     title: 'Hair & Scalp Disorders',
     subtitle: 'Treatment approaches, nutritional support and scalp care.',
     image: '/ryan/guide-hair.jpg',
@@ -196,6 +202,7 @@ const THERAPEUTIC_GUIDES: GuideItem[] = [
   },
   {
     id: 'pigmentation',
+    slug: 'pigmentation-and-skin-renewal',
     title: 'Pigmentation & Skin Renewal',
     subtitle: 'Assessment, treatment approaches and maintenance.',
     image: '/ryan/guide-pigmentation.jpg',
@@ -231,6 +238,7 @@ const THERAPEUTIC_GUIDES: GuideItem[] = [
 
 interface InsightArticle {
   id: string;
+  slug: string;
   title: string;
   date: string;
   category: string;
@@ -251,6 +259,7 @@ interface InsightArticle {
 const CLINICAL_INSIGHTS: InsightArticle[] = [
   {
     id: 'insight-acne',
+    slug: 'understanding-acne',
     title: 'Understanding Acne: From Presentation to Management',
     date: '12 Aug 2026',
     category: 'Clinical Insights',
@@ -272,6 +281,7 @@ const CLINICAL_INSIGHTS: InsightArticle[] = [
   },
   {
     id: 'insight-fungal',
+    slug: 'superficial-fungal',
     title: 'Approach to Superficial Fungal Infections',
     date: '05 Aug 2026',
     category: 'Therapeutic Update',
@@ -293,6 +303,7 @@ const CLINICAL_INSIGHTS: InsightArticle[] = [
   },
   {
     id: 'insight-steroids',
+    slug: 'corticosteroid-potency',
     title: 'Topical Corticosteroids: Potency and Safe Use',
     date: '28 Jul 2026',
     category: 'Clinical Practice',
@@ -314,6 +325,7 @@ const CLINICAL_INSIGHTS: InsightArticle[] = [
   },
   {
     id: 'insight-hair',
+    slug: 'hair-loss-patterns',
     title: 'Common Patterns of Hair Loss and Management Approaches',
     date: '20 Jul 2026',
     category: 'Hair & Scalp',
@@ -332,6 +344,48 @@ const CLINICAL_INSIGHTS: InsightArticle[] = [
         'Kanti V, et al. Evidence-based (S3) guideline for the management of hair disorders. J Eur Acad Dermatol Venereol. 2020;34(11):2466-2488.'
       ]
     }
+  },
+  {
+    id: 'insight-pruritus',
+    slug: 'chronic-pruritus',
+    title: 'Approach to Chronic Pruritus: Diagnostic & Therapeutic Pathways',
+    date: '10 Jul 2026',
+    category: 'Allergy & Pruritus',
+    image: '/ryan/guide-allergy.jpg',
+    author: 'Ryan Neurodermatology Group',
+    readingTime: '5 min read',
+    summary: 'Stepwise algorithmic approach to chronic itch without primary skin lesions vs inflammatory dermatoses, mast cell stabilization, and targeted second-generation antihistamines.',
+    content: {
+      overview: 'Chronic pruritus lasting >6 weeks poses diagnostic complexity requiring differentiation between dermatological, systemic, neuropathic, and psychogenic etiologies.',
+      presentation: 'Diffuse or localized pruritus with or without secondary excoriations, lichen simplex chronicus, and prurigo nodules.',
+      differentials: 'Scabies, atopic diathesis, renal or cholestatic itch, thyroid dysfunction, hematologic malignancy.',
+      management: 'First-line non-sedating H1 antihistamines (Bilastine, Levocetirizine up to 4x standard dose), barrier repair emollients, topical counter-irritants.',
+      considerations: 'Screen renal, hepatic, and thyroid panel in recalcitrant generalized pruritus sine materia.',
+      references: [
+        'Stander S, et al. IFSI guideline on chronic pruritus. Acta Derm Venereol. 2020;100(7):adv00085.'
+      ]
+    }
+  },
+  {
+    id: 'insight-systemic',
+    slug: 'topical-vs-systemic',
+    title: 'Topical vs Systemic Dermatological Therapy: Decision Frameworks',
+    date: '02 Jul 2026',
+    category: 'Therapeutics',
+    image: '/ryan/safety-shield.jpg',
+    author: 'Ryan Clinical Pharmacology Board',
+    readingTime: '7 min read',
+    summary: 'Evidence-based criteria for escalating from localized topical treatments to oral targeted therapies across acne, psoriasis, and superficial fungal infections.',
+    content: {
+      overview: 'Balancing efficacy against systemic exposure and adverse events defines optimal dermatological pharmacology.',
+      presentation: 'Extensive body surface area (>10% BSA), scarring potential, anatomical limitations, and quality of life impairment dictate systemic escalation.',
+      differentials: 'Localized disease responsive to topical monotherapy vs refractory multi-site pathology.',
+      management: 'Stepwise protocol: Optimize vehicle and adherence before declaring topical failure. Initiate oral antimycotics, retinoids, or JAK inhibitors with appropriate monitoring.',
+      considerations: 'Evaluate baseline hepatic and metabolic parameters before systemic therapy initiation.',
+      references: [
+        'Nast A, et al. European Dermatology Forum S3-Guideline. J Eur Acad Dermatol Venereol. 2021;35(4):812-828.'
+      ]
+    }
   }
 ];
 
@@ -341,22 +395,23 @@ const CLINICAL_INSIGHTS: InsightArticle[] = [
 
 interface LibraryArea {
   id: string;
+  slug: string;
   name: string;
   count: number;
   highlightTopics: string[];
 }
 
 const LIBRARY_AREAS: LibraryArea[] = [
-  { id: 'acne', name: 'Acne', count: 12, highlightTopics: ['Acne Vulgaris', 'Comedonal Acne', 'Inflammatory Acne', 'Nodulocystic Acne', 'Topical Retinoids', 'Benzoyl Peroxide', 'Isotretinoin'] },
-  { id: 'fungal', name: 'Fungal Infections', count: 14, highlightTopics: ['Dermatophytosis', 'Tinea Corporis', 'Tinea Cruris', 'Tinea Pedis', 'Onychomycosis', 'Topical Antifungals', 'Systemic Antifungals'] },
-  { id: 'bacterial', name: 'Bacterial Infections', count: 10, highlightTopics: ['Impetigo', 'Folliculitis', 'Furunculosis', 'Ecthyma', 'Topical Antibiotics', 'Antimicrobial Stewardship'] },
-  { id: 'inflammatory', name: 'Inflammatory Dermatoses', count: 11, highlightTopics: ['Atopic Dermatitis', 'Contact Dermatitis', 'Seborrhoeic Dermatitis', 'Psoriasis', 'Steroid Potency', 'Calcineurin Inhibitors'] },
-  { id: 'allergy', name: 'Allergy & Pruritus', count: 10, highlightTopics: ['Urticaria', 'Chronic Urticaria', 'Dermatographism', 'Generalised Pruritus', 'Antihistamines', 'Chronic Itch Approach'] },
-  { id: 'hair', name: 'Hair & Scalp', count: 11, highlightTopics: ['Androgenetic Alopecia', 'Telogen Effluvium', 'Alopecia Areata', 'Dandruff', 'Minoxidil', 'Finasteride'] },
-  { id: 'pigmentation', name: 'Pigmentation', count: 10, highlightTopics: ['Melasma', 'PIH', 'Facial Hypermelanosis', 'Vitiligo Overview', 'Hydroquinone', 'Photoprotection'] },
-  { id: 'immunomodulatory', name: 'Immunomodulatory Dermatology', count: 8, highlightTopics: ['Topical Tacrolimus', 'Calcineurin Inhibitors', 'JAK Inhibitors', 'Tofacitinib Reference', 'Monitoring'] },
-  { id: 'parasitic', name: 'Parasitic Conditions', count: 7, highlightTopics: ['Classical Scabies', 'Crusted Scabies', 'Pediculosis', 'Permethrin', 'Contact Management', 'Reinfection Prevention'] },
-  { id: 'skincare', name: 'Skin Care', count: 12, highlightTopics: ['Skin Barrier', 'Xerosis', 'Emollients', 'Sensitive Skin', 'Sunscreen Photoprotection', 'Ceramides'] }
+  { id: 'acne', slug: 'acne', name: 'Acne', count: 12, highlightTopics: ['Acne Vulgaris', 'Comedonal Acne', 'Inflammatory Acne', 'Nodulocystic Acne', 'Topical Retinoids', 'Benzoyl Peroxide', 'Isotretinoin'] },
+  { id: 'fungal', slug: 'fungal-infections', name: 'Fungal Infections', count: 14, highlightTopics: ['Dermatophytosis', 'Tinea Corporis', 'Tinea Cruris', 'Tinea Pedis', 'Onychomycosis', 'Topical Antifungals', 'Systemic Antifungals'] },
+  { id: 'bacterial', slug: 'bacterial-infections', name: 'Bacterial Infections', count: 10, highlightTopics: ['Impetigo', 'Folliculitis', 'Furunculosis', 'Ecthyma', 'Topical Antibiotics', 'Antimicrobial Stewardship'] },
+  { id: 'inflammatory', slug: 'inflammatory-dermatoses', name: 'Inflammatory Dermatoses', count: 11, highlightTopics: ['Atopic Dermatitis', 'Contact Dermatitis', 'Seborrhoeic Dermatitis', 'Psoriasis', 'Steroid Potency', 'Calcineurin Inhibitors'] },
+  { id: 'allergy', slug: 'allergy-and-pruritus', name: 'Allergy & Pruritus', count: 10, highlightTopics: ['Urticaria', 'Chronic Urticaria', 'Dermatographism', 'Generalised Pruritus', 'Antihistamines', 'Chronic Itch Approach'] },
+  { id: 'hair', slug: 'hair-and-scalp', name: 'Hair & Scalp', count: 11, highlightTopics: ['Androgenetic Alopecia', 'Telogen Effluvium', 'Alopecia Areata', 'Dandruff', 'Minoxidil', 'Finasteride'] },
+  { id: 'pigmentation', slug: 'pigmentation', name: 'Pigmentation', count: 10, highlightTopics: ['Melasma', 'PIH', 'Facial Hypermelanosis', 'Vitiligo Overview', 'Hydroquinone', 'Photoprotection'] },
+  { id: 'immunomodulatory', slug: 'immunomodulatory-dermatology', name: 'Immunomodulatory Dermatology', count: 8, highlightTopics: ['Topical Tacrolimus', 'Calcineurin Inhibitors', 'JAK Inhibitors', 'Tofacitinib Reference', 'Monitoring'] },
+  { id: 'parasitic', slug: 'parasitic-conditions', name: 'Parasitic Conditions', count: 7, highlightTopics: ['Classical Scabies', 'Crusted Scabies', 'Pediculosis', 'Permethrin', 'Contact Management', 'Reinfection Prevention'] },
+  { id: 'skincare', slug: 'skin-care', name: 'Skin Care', count: 12, highlightTopics: ['Skin Barrier', 'Xerosis', 'Emollients', 'Sensitive Skin', 'Sunscreen Photoprotection', 'Ceramides'] }
 ];
 
 export default function TherapeuticResourcesPage() {
@@ -522,22 +577,22 @@ export default function TherapeuticResourcesPage() {
               Comprehensive overviews of common dermatological conditions with treatment approaches, clinical considerations and patient counselling points.
             </p>
           </div>
-          <button 
-            onClick={() => setActiveGuideModal(THERAPEUTIC_GUIDES[0])}
+          <a 
+            href={`/for-doctors/therapeutic-resources/guides/${THERAPEUTIC_GUIDES[0].slug}`}
             className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#00768a] hover:text-[#004f5e] group"
           >
             View All Guides
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </a>
         </div>
 
         {/* 6 Grid Cards Matching Mockup */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5">
           {THERAPEUTIC_GUIDES.map((guide) => (
-            <div
+            <a
               key={guide.id}
+              href={`/for-doctors/therapeutic-resources/guides/${guide.slug}`}
               className="bg-white rounded-xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-xl hover:border-teal-300 transition-all duration-300 flex flex-col group cursor-pointer"
-              onClick={() => setActiveGuideModal(guide)}
             >
               {/* Card Thumbnail */}
               <div className="relative h-32 w-full overflow-hidden bg-slate-100">
@@ -571,7 +626,7 @@ export default function TherapeuticResourcesPage() {
                   </span>
                 </div>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </section>
@@ -590,22 +645,22 @@ export default function TherapeuticResourcesPage() {
                 Stay updated with educational articles and expert insights on modern dermatology practice.
               </p>
             </div>
-            <button 
-              onClick={() => setActiveArticleModal(CLINICAL_INSIGHTS[0])}
+            <a 
+              href={`/for-doctors/therapeutic-resources/insights/${CLINICAL_INSIGHTS[0].slug}`}
               className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#00768a] hover:text-[#004f5e] group"
             >
               View All Articles
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </a>
           </div>
 
-          {/* 4 Article Cards Matching Mockup */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {/* 6 Article Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {CLINICAL_INSIGHTS.map((article) => (
-              <div
+              <a
                 key={article.id}
+                href={`/for-doctors/therapeutic-resources/insights/${article.slug}`}
                 className="bg-white rounded-xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-teal-300 transition-all duration-300 flex flex-col group cursor-pointer"
-                onClick={() => setActiveArticleModal(article)}
               >
                 <div className="relative h-36 w-full overflow-hidden bg-slate-100">
                   <Image
@@ -645,7 +700,7 @@ export default function TherapeuticResourcesPage() {
                     </span>
                   </div>
                 </div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
@@ -682,7 +737,7 @@ export default function TherapeuticResourcesPage() {
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100">
               <a
-                href="#reference-library"
+                href="/for-doctors/prescribing-information"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00768a] hover:text-[#004f5e]"
               >
                 SEARCH MONOGRAPHS
@@ -706,7 +761,7 @@ export default function TherapeuticResourcesPage() {
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100">
               <a
-                href="#reference-library"
+                href="/for-doctors/prescribing-information"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00768a] hover:text-[#004f5e]"
               >
                 VIEW PRESCRIBING INFO
@@ -731,7 +786,7 @@ export default function TherapeuticResourcesPage() {
             </div>
             <div className="pt-4 mt-4 border-t border-white/10">
               <a
-                href="#reference-library"
+                href="/for-doctors/reference-library"
                 className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-200 hover:text-white"
               >
                 EXPLORE LIBRARY
@@ -848,9 +903,9 @@ export default function TherapeuticResourcesPage() {
           {/* 10 Category Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
             {filteredAreas.map((area) => (
-              <div
+              <a
                 key={area.id}
-                onClick={() => setActiveLibraryModal(area)}
+                href={`/for-doctors/reference-library/${area.slug}`}
                 className="bg-white rounded-xl p-4 border border-teal-100/90 shadow-2xs hover:shadow-md hover:border-[#00768a] hover:-translate-y-0.5 transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div>
@@ -872,7 +927,7 @@ export default function TherapeuticResourcesPage() {
                   <span>Explore</span>
                   <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                 </div>
-              </div>
+              </a>
             ))}
           </div>
 

@@ -23,10 +23,10 @@ export default function RyanHeader() {
             <span className="font-medium tracking-wide">Doctor Portal:</span>
             <span className="text-teal-100">Direct Clinical & Scientific Resources</span>
           </div>
-          <div className="flex items-center gap-3 font-medium">
+          <div className="flex items-center gap-2 sm:gap-3 font-medium flex-wrap">
             <a
               href="/for-doctors/therapeutic-resources"
-              className={`px-2.5 py-0.5 rounded transition ${
+              className={`px-2 py-0.5 rounded transition text-[11px] sm:text-xs ${
                 isTherapeutic
                   ? 'bg-white text-[#006070] font-bold shadow-xs'
                   : 'text-teal-100 hover:text-white hover:bg-white/10'
@@ -34,16 +34,38 @@ export default function RyanHeader() {
             >
               Therapeutic Resources
             </a>
-            <span className="text-teal-300/40">|</span>
+            <span className="text-teal-300/40 hidden sm:inline">|</span>
+            <a
+              href="/for-doctors/prescribing-information"
+              className={`px-2 py-0.5 rounded transition text-[11px] sm:text-xs ${
+                pathname?.includes('prescribing-information')
+                  ? 'bg-white text-[#006070] font-bold shadow-xs'
+                  : 'text-teal-100 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              Prescribing Info
+            </a>
+            <span className="text-teal-300/40 hidden sm:inline">|</span>
+            <a
+              href="/for-doctors/reference-library"
+              className={`px-2 py-0.5 rounded transition text-[11px] sm:text-xs ${
+                pathname?.includes('reference-library')
+                  ? 'bg-white text-[#006070] font-bold shadow-xs'
+                  : 'text-teal-100 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              Reference Library
+            </a>
+            <span className="text-teal-300/40 hidden sm:inline">|</span>
             <a
               href="/for-doctors/medical-information"
-              className={`px-2.5 py-0.5 rounded transition ${
+              className={`px-2 py-0.5 rounded transition text-[11px] sm:text-xs ${
                 isMedicalInfo
                   ? 'bg-white text-[#006070] font-bold shadow-xs'
                   : 'text-teal-100 hover:text-white hover:bg-white/10'
               }`}
             >
-              Medical Information
+              Medical Info
             </a>
           </div>
         </div>
@@ -72,10 +94,10 @@ export default function RyanHeader() {
 
           {/* Desktop Nav Items */}
           <nav className="hidden lg:flex items-center gap-6 xl:gap-7 text-[13.5px] font-medium text-slate-700">
-            <a href="#" className="hover:text-[#00768a] transition-colors">Home</a>
-            <a href="#" className="hover:text-[#00768a] transition-colors">About Ryan</a>
-            <a href="#" className="hover:text-[#00768a] transition-colors">Therapeutic Areas</a>
-            <a href="#" className="hover:text-[#00768a] transition-colors">Products</a>
+            <a href="/for-doctors/therapeutic-resources" className="hover:text-[#00768a] transition-colors">Home</a>
+            <a href="/for-doctors/therapeutic-resources" className="hover:text-[#00768a] transition-colors">About Ryan</a>
+            <a href="/for-doctors/therapeutic-resources" className="hover:text-[#00768a] transition-colors">Therapeutic Areas</a>
+            <a href="/for-doctors/prescribing-information" className="hover:text-[#00768a] transition-colors">Products</a>
             
             {/* For Doctors dropdown */}
             <div 
@@ -85,7 +107,7 @@ export default function RyanHeader() {
             >
               <button 
                 className={`flex items-center gap-1 font-semibold transition-colors py-2 ${
-                  isTherapeutic || isMedicalInfo ? 'text-[#00768a] border-b-2 border-[#00768a]' : 'hover:text-[#00768a]'
+                  isTherapeutic || isMedicalInfo || pathname?.includes('prescribing') || pathname?.includes('library') ? 'text-[#00768a] border-b-2 border-[#00768a]' : 'hover:text-[#00768a]'
                 }`}
               >
                 For Doctors
@@ -93,32 +115,55 @@ export default function RyanHeader() {
               </button>
 
               {doctorsDropdown && (
-                <div className="absolute top-full left-0 w-64 bg-white rounded-xl shadow-xl border border-teal-100 py-2.5 z-50 animate-fade-in">
-                  <a
-                    href="/for-doctors/therapeutic-resources"
-                    className={`block px-4 py-2.5 text-xs transition ${
-                      isTherapeutic ? 'bg-teal-50 text-[#00768a] font-bold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#00768a]'
-                    }`}
-                  >
-                    <div className="font-semibold text-sm text-[#004f5e]">Therapeutic Resources</div>
-                    <div className="text-[11px] text-slate-500 font-normal mt-0.5">Clinical guides, monographs & library</div>
-                  </a>
-                  <a
-                    href="/for-doctors/medical-information"
-                    className={`block px-4 py-2.5 text-xs transition ${
-                      isMedicalInfo ? 'bg-teal-50 text-[#00768a] font-bold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#00768a]'
-                    }`}
-                  >
-                    <div className="font-semibold text-sm text-[#004f5e]">Medical Information</div>
-                    <div className="text-[11px] text-slate-500 font-normal mt-0.5">Product queries, safety & quality reports</div>
-                  </a>
+                <div className="absolute top-full left-0 w-72 bg-white rounded-xl shadow-xl border border-teal-100 py-2.5 z-50 animate-fade-in divide-y divide-slate-100">
+                  <div className="py-1">
+                    <a
+                      href="/for-doctors/therapeutic-resources"
+                      className={`block px-4 py-2 text-xs transition ${
+                        isTherapeutic ? 'bg-teal-50 text-[#00768a] font-bold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#00768a]'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm text-[#004f5e]">Therapeutic Resources Hub</div>
+                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Topic guides, clinical insights & portal</div>
+                    </a>
+                  </div>
+                  <div className="py-1">
+                    <a
+                      href="/for-doctors/prescribing-information"
+                      className={`block px-4 py-2 text-xs transition ${
+                        pathname?.includes('prescribing-information') ? 'bg-teal-50 text-[#00768a] font-bold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#00768a]'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm text-[#004f5e]">Prescribing Information</div>
+                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Product monographs & regulatory guidance</div>
+                    </a>
+                    <a
+                      href="/for-doctors/reference-library"
+                      className={`block px-4 py-2 text-xs transition ${
+                        pathname?.includes('reference-library') ? 'bg-teal-50 text-[#00768a] font-bold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#00768a]'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm text-[#004f5e]">Dermatology Reference Library</div>
+                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">10 domains & 11-step diagnostic monographs</div>
+                    </a>
+                  </div>
+                  <div className="py-1">
+                    <a
+                      href="/for-doctors/medical-information"
+                      className={`block px-4 py-2 text-xs transition ${
+                        isMedicalInfo ? 'bg-teal-50 text-[#00768a] font-bold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#00768a]'
+                      }`}
+                    >
+                      <div className="font-semibold text-sm text-[#004f5e]">Medical Information Service</div>
+                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Safety reports, queries & complaints</div>
+                    </a>
+                  </div>
                 </div>
               )}
             </div>
 
-            <a href="#" className="hover:text-[#00768a] transition-colors">Resources</a>
-            <a href="#" className="hover:text-[#00768a] transition-colors">Partner With Us</a>
-            <a href="#" className="hover:text-[#00768a] transition-colors">Contact</a>
+            <a href="/for-doctors/therapeutic-resources#download" className="hover:text-[#00768a] transition-colors">Resources</a>
+            <a href="/for-doctors/medical-information" className="hover:text-[#00768a] transition-colors">Contact</a>
           </nav>
 
           {/* Right Action Buttons */}
@@ -130,7 +175,7 @@ export default function RyanHeader() {
               <Search className="w-4 h-4" />
             </button>
             <a
-              href="#products"
+              href="/for-doctors/prescribing-information"
               className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white bg-[#00768a] hover:bg-[#006070] active:scale-95 rounded-lg shadow-sm shadow-teal-800/20 transition-all"
             >
               Explore Products
@@ -157,15 +202,27 @@ export default function RyanHeader() {
             <div className="text-xs font-bold text-[#006070] uppercase tracking-wider">For Doctors Portal</div>
             <a
               href="/for-doctors/therapeutic-resources"
-              className="block p-2 rounded bg-white text-sm font-semibold text-[#004f5e] shadow-xs"
+              className="block p-2 rounded bg-white text-xs font-semibold text-[#004f5e] shadow-xs"
             >
-              Therapeutic Resources
+              Therapeutic Resources Hub
+            </a>
+            <a
+              href="/for-doctors/prescribing-information"
+              className="block p-2 rounded bg-white text-xs font-semibold text-[#004f5e] shadow-xs"
+            >
+              Prescribing Information (Monographs)
+            </a>
+            <a
+              href="/for-doctors/reference-library"
+              className="block p-2 rounded bg-white text-xs font-semibold text-[#004f5e] shadow-xs"
+            >
+              Dermatology Reference Library
             </a>
             <a
               href="/for-doctors/medical-information"
-              className="block p-2 rounded bg-white text-sm font-semibold text-[#004f5e] shadow-xs"
+              className="block p-2 rounded bg-white text-xs font-semibold text-[#004f5e] shadow-xs"
             >
-              Medical Information
+              Medical Information Service
             </a>
           </div>
           <div className="space-y-1 text-sm font-medium text-slate-700">
