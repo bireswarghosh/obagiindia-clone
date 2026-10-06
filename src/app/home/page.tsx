@@ -415,7 +415,7 @@ export default function RyanHomePage() {
                   {/* Visual Render */}
                   <div className="h-36 rounded-xl bg-gradient-to-b from-slate-50 to-teal-50/20 border border-slate-100 flex flex-col items-center justify-center p-3 mb-4 group-hover:bg-teal-50/40 transition-colors">
                     <div className="w-14 h-14 rounded-xl bg-[#00768a] text-white flex items-center justify-center text-xl font-black shadow-md mb-2 group-hover:scale-105 transition-transform">
-                      {p.brandName.charAt(0)}
+                      {p.brandName.replace(/[^a-zA-Z0-9]/g, '').charAt(0) || p.brandName.charAt(0)}
                     </div>
                     <span className="text-[11px] font-black uppercase text-[#004f5e] tracking-tight line-clamp-1">
                       {p.brandName}

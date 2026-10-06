@@ -76,11 +76,35 @@ export default function RyanAdminPortal() {
   const [prescribingList, setPrescribingList] = useState<PrescribingInfoProduct[]>(PRESCRIBING_INFO_PRODUCTS);
   const [selectedPi, setSelectedPi] = useState<PrescribingInfoProduct | null>(PRESCRIBING_INFO_PRODUCTS[0] || null);
 
-  // Load saved modifications from localStorage on mount
   useEffect(() => {
     try {
-      const savedProducts = localStorage.getItem('ryan_admin_products');
-      if (savedProducts) setProductsList(JSON.parse(savedProducts));
+      const savedProducts = localStorage.getItem('ryan_admin_products_v2') || localStorage.getItem('ryan_admin_products');
+      if (savedProducts) {
+        try {
+          const parsed = JSON.parse(savedProducts);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            const sanitized = parsed.map((p: any) => ({
+              ...p,
+              brandName: p.brandName ? p.brandName.replace(/®/g, '').replace(/\s+/g, ' ').trim() : '',
+              genericName: p.genericName ? p.genericName.replace(/®/g, '').replace(/\s+/g, ' ').trim() : '',
+              relatedProducts: Array.isArray(p.relatedProducts) ? p.relatedProducts.map((rp: any) => ({
+                ...rp,
+                name: rp.name ? rp.name.replace(/®/g, '').replace(/\s+/g, ' ').trim() : ''
+              })) : []
+            }));
+            setProductsList(sanitized);
+            setSelectedProduct(sanitized[0] || null);
+            localStorage.setItem('ryan_admin_products_v2', JSON.stringify(sanitized));
+            localStorage.setItem('ryan_admin_products', JSON.stringify(sanitized));
+          }
+        } catch (e) {
+          setProductsList(RYAN_PRODUCTS);
+          setSelectedProduct(RYAN_PRODUCTS[0] || null);
+        }
+      } else {
+        setProductsList(RYAN_PRODUCTS);
+        setSelectedProduct(RYAN_PRODUCTS[0] || null);
+      }
 
       const savedInsights = localStorage.getItem('ryan_admin_insights');
       if (savedInsights) setInsightsMap(JSON.parse(savedInsights));
@@ -102,6 +126,7 @@ export default function RyanAdminPortal() {
 
   const handleSaveAll = () => {
     try {
+      localStorage.setItem('ryan_admin_products_v2', JSON.stringify(productsList));
       localStorage.setItem('ryan_admin_products', JSON.stringify(productsList));
       localStorage.setItem('ryan_admin_insights', JSON.stringify(insightsMap));
       localStorage.setItem('ryan_admin_guides', JSON.stringify(guidesMap));
@@ -156,6 +181,7 @@ export default function RyanAdminPortal() {
       setGuidesMap(THERAPEUTIC_GUIDES_DATA);
       setPrescribingList(PRESCRIBING_INFO_PRODUCTS);
       localStorage.removeItem('ryan_admin_products');
+      localStorage.removeItem('ryan_admin_products_v2');
       localStorage.removeItem('ryan_admin_insights');
       localStorage.removeItem('ryan_admin_guides');
       localStorage.removeItem('ryan_admin_prescribing');
@@ -585,10 +611,10 @@ export default function RyanAdminPortal() {
                         }`}
                       >
                         <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0 font-bold text-xs text-teal-200">
-                          {p.brandName.charAt(0)}
+                          {p.brandName.replace(/[^a-zA-Z0-9]/g, '').charAt(0) || p.brandName.charAt(0)}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="font-bold text-xs truncate text-white">{p.brandName}</div>
+                          <div className="font-bold text-xs truncate text-white">{p.brandName.replace(/®/g, '')}</div>
                           <div className={`text-[11px] truncate ${isSelected ? 'text-teal-100' : 'text-slate-400'}`}>
                             {p.genericName}
                           </div>
@@ -614,7 +640,7 @@ export default function RyanAdminPortal() {
                         <div className="text-[10px] font-bold text-teal-400 uppercase tracking-widest">
                           EDITING PRODUCT MONOGRAPH &bull; ID: {selectedProduct.id}
                         </div>
-                        <h2 className="text-xl font-extrabold text-white mt-0.5">{selectedProduct.brandName}</h2>
+                        <h2 className="text-xl font-extrabold text-white mt-0.5">{selectedProduct.brandName.replace(/®/g, '')}</h2>
                       </div>
                       <div className="flex items-center gap-2">
                         <a
@@ -651,7 +677,7 @@ export default function RyanAdminPortal() {
                         <input
                           type="text"
                           value={selectedProduct.brandName}
-                          onChange={(e) => updateCurrentProduct('brandName', e.target.value)}
+                          onChange={(e) => updateCurrentProduct('brandName', e.target.value.replace(/®/g, ''))}
                           className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
                         />
                       </div>

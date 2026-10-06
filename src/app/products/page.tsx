@@ -513,7 +513,7 @@ export default function ProductsPage() {
                         {/* Packaging Rendering */}
                         <div className="w-full h-full flex flex-col items-center justify-center text-center p-2">
                           <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#00768a] to-[#004f5e] flex items-center justify-center text-white text-2xl font-black shadow-md shadow-teal-900/10 mb-2 group-hover:scale-110 transition-transform">
-                            {product.brandName.charAt(0)}
+                            {product.brandName.replace(/[^a-zA-Z0-9]/g, '').charAt(0) || product.brandName.charAt(0)}
                           </div>
                           <span className="text-[11px] font-black uppercase text-[#004f5e] tracking-wider line-clamp-1">
                             {product.brandName}
@@ -584,7 +584,7 @@ export default function ProductsPage() {
                   >
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-[#00768a] font-black text-lg shrink-0">
-                        {product.brandName.charAt(0)}
+                        {product.brandName.replace(/[^a-zA-Z0-9]/g, '').charAt(0) || product.brandName.charAt(0)}
                       </div>
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">

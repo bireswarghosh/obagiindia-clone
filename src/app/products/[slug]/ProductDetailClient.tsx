@@ -113,7 +113,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           <div className="lg:col-span-4 flex flex-col items-center lg:items-end gap-4">
             <div className="w-full max-w-xs h-48 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 p-6 flex flex-col items-center justify-center text-center shadow-lg">
               <div className="w-20 h-20 rounded-2xl bg-white text-[#004f5e] flex items-center justify-center text-3xl font-black shadow-md mb-3">
-                {product.brandName.charAt(0)}
+                {product.brandName.replace(/[^a-zA-Z0-9]/g, '').charAt(0) || product.brandName.charAt(0)}
               </div>
               <span className="text-sm font-black text-white uppercase tracking-wider line-clamp-1">
                 {product.brandName}
