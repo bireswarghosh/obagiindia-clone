@@ -140,7 +140,7 @@ export default function PrescribingInformationPortal() {
       <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-            Showing {filteredProducts.length} Prescribing Monographs
+            Showing {filteredProducts.length} Prescribing Information Records
           </span>
           {selectedCategory !== 'All' && (
             <button
@@ -206,7 +206,7 @@ export default function PrescribingInformationPortal() {
                   onClick={() => setActiveProductModal(prod)}
                   className="flex-1 py-2 rounded-lg bg-teal-50 hover:bg-[#00768a] text-[#006070] hover:text-white font-bold text-xs uppercase tracking-wider transition-all text-center flex items-center justify-center gap-1.5"
                 >
-                  <span>View Monograph</span>
+                  <span>View PI</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
                 <button
@@ -226,7 +226,7 @@ export default function PrescribingInformationPortal() {
       </section>
 
       {/* ========================================================= */}
-      {/* 3. INTERACTIVE PRESCRIBING MONOGRAPH MODAL                */}
+      {/* 3. INTERACTIVE PRESCRIBING INFORMATION MODAL              */}
       {/* ========================================================= */}
       {activeProductModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
@@ -236,7 +236,7 @@ export default function PrescribingInformationPortal() {
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-bold tracking-widest text-teal-200 uppercase bg-white/10 px-2.5 py-0.5 rounded">
-                    OFFICIAL PRESCRIBING MONOGRAPH
+                    OFFICIAL PRESCRIBING INFORMATION (PI)
                   </span>
                   <span className="text-[10px] font-bold text-emerald-300">SCHEDULE H / Rx</span>
                 </div>
@@ -364,14 +364,14 @@ export default function PrescribingInformationPortal() {
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold transition"
               >
                 <Printer className="w-4 h-4 text-[#00768a]" />
-                <span>Print Official Monograph</span>
+                <span>Print Official PI</span>
               </button>
 
               <button
                 onClick={() => setActiveProductModal(null)}
                 className="px-5 py-2 rounded-lg bg-[#00768a] text-white font-bold hover:bg-[#005f70] transition"
               >
-                Close Monograph
+                Close Prescribing Information
               </button>
             </div>
           </div>

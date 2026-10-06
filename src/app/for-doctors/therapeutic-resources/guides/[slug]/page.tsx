@@ -9,6 +9,7 @@ import {
   THERAPEUTIC_GUIDES_DATA,
   TherapeuticGuide
 } from '@/data/ryan-data';
+import MinoxidilEducationalCard from '@/components/ryan/MinoxidilEducationalCard';
 import {
   ChevronRight,
   BookOpen,
@@ -325,56 +326,64 @@ export default function TherapeuticGuideTopicPage() {
                         {/* Accordion Body Content */}
                         {isOpen && (
                           <div className="p-5 space-y-4 bg-white text-xs sm:text-sm text-slate-700 animate-fade-in leading-relaxed">
-                            <p className="text-slate-600 leading-relaxed">
-                              {acc.description}
-                            </p>
-
-                            {/* Dual columns for Agents & Key Points */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                              {/* Common Agents */}
-                              {acc.commonAgents && (
-                                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-                                  <h4 className="font-bold text-slate-900 text-xs mb-2">Common agents</h4>
-                                  <ul className="space-y-1.5 text-xs text-slate-600">
-                                    {acc.commonAgents.map((agent, i) => (
-                                      <li key={i} className="flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#00768a]" />
-                                        <span>{agent}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-
-                              {/* Key Points */}
-                              {acc.keyPoints && (
-                                <div className="p-4 rounded-xl bg-teal-50/50 border border-teal-100">
-                                  <h4 className="font-bold text-[#004f5e] text-xs mb-2">Key points</h4>
-                                  <ul className="space-y-2 text-xs text-slate-700">
-                                    {acc.keyPoints.map((pt, i) => (
-                                      <li key={i} className="flex items-start gap-2">
-                                        <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                                        <span>{pt}</span>
-                                      </li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Application Considerations */}
-                            {acc.applicationConsiderations && (
-                              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-                                <h4 className="font-bold text-slate-900 text-xs mb-2">Application considerations</h4>
-                                <ul className="space-y-1.5 text-xs text-slate-600">
-                                  {acc.applicationConsiderations.map((c, i) => (
-                                    <li key={i} className="flex items-start gap-2">
-                                      <span className="text-[#00768a] font-bold">•</span>
-                                      <span>{c}</span>
-                                    </li>
-                                  ))}
-                                </ul>
+                            {acc.id === 'minoxidil' ? (
+                              <div className="pt-2">
+                                <MinoxidilEducationalCard />
                               </div>
+                            ) : (
+                              <>
+                                <p className="text-slate-600 leading-relaxed">
+                                  {acc.description}
+                                </p>
+
+                                {/* Dual columns for Agents & Key Points */}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                                  {/* Common Agents */}
+                                  {acc.commonAgents && (
+                                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                                      <h4 className="font-bold text-slate-900 text-xs mb-2">Common agents</h4>
+                                      <ul className="space-y-1.5 text-xs text-slate-600">
+                                        {acc.commonAgents.map((agent, i) => (
+                                          <li key={i} className="flex items-center gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-[#00768a]" />
+                                            <span>{agent}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+
+                                  {/* Key Points */}
+                                  {acc.keyPoints && (
+                                    <div className="p-4 rounded-xl bg-teal-50/50 border border-teal-100">
+                                      <h4 className="font-bold text-[#004f5e] text-xs mb-2">Key points</h4>
+                                      <ul className="space-y-2 text-xs text-slate-700">
+                                        {acc.keyPoints.map((pt, i) => (
+                                          <li key={i} className="flex items-start gap-2">
+                                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                                            <span>{pt}</span>
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Application Considerations */}
+                                {acc.applicationConsiderations && (
+                                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                                    <h4 className="font-bold text-slate-900 text-xs mb-2">Application considerations</h4>
+                                    <ul className="space-y-1.5 text-xs text-slate-600">
+                                      {acc.applicationConsiderations.map((c, i) => (
+                                        <li key={i} className="flex items-start gap-2">
+                                          <span className="text-[#00768a] font-bold">•</span>
+                                          <span>{c}</span>
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </>
                             )}
                           </div>
                         )}

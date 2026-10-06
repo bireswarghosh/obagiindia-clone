@@ -13,14 +13,15 @@ interface RichTextEditorProps {
 }
 
 const BRAND_COLORS = [
-  { name: 'Navy', hex: '#2B328C' },
-  { name: 'Deep Navy', hex: '#0e2238' },
-  { name: 'Gold', hex: '#b1843b' },
-  { name: 'White', hex: '#ffffff' },
-  { name: 'Slate', hex: '#94a3b8' },
-  { name: 'Dark Gray', hex: '#334155' },
+  { name: 'Ryan Teal', hex: '#00768a' },
+  { name: 'Deep Cyan', hex: '#003d4d' },
+  { name: 'Soft Teal', hex: '#00a896' },
   { name: 'Emerald', hex: '#10b981' },
-  { name: 'Rose', hex: '#f43f5e' },
+  { name: 'Sky Blue', hex: '#0284c7' },
+  { name: 'Amber', hex: '#d97706' },
+  { name: 'Rose', hex: '#e11d48' },
+  { name: 'Slate Gray', hex: '#334155' },
+  { name: 'Pure White', hex: '#ffffff' },
 ];
 
 export default function RichTextEditor({

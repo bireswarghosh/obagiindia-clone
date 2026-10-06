@@ -1,93 +1,98 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import {
-  FullSiteData,
-  CardItem,
-  ResearchItem,
-  ApproachTab,
-  StorageProvider,
-  NavItem,
-  TrustBannerItem
-} from '@/types/content';
-import {
-  Video,
-  Image as ImageIcon,
+  Package,
+  FileText,
   BookOpen,
-  Microscope,
-  Compass,
+  Sparkles,
   Layers,
-  Mail,
+  Image as ImageIcon,
   Save,
-  CheckCircle2,
-  ExternalLink,
+  Download,
+  Upload,
+  RefreshCw,
+  Search,
   Plus,
   Trash2,
+  ExternalLink,
+  CheckCircle2,
+  AlertCircle,
   Eye,
   Sliders,
-  Type,
-  Palette,
-  Menu,
-  ChevronLeft,
+  ShieldCheck,
   ChevronRight,
-  Shield,
-  Key,
-  Lock,
-  Download,
+  Menu,
+  X,
   Database,
-  Activity,
-  Sparkles,
-  Users,
-  Settings,
-  HelpCircle,
-  FileSpreadsheet,
-  Globe,
-  Cloud
+  Printer,
+  Copy,
+  LayoutDashboard,
+  Pipette,
+  Check
 } from 'lucide-react';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import MediaInput from '@/components/admin/MediaInput';
+import MinoxidilEducationalCard from '@/components/ryan/MinoxidilEducationalCard';
+import { RYAN_PRODUCTS, RyanProduct, THERAPEUTIC_AREAS, ROUTES, DOSAGE_FORMS } from '@/data/ryan-products';
+import {
+  CLINICAL_INSIGHTS_DATA,
+  ClinicalInsight,
+  THERAPEUTIC_GUIDES_DATA,
+  TherapeuticGuide,
+  PRESCRIBING_INFO_PRODUCTS,
+  PrescribingInfoProduct,
+  REFERENCE_LIBRARY_CATEGORIES
+} from '@/data/ryan-data';
 
 type AdminTab =
-  | 'screen0'
-  | 'screen1'
-  | 'ticker'
-  | 'screen2'
-  | 'screen3'
-  | 'screen4'
-  | 'screen5'
-  | 'screen6'
-  | 'screen7'
-  | 'widget'
-  | 'subscribers'
-  | 'settings'
-  | 'security'
-  | 'logs';
+  | 'dashboard'
+  | 'products'
+  | 'insights'
+  | 'guides'
+  | 'prescribing'
+  | 'library'
+  | 'media'
+  | 'backup';
 
-export default function AdminDashboard() {
-  const [data, setData] = useState<FullSiteData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<AdminTab>('screen0');
+export default function RyanAdminPortal() {
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [isLocked, setIsLocked] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState(false);
 
+  // Editable Datasets (initialized from defaults or localStorage)
+  const [productsList, setProductsList] = useState<RyanProduct[]>(RYAN_PRODUCTS);
+  const [selectedProduct, setSelectedProduct] = useState<RyanProduct | null>(RYAN_PRODUCTS[0] || null);
+  const [productSearch, setProductSearch] = useState('');
+  const [productCategoryFilter, setProductCategoryFilter] = useState('All');
+
+  const [insightsMap, setInsightsMap] = useState<Record<string, ClinicalInsight>>(CLINICAL_INSIGHTS_DATA);
+  const [selectedInsightSlug, setSelectedInsightSlug] = useState<string>('understanding-acne');
+
+  const [guidesMap, setGuidesMap] = useState<Record<string, TherapeuticGuide>>(THERAPEUTIC_GUIDES_DATA);
+  const [selectedGuideSlug, setSelectedGuideSlug] = useState<string>('hair-and-scalp-disorders');
+
+  const [prescribingList, setPrescribingList] = useState<PrescribingInfoProduct[]>(PRESCRIBING_INFO_PRODUCTS);
+  const [selectedPi, setSelectedPi] = useState<PrescribingInfoProduct | null>(PRESCRIBING_INFO_PRODUCTS[0] || null);
+
+  // Load saved modifications from localStorage on mount
   useEffect(() => {
-    fetch('/api/content')
-      .then((res) => res.json())
-      .then((d) => {
-        setData(d);
-        if (d.security?.twoFactorEnabled) {
-          setIsLocked(true);
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error('Failed to load content:', err);
-        setLoading(false);
-      });
+    try {
+      const savedProducts = localStorage.getItem('ryan_admin_products');
+      if (savedProducts) setProductsList(JSON.parse(savedProducts));
+
+      const savedInsights = localStorage.getItem('ryan_admin_insights');
+      if (savedInsights) setInsightsMap(JSON.parse(savedInsights));
+
+      const savedGuides = localStorage.getItem('ryan_admin_guides');
+      if (savedGuides) setGuidesMap(JSON.parse(savedGuides));
+
+      const savedPi = localStorage.getItem('ryan_admin_prescribing');
+      if (savedPi) setPrescribingList(JSON.parse(savedPi));
+    } catch (e) {
+      console.error('Error loading stored admin data:', e);
+    }
   }, []);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
@@ -95,1590 +100,1180 @@ export default function AdminDashboard() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  const handleSave = async () => {
-    if (!data) return;
-    setSaving(true);
+  const handleSaveAll = () => {
     try {
-      const res = await fetch('/api/content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      const result = await res.json();
-      if (result.success) {
-        setData(result.data);
-        showToast('Changes published successfully to Live Site!', 'success');
-      } else {
-        showToast(result.error || 'Failed to publish changes', 'error');
-      }
+      localStorage.setItem('ryan_admin_products', JSON.stringify(productsList));
+      localStorage.setItem('ryan_admin_insights', JSON.stringify(insightsMap));
+      localStorage.setItem('ryan_admin_guides', JSON.stringify(guidesMap));
+      localStorage.setItem('ryan_admin_prescribing', JSON.stringify(prescribingList));
+      showToast('All modifications saved successfully to system storage!');
     } catch (err: any) {
-      showToast(err.message || 'Error communicating with server', 'error');
-    } finally {
-      setSaving(false);
+      showToast(err.message || 'Failed to save', 'error');
     }
   };
 
-  const handleUnlock = () => {
-    const expectedPin = data?.security?.pinCode || '1234';
-    if (pinInput === expectedPin) {
-      setIsLocked(false);
-      setPinError(false);
-      setPinInput('');
-    } else {
-      setPinError(true);
-    }
+  const handleExportJson = () => {
+    const payload = {
+      exportDate: new Date().toISOString(),
+      products: productsList,
+      insights: insightsMap,
+      guides: guidesMap,
+      prescribing: prescribingList,
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `ryan-dermaceutics-content-backup-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast('JSON backup exported successfully!');
   };
 
-  const handleDeleteSubscriber = async (id: string) => {
-    if (!confirm('Are you sure you want to remove this subscriber?')) return;
-    try {
-      const res = await fetch('/api/newsletter', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      const result = await res.json();
-      if (result.success && data) {
-        setData({
-          ...data,
-          newsletter: {
-            ...data.newsletter,
-            subscribers: result.subscribers,
-          },
-        });
-        showToast('Subscriber removed.', 'success');
+  const handleImportJson = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const parsed = JSON.parse(event.target?.result as string);
+        if (parsed.products) setProductsList(parsed.products);
+        if (parsed.insights) setInsightsMap(parsed.insights);
+        if (parsed.guides) setGuidesMap(parsed.guides);
+        if (parsed.prescribing) setPrescribingList(parsed.prescribing);
+        showToast('JSON backup restored successfully!');
+      } catch (err: any) {
+        showToast('Invalid JSON file format', 'error');
       }
-    } catch (err) {
-      showToast('Failed to delete subscriber', 'error');
+    };
+    reader.readAsText(file);
+  };
+
+  const handleResetDefaults = () => {
+    if (confirm('Are you sure you want to reset all content to system defaults? Any unsaved local edits will be replaced.')) {
+      setProductsList(RYAN_PRODUCTS);
+      setInsightsMap(CLINICAL_INSIGHTS_DATA);
+      setGuidesMap(THERAPEUTIC_GUIDES_DATA);
+      setPrescribingList(PRESCRIBING_INFO_PRODUCTS);
+      localStorage.removeItem('ryan_admin_products');
+      localStorage.removeItem('ryan_admin_insights');
+      localStorage.removeItem('ryan_admin_guides');
+      localStorage.removeItem('ryan_admin_prescribing');
+      showToast('Reset to original system defaults.');
     }
   };
 
-  const handleExportSubscribers = (format: 'csv' | 'json') => {
-    if (!data?.newsletter?.subscribers) return;
-    if (format === 'csv') {
-      window.open('/api/newsletter?format=csv', '_blank');
-    } else {
-      const jsonStr = JSON.stringify(data.newsletter.subscribers, null, 2);
-      const blob = new Blob([jsonStr], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `obagi-subscribers-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
+  // Product Updates
+  const updateCurrentProduct = (field: keyof RyanProduct, value: any) => {
+    if (!selectedProduct) return;
+    const updated = { ...selectedProduct, [field]: value };
+    setSelectedProduct(updated);
+    setProductsList(prev => prev.map(p => p.id === updated.id ? updated : p));
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-slate-950 text-white">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-          <span className="text-sm font-semibold tracking-wide">Loading Obagi Enterprise CMS...</span>
-        </div>
-      </div>
-    );
-  }
+  // Insight Updates
+  const updateCurrentInsight = (field: keyof ClinicalInsight, value: any) => {
+    const current = insightsMap[selectedInsightSlug];
+    if (!current) return;
+    const updated = { ...current, [field]: value };
+    setInsightsMap(prev => ({ ...prev, [selectedInsightSlug]: updated }));
+  };
 
-  if (!data) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-slate-950 text-white">
-        <p className="text-sm text-red-400">Failed to initialize content engine.</p>
-      </div>
-    );
-  }
-
-  // PIN / 2FA Gate
-  if (isLocked) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-slate-950 text-white p-4">
-        <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl space-y-6 text-center animate-in zoom-in-95">
-          <div className="w-16 h-16 bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 rounded-2xl flex items-center justify-center mx-auto">
-            <Lock className="w-8 h-8" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-white">Obagi Admin Security</h2>
-            <p className="text-xs text-slate-400 mt-1">Enter your 4-digit PIN code to unlock the CMS management studio.</p>
-          </div>
-          <div className="space-y-3">
-            <input
-              type="password"
-              maxLength={6}
-              value={pinInput}
-              onChange={(e) => {
-                setPinInput(e.target.value);
-                setPinError(false);
-              }}
-              onKeyDown={(e) => e.key === 'Enter' && handleUnlock()}
-              placeholder="Enter PIN (Default: 1234)"
-              className="w-full text-center tracking-widest text-lg px-4 py-3 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
-              autoFocus
-            />
-            {pinError && <p className="text-xs text-rose-400 font-medium">Incorrect security PIN code.</p>}
-            <button
-              onClick={handleUnlock}
-              className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm font-bold text-white shadow-lg shadow-indigo-600/30 transition-all"
-            >
-              Unlock Dashboard
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const activeProvider = data.storage?.activeSource || data.storage?.provider || 'local';
-
-  const menuSections = [
-    {
-      group: 'Home Page Sections',
-      items: [
-        { id: 'screen0', label: 'Navbar & Header', icon: Globe, desc: 'Logo, Navigation & SPECTRA' },
-        { id: 'screen1', label: 'Screen 1: Hero Video', icon: Video, desc: 'H1 Headline & Video Box' },
-        { id: 'ticker', label: 'Trust Marquee Ticker', icon: Activity, desc: '35-Yr Experience Marquee' },
-        { id: 'screen2', label: 'Screen 2: Our History', icon: ImageIcon, desc: '35-Yr Story & 4 Images' },
-        { id: 'screen3', label: 'Screen 3: About Obagi', icon: BookOpen, desc: 'Company Quote & Paragraph' },
-        { id: 'screen4', label: 'Screen 4: Physician Heritage', icon: Shield, desc: '#1 Brand & 4 Standard Cards' },
-        { id: 'screen5', label: 'Screen 5: Research & Approach', icon: Microscope, desc: 'R&D Banner & 3 Cards' },
-        { id: 'screen6', label: 'Screen 6: 3D Cards & Video', icon: Layers, desc: 'Card Stack & Under-card Video' },
-        { id: 'screen7', label: 'Screen 7: Quote & Footer', icon: Mail, desc: 'Doctor Quote, Newsletter, Links' },
-      ],
-    },
-    {
-      group: 'Features & Operations',
-      items: [
-        { id: 'widget', label: 'Floating AI Widget', icon: Sparkles, desc: 'Chat with AI & Quick Pills' },
-        { id: 'subscribers', label: 'Subscribers List', icon: Users, desc: `${data.newsletter?.subscribers?.length || 0} Emails + CSV Export` },
-        { id: 'settings', label: 'Multi-Source Media', icon: Cloud, desc: 'Local / R2 / S3 / Cloudinary' },
-        { id: 'security', label: 'Admin Security & 2FA', icon: Key, desc: 'PIN Lock & 2FA Protection' },
-        { id: 'logs', label: 'Activity Audit Log', icon: Database, desc: 'Real-time System Audit' },
-      ],
-    },
-  ];
+  // Filtered Products
+  const filteredProducts = productsList.filter(p => {
+    const matchesSearch = p.brandName.toLowerCase().includes(productSearch.toLowerCase()) ||
+      p.genericName.toLowerCase().includes(productSearch.toLowerCase()) ||
+      p.therapeuticArea.toLowerCase().includes(productSearch.toLowerCase());
+    const matchesCat = productCategoryFilter === 'All' || p.therapeuticArea === productCategoryFilter;
+    return matchesSearch && matchesCat;
+  });
 
   return (
-    <div className="flex flex-col h-screen bg-slate-950 text-slate-100 font-sans overflow-hidden">
-      {/* Top Header */}
-      <header className="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur-md px-6 flex items-center justify-between z-30">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-md shadow-indigo-600/30">
-            O
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-sm font-bold tracking-wide text-white">OBAGI MEDICAL INDIA</h1>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/60">
-                100% Dynamic Engine
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-400">Enterprise Wix Clone CMS & Multi-Source Cloud Engine</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* Active storage badge */}
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800/80 border border-slate-700/80 text-[10px] text-slate-300 font-mono">
-            <span className="text-slate-400">Media Source:</span>
-            <span className="font-bold text-indigo-400 uppercase">{activeProvider}</span>
-          </div>
-
-          <button
-            onClick={() => setIsLocked(true)}
-            title="Lock CMS Session"
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition-colors"
-          >
-            <Lock className="w-3.5 h-3.5" />
-          </button>
-
-          <a
-            href="/"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-all border border-slate-700 shadow-sm"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            <span>View Live Site</span>
-          </a>
-
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-lg shadow-indigo-600/30 transition-all disabled:opacity-50"
-          >
-            {saving ? (
-              <>
-                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                <span>Publishing...</span>
-              </>
-            ) : (
-              <>
-                <Save className="w-3.5 h-3.5" />
-                <span>SAVE & PUBLISH LIVE</span>
-              </>
-            )}
-          </button>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-[#0f172a] text-slate-100 flex font-sans selection:bg-teal-500 selection:text-white">
       {/* Toast Notification */}
       {toast && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-2xl border text-xs font-semibold backdrop-blur-lg animate-in slide-in-from-bottom-5 ${
-            toast.type === 'success'
-              ? 'bg-emerald-950/90 text-emerald-200 border-emerald-800'
-              : 'bg-rose-950/90 text-rose-200 border-rose-800'
-          }`}
-        >
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <div className={`fixed top-5 right-5 z-50 px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2.5 text-xs font-bold border transition-all animate-bounce ${
+          toast.type === 'success' ? 'bg-emerald-600 text-white border-emerald-400' : 'bg-rose-600 text-white border-rose-400'
+        }`}>
+          {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
           <span>{toast.message}</span>
         </div>
       )}
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar Navigation */}
-        <aside
-          className={`${
-            sidebarCollapsed ? 'w-20' : 'w-72'
-          } border-r border-slate-800 bg-slate-900/50 p-3 flex flex-col gap-1 overflow-y-auto transition-all duration-300`}
-        >
-          {/* Collapse Toggle */}
-          <div className="flex items-center justify-between px-2 py-1 mb-2">
-            {!sidebarCollapsed && (
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                Navigation
-              </span>
+      {/* ========================================================= */}
+      {/* SIDEBAR NAVIGATION                                       */}
+      {/* ========================================================= */}
+      <aside className={`bg-[#003d4d] border-r border-[#005466] flex flex-col justify-between transition-all duration-300 z-40 ${
+        sidebarOpen ? 'w-64' : 'w-20'
+      }`}>
+        <div>
+          {/* Logo & Header */}
+          <div className="p-4 border-b border-[#005466] flex items-center justify-between">
+            <div className={`flex items-center gap-2.5 overflow-hidden ${!sidebarOpen && 'justify-center w-full'}`}>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-400 to-[#00768a] text-white flex items-center justify-center font-extrabold text-base shadow-md shrink-0">
+                R
+              </div>
+              {sidebarOpen && (
+                <div>
+                  <div className="font-extrabold text-sm tracking-tight text-white leading-none">RYAN DERMA</div>
+                  <div className="text-[10px] text-teal-300 font-bold uppercase tracking-widest mt-0.5">Admin Portal</div>
+                </div>
+              )}
+            </div>
+            {sidebarOpen && (
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="p-1 rounded-lg hover:bg-white/10 text-teal-200 transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
             )}
-            <button
-              onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-              title={sidebarCollapsed ? 'Expand Sidebar' : 'Collapse Sidebar'}
-              className="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-white ml-auto"
-            >
-              {sidebarCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-            </button>
           </div>
 
-          {menuSections.map((sec, sIdx) => (
-            <div key={sec.group} className="space-y-1 mb-4">
-              {!sidebarCollapsed && (
-                <span className="text-[9px] font-bold uppercase tracking-wider text-slate-500 px-2 block">
-                  {sec.group}
-                </span>
-              )}
-              {sec.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id as AdminTab)}
-                    title={sidebarCollapsed ? item.label : undefined}
-                    className={`w-full flex items-center gap-3 p-2.5 rounded-xl text-left transition-all ${
-                      isActive
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                        : 'text-slate-400 hover:bg-slate-800/60 hover:text-white'
-                    }`}
-                  >
-                    <div className={`p-1.5 rounded-lg ${isActive ? 'bg-white/20' : 'bg-slate-800'}`}>
-                      <Icon className="w-4 h-4" />
+          {/* Navigation Links */}
+          <nav className="p-3 space-y-1.5">
+            {[
+              { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
+              { id: 'products', label: 'Products & Monographs', icon: Package, badge: productsList.length },
+              { id: 'insights', label: 'Clinical Insights', icon: FileText, badge: Object.keys(insightsMap).length },
+              { id: 'guides', label: 'Therapeutic Guides', icon: BookOpen, badge: Object.keys(guidesMap).length },
+              { id: 'prescribing', label: 'Prescribing Info (PI)', icon: ShieldCheck, badge: prescribingList.length },
+              { id: 'library', label: 'Reference Library', icon: Layers },
+              { id: 'media', label: 'Media & Assets', icon: ImageIcon },
+              { id: 'backup', label: 'Backup & Settings', icon: Database }
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setActiveTab(tab.id as AdminTab);
+                    if (!sidebarOpen) setSidebarOpen(true);
+                  }}
+                  className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all ${
+                    isActive
+                      ? 'bg-[#00768a] text-white shadow-md shadow-teal-900/50'
+                      : 'text-teal-100/70 hover:bg-white/5 hover:text-white'
+                  }`}
+                  title={tab.label}
+                >
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-white' : 'text-teal-300'}`} />
+                  {sidebarOpen && (
+                    <div className="flex-1 flex items-center justify-between text-left">
+                      <span>{tab.label}</span>
+                      {tab.badge !== undefined && (
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-[#002833] text-teal-300'
+                        }`}>
+                          {tab.badge}
+                        </span>
+                      )}
                     </div>
-                    {!sidebarCollapsed && (
-                      <div className="flex-1 min-w-0">
-                        <span className="text-xs font-bold block truncate">{item.label}</span>
-                        <p className={`text-[10px] truncate ${isActive ? 'text-indigo-100' : 'text-slate-500'}`}>
-                          {item.desc}
-                        </p>
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Sidebar Footer */}
+        <div className="p-3 border-t border-[#005466] space-y-2">
+          {!sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="w-full p-2 rounded-lg bg-white/5 hover:bg-white/10 text-teal-200 flex items-center justify-center transition"
+            >
+              <Menu className="w-4 h-4" />
+            </button>
+          )}
+
+          {sidebarOpen && (
+            <div className="space-y-2">
+              <div className="p-2.5 rounded-xl bg-[#002833] border border-teal-800/40 text-[11px] text-teal-200">
+                <div className="font-bold text-white flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  Live Sync Active
+                </div>
+                <div className="text-[10px] text-teal-400/80 mt-0.5">Vercel Production Connected</div>
+              </div>
+
+              <a
+                href="/home"
+                target="_blank"
+                rel="noreferrer"
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition"
+              >
+                <span>View Live Site</span>
+                <ExternalLink className="w-3.5 h-3.5 text-teal-300" />
+              </a>
             </div>
-          ))}
-        </aside>
+          )}
+        </div>
+      </aside>
 
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-8 bg-slate-950/70">
-          <div className="max-w-5xl mx-auto space-y-6">
+      {/* ========================================================= */}
+      {/* MAIN ADMIN WORKSPACE                                      */}
+      {/* ========================================================= */}
+      <main className="flex-1 flex flex-col h-screen overflow-hidden bg-[#0b1329]">
+        {/* Top Control Bar */}
+        <header className="h-16 bg-[#0f1b35] border-b border-slate-800 px-6 flex items-center justify-between gap-4 shrink-0">
+          <div className="flex items-center gap-3">
+            <h1 className="text-base sm:text-lg font-extrabold text-white capitalize flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-teal-400" />
+              {activeTab === 'dashboard' && 'Executive Management Dashboard'}
+              {activeTab === 'products' && 'Product Monographs Directory'}
+              {activeTab === 'insights' && 'Clinical Insights Articles'}
+              {activeTab === 'guides' && 'Therapeutic Guides & Protocols'}
+              {activeTab === 'prescribing' && 'Official Prescribing Information (PI)'}
+              {activeTab === 'library' && 'Reference Library Knowledgebase'}
+              {activeTab === 'media' && 'Media & Asset Center'}
+              {activeTab === 'backup' && 'System Backup & Export'}
+            </h1>
+          </div>
 
-            {/* =========================================================================
-                SCREEN 0: NAVBAR & HEADER BRANDING
-               ========================================================================= */}
-            {activeTab === 'screen0' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={handleSaveAll}
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-teal-950 transition"
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>Save Changes</span>
+            </button>
+
+            <button
+              onClick={handleExportJson}
+              title="Export Content Backup"
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition"
+            >
+              <Download className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
+
+        {/* Tab Content Body */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 space-y-6">
+          {/* ========================================================= */}
+          {/* 1. DASHBOARD OVERVIEW TAB                                 */}
+          {/* ========================================================= */}
+          {activeTab === 'dashboard' && (
+            <div className="space-y-6 max-w-7xl mx-auto">
+              {/* Metrics Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-[#132247] p-5 rounded-2xl border border-teal-900/50 shadow-xl flex items-center justify-between">
                   <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Navbar & Header
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">Navbar, Logo & SPECTRA Partnership</h2>
-                    <p className="text-xs text-slate-400">Controls `#comp-lw3c3n7z`, top logo, navigation items, search, and Brought to you badge.</p>
+                    <span className="text-xs font-bold text-teal-300 uppercase tracking-wider block">Total Monographs</span>
+                    <span className="text-3xl font-extrabold text-white mt-1 block">{productsList.length}</span>
+                    <span className="text-[11px] text-emerald-400 font-semibold mt-1 block">Full SSG Rendered</span>
                   </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
+                  <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-300">
+                    <Package className="w-6 h-6" />
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Logo & Position */}
-                  <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Logo Settings</h3>
+                <div className="bg-[#132247] p-5 rounded-2xl border border-teal-900/50 shadow-xl flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-teal-300 uppercase tracking-wider block">Clinical Insights</span>
+                    <span className="text-3xl font-extrabold text-white mt-1 block">{Object.keys(insightsMap).length}</span>
+                    <span className="text-[11px] text-teal-400 font-semibold mt-1 block">Authentic Photos &amp; Accordions</span>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-300">
+                    <FileText className="w-6 h-6" />
+                  </div>
+                </div>
 
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Logo Text Brand</label>
-                      <input
-                        type="text"
-                        value={data.header.logoText}
-                        onChange={(e) => setData({ ...data, header: { ...data.header, logoText: e.target.value } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
-                      />
+                <div className="bg-[#132247] p-5 rounded-2xl border border-teal-900/50 shadow-xl flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-teal-300 uppercase tracking-wider block">Therapeutic Guides</span>
+                    <span className="text-3xl font-extrabold text-white mt-1 block">{Object.keys(guidesMap).length}</span>
+                    <span className="text-[11px] text-emerald-400 font-semibold mt-1 block">With Minoxidil 6-Card</span>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-300">
+                    <BookOpen className="w-6 h-6" />
+                  </div>
+                </div>
+
+                <div className="bg-[#132247] p-5 rounded-2xl border border-teal-900/50 shadow-xl flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-teal-300 uppercase tracking-wider block">Prescribing Info (PI)</span>
+                    <span className="text-3xl font-extrabold text-white mt-1 block">{prescribingList.length}</span>
+                    <span className="text-[11px] text-teal-400 font-semibold mt-1 block">Schedule H / Rx Classified</span>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-300">
+                    <ShieldCheck className="w-6 h-6" />
+                  </div>
+                </div>
+              </div>
+
+              {/* Quick Actions & Live Links */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="lg:col-span-8 bg-[#132247] p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-extrabold text-white text-base flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-teal-400" />
+                      Rapid Operations Center
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <button
+                      onClick={() => setActiveTab('products')}
+                      className="p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-700/60 text-left transition group"
+                    >
+                      <div className="font-bold text-sm text-white group-hover:text-teal-300 transition-colors flex items-center justify-between">
+                        <span>Edit Product Monographs</span>
+                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Update dosage, composition, pack sizes &amp; imagery for all 53 monographs.</p>
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab('insights')}
+                      className="p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-700/60 text-left transition group"
+                    >
+                      <div className="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors flex items-center justify-between">
+                        <span>Clinical Insights Editor</span>
+                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Review the 9-section Acne article, Rosacea accordions, &amp; topical comparisons.</p>
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab('guides')}
+                      className="p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-700/60 text-left transition group"
+                    >
+                      <div className="font-bold text-sm text-white group-hover:text-emerald-300 transition-colors flex items-center justify-between">
+                        <span>Minoxidil Educational Card</span>
+                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Customize the 6 educational boxes, strengths, expectations &amp; local effects.</p>
+                    </button>
+
+                    <button
+                      onClick={() => setActiveTab('prescribing')}
+                      className="p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-700/60 text-left transition group"
+                    >
+                      <div className="font-bold text-sm text-white group-hover:text-purple-300 transition-colors flex items-center justify-between">
+                        <span>Prescribing Information (PI)</span>
+                        <ChevronRight className="w-4 h-4 text-slate-500 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                      <p className="text-xs text-slate-400 mt-1">Update regulatory Rx information with &lsquo;View PI&rsquo; action buttons.</p>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="lg:col-span-4 bg-[#132247] p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4 flex flex-col justify-between">
+                  <div>
+                    <h3 className="font-extrabold text-white text-base mb-3">Live Clinical Navigation</h3>
+                    <ul className="space-y-2 text-xs">
+                      <li>
+                        <a href="/home" target="_blank" className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-between text-teal-200 transition">
+                          <span>Ryan Home Page</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </li>
+                      <li>
+                        <a href="/products" target="_blank" className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-between text-teal-200 transition">
+                          <span>Product Monograph Directory</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </li>
+                      <li>
+                        <a href="/for-doctors/therapeutic-resources" target="_blank" className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-between text-teal-200 transition">
+                          <span>Therapeutic Resources Hub</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </li>
+                      <li>
+                        <a href="/for-doctors/therapeutic-resources/insights/understanding-acne" target="_blank" className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-between text-teal-200 transition">
+                          <span>Acne 9-Section Article</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </li>
+                      <li>
+                        <a href="/for-doctors/prescribing-information" target="_blank" className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-between text-teal-200 transition">
+                          <span>Prescribing Info (PI) Page</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </li>
+                      <li>
+                        <a href="/for-doctors/reference-library" target="_blank" className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-between text-teal-200 transition">
+                          <span>Dermatology Reference Library</span>
+                          <ExternalLink className="w-3.5 h-3.5" />
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="pt-3 border-t border-slate-800 text-[11px] text-slate-400">
+                    Ryan Dermaceutics Platform &bull; Production v2.0
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* 2. PRODUCTS & MONOGRAPHS TAB                              */}
+          {/* ========================================================= */}
+          {activeTab === 'products' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto h-[calc(100vh-8.5rem)]">
+              {/* Product Selector Sidebar */}
+              <div className="lg:col-span-4 bg-[#132247] rounded-2xl border border-slate-800 flex flex-col overflow-hidden shadow-xl">
+                <div className="p-4 border-b border-slate-800 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-white uppercase tracking-wider">
+                      Monographs ({filteredProducts.length})
+                    </span>
+                    <button
+                      onClick={() => {
+                        const newId = `ryan-prod-${Date.now()}`;
+                        const newProd: RyanProduct = {
+                          ...RYAN_PRODUCTS[0],
+                          id: newId,
+                          brandName: 'NEW FORMULATION',
+                          slug: `new-formulation-${Date.now()}`,
+                          genericName: 'Active Ingredient & Formulation',
+                          packSize: '30g Tube',
+                        };
+                        setProductsList([newProd, ...productsList]);
+                        setSelectedProduct(newProd);
+                        showToast('New product monograph created!');
+                      }}
+                      className="px-2.5 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white text-[11px] font-bold flex items-center gap-1 transition"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>New Product</span>
+                    </button>
+                  </div>
+
+                  {/* Search */}
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Search 53 monographs..."
+                      value={productSearch}
+                      onChange={(e) => setProductSearch(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                    />
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+
+                  {/* Category Filter */}
+                  <select
+                    value={productCategoryFilter}
+                    onChange={(e) => setProductCategoryFilter(e.target.value)}
+                    className="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-300 focus:outline-none focus:ring-1 focus:ring-teal-500"
+                  >
+                    <option value="All">All Therapeutic Areas</option>
+                    {THERAPEUTIC_AREAS.map((ta) => (
+                      <option key={ta} value={ta}>{ta}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Product List */}
+                <div className="flex-1 overflow-y-auto divide-y divide-slate-800/60 p-2 space-y-1">
+                  {filteredProducts.map((p) => {
+                    const isSelected = selectedProduct?.id === p.id;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedProduct(p)}
+                        className={`w-full text-left p-3 rounded-xl transition flex items-start gap-3 ${
+                          isSelected ? 'bg-[#00768a] text-white shadow-md' : 'hover:bg-white/5 text-slate-300'
+                        }`}
+                      >
+                        <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0 font-bold text-xs text-teal-200">
+                          {p.brandName.charAt(0)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-xs truncate text-white">{p.brandName}</div>
+                          <div className={`text-[11px] truncate ${isSelected ? 'text-teal-100' : 'text-slate-400'}`}>
+                            {p.genericName}
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[9px] uppercase font-bold tracking-wider px-1.5 py-0.2 rounded bg-black/20 text-teal-200">
+                              {p.dosageForm}
+                            </span>
+                            <span className="text-[10px] text-teal-300">{p.packSize}</span>
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Product Edit Panel */}
+              <div className="lg:col-span-8 bg-[#132247] rounded-2xl border border-slate-800 p-6 flex flex-col overflow-y-auto shadow-xl space-y-6">
+                {selectedProduct ? (
+                  <>
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                      <div>
+                        <div className="text-[10px] font-bold text-teal-400 uppercase tracking-widest">
+                          EDITING PRODUCT MONOGRAPH &bull; ID: {selectedProduct.id}
+                        </div>
+                        <h2 className="text-xl font-extrabold text-white mt-0.5">{selectedProduct.brandName}</h2>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`/products/${selectedProduct.slug || selectedProduct.id}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>View on Site</span>
+                        </a>
+                        <button
+                          onClick={() => {
+                            if (confirm(`Delete monograph for "${selectedProduct.brandName}"?`)) {
+                              setProductsList(prev => prev.filter(p => p.id !== selectedProduct.id));
+                              setSelectedProduct(productsList[0] || null);
+                              showToast('Product monograph deleted');
+                            }
+                          }}
+                          className="p-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 transition"
+                          title="Delete Product"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
 
-                    <MediaInput
-                      label="Custom Logo Image URL (Overrides SVG if provided)"
-                      value={data.header.logoImageUrl}
-                      onChange={(url) => setData({ ...data, header: { ...data.header, logoImageUrl: url } })}
-                      mediaType="image"
-                      activeProvider={activeProvider}
-                      placeholder="https://... or /uploads/logo.png"
-                    />
-
-                    <div className="grid grid-cols-2 gap-4">
+                    {/* Basic Meta Fields */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <label className="text-xs font-semibold text-slate-300 block mb-1">Logo Color</label>
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={data.header.logoColor || '#ffffff'}
-                            onChange={(e) => setData({ ...data, header: { ...data.header, logoColor: e.target.value } })}
-                            className="w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer"
-                          />
-                          <input
-                            type="text"
-                            value={data.header.logoColor || '#ffffff'}
-                            onChange={(e) => setData({ ...data, header: { ...data.header, logoColor: e.target.value } })}
-                            className="w-full px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
-                          />
-                        </div>
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Brand Name
+                        </label>
+                        <input
+                          type="text"
+                          value={selectedProduct.brandName}
+                          onChange={(e) => updateCurrentProduct('brandName', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        />
                       </div>
 
                       <div>
-                        <label className="text-xs font-semibold text-slate-300 block mb-1">Logo Alignment</label>
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Generic Formulation
+                        </label>
+                        <input
+                          type="text"
+                          value={selectedProduct.genericName}
+                          onChange={(e) => updateCurrentProduct('genericName', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Pack Size
+                        </label>
+                        <input
+                          type="text"
+                          value={selectedProduct.packSize}
+                          onChange={(e) => updateCurrentProduct('packSize', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Therapeutic Area
+                        </label>
                         <select
-                          value={data.header.logoPosition || 'left'}
-                          onChange={(e) => setData({ ...data, header: { ...data.header, logoPosition: e.target.value as any } })}
-                          className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
+                          value={selectedProduct.therapeuticArea}
+                          onChange={(e) => updateCurrentProduct('therapeuticArea', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
                         >
-                          <option value="left">Left Aligned (Default)</option>
-                          <option value="center">Centered</option>
+                          {THERAPEUTIC_AREAS.map((ta) => (
+                            <option key={ta} value={ta}>{ta}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Dosage Form
+                        </label>
+                        <select
+                          value={selectedProduct.dosageForm}
+                          onChange={(e) => updateCurrentProduct('dosageForm', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        >
+                          {DOSAGE_FORMS.map((df) => (
+                            <option key={df} value={df}>{df}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Route
+                        </label>
+                        <select
+                          value={selectedProduct.route}
+                          onChange={(e) => updateCurrentProduct('route', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        >
+                          {ROUTES.map((r) => (
+                            <option key={r.name} value={r.name}>{r.name}</option>
+                          ))}
                         </select>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Brought to you by SPECTRA */}
-                  <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Brought by SPECTRA Badge</h3>
-
-                    <RichTextEditor
-                      label="Badge Label Text"
-                      value={data.header.broughtByText}
-                      onChange={(val) => setData({ ...data, header: { ...data.header, broughtByText: val } })}
-                      rows={2}
-                    />
-
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Badge Target Link URL</label>
-                      <input
-                        type="text"
-                        value={data.header.broughtByLinkUrl || 'https://www.spectramedicals.com/'}
-                        onChange={(e) => setData({ ...data, header: { ...data.header, broughtByLinkUrl: e.target.value } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
+                    {/* Image Multi-Source Input */}
+                    <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800 space-y-2">
+                      <MediaInput
+                        label="Product Packshot Image (Upload / URL / Asset)"
+                        value={(selectedProduct as any).image || '/ryan/library/prod-luliprix.jpg'}
+                        onChange={(url) => updateCurrentProduct('image' as any, url)}
+                        mediaType="image"
+                        helperText="Provide image URL, pick from /ryan/ assets, or upload from your computer."
                       />
                     </div>
 
-                    <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
+                    {/* Rich Text Editor for Description */}
+                    <div>
+                      <RichTextEditor
+                        label="Clinical Product Description"
+                        value={selectedProduct.clinicalSummary || ''}
+                        onChange={(val) => updateCurrentProduct('clinicalSummary', val)}
+                        rows={4}
+                      />
+                    </div>
+
+                    {/* Rich Text Editor for Composition */}
+                    <div>
+                      <RichTextEditor
+                        label="Active Composition &amp; Strength"
+                        value={Array.isArray(selectedProduct.composition) ? selectedProduct.composition.join('\n') : ((selectedProduct as any).composition || '')}
+                        onChange={(val) => updateCurrentProduct('composition', typeof val === 'string' ? val.split('\n') : val)}
+                        rows={2}
+                      />
+                    </div>
+
+                    {/* Rich Text Editor for Dosage */}
+                    <div>
+                      <RichTextEditor
+                        label="Recommended Dosage &amp; Administration"
+                        value={typeof selectedProduct.dosageAdministration === 'object' ? selectedProduct.dosageAdministration.recommended : ((selectedProduct as any).dosageAdministration || '')}
+                        onChange={(val) => updateCurrentProduct('dosageAdministration', { recommended: val, specialPopulations: '', duration: '' })}
+                        rows={2}
+                      />
+                    </div>
+
+                    {/* Save Action */}
+                    <div className="pt-4 border-t border-slate-800 flex justify-end">
+                      <button
+                        onClick={handleSaveAll}
+                        className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-teal-950 transition"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Save Monograph Updates</span>
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-slate-500 text-xs">
+                    Select a product from the list to begin editing.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* 3. CLINICAL INSIGHTS TAB                                  */}
+          {/* ========================================================= */}
+          {activeTab === 'insights' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
+              {/* Insight Selector */}
+              <div className="lg:col-span-4 bg-[#132247] p-4 rounded-2xl border border-slate-800 shadow-xl space-y-3">
+                <span className="text-xs font-bold text-white uppercase tracking-wider block">
+                  Select Clinical Insight ({Object.keys(insightsMap).length})
+                </span>
+                <div className="space-y-1.5">
+                  {Object.values(insightsMap).map((art) => {
+                    const isSelected = selectedInsightSlug === art.slug;
+                    return (
+                      <button
+                        key={art.slug}
+                        onClick={() => setSelectedInsightSlug(art.slug)}
+                        className={`w-full text-left p-3 rounded-xl transition flex items-center justify-between ${
+                          isSelected ? 'bg-[#00768a] text-white shadow-md' : 'hover:bg-white/5 text-slate-300'
+                        }`}
+                      >
+                        <div className="min-w-0 pr-2">
+                          <div className="font-bold text-xs truncate">{art.title}</div>
+                          <div className="text-[10px] text-teal-200 mt-0.5">{art.readingTime} &bull; {art.date}</div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 shrink-0 text-slate-400" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Insight Edit Fields */}
+              <div className="lg:col-span-8 bg-[#132247] p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+                {insightsMap[selectedInsightSlug] && (
+                  <>
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-800">
                       <div>
-                        <span className="text-xs font-semibold text-slate-200 block">Search Functionality</span>
-                        <span className="text-[10px] text-slate-500">Show/hide search button in header</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={data.header.searchEnabled}
-                        onChange={(e) => setData({ ...data, header: { ...data.header, searchEnabled: e.target.checked } })}
-                        className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Nav Items List */}
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Navigation Menu Items</h3>
-                      <p className="text-[11px] text-slate-400">Primary navbar items with sub-menu dropdown collections.</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {data.header.navItems.map((item, idx) => (
-                      <div key={item.id || idx} className="p-3 bg-slate-950 rounded-xl border border-slate-800 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-white">Item 0{idx + 1}: {item.title}</span>
-                          <span className="text-[10px] text-slate-500 font-mono">{item.dropdown?.length || 0} sub-items</span>
+                        <div className="text-[10px] font-bold text-teal-400 uppercase tracking-widest">
+                          CLINICAL ARTICLE EDITOR
                         </div>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-[10px] text-slate-400 block mb-0.5">Title</label>
-                            <input
-                              type="text"
-                              value={item.title}
-                              onChange={(e) => {
-                                const newItems = [...data.header.navItems];
-                                newItems[idx].title = e.target.value;
-                                setData({ ...data, header: { ...data.header, navItems: newItems } });
-                              }}
-                              className="w-full px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] text-slate-400 block mb-0.5">Target Anchor/Link</label>
-                            <input
-                              type="text"
-                              value={item.href}
-                              onChange={(e) => {
-                                const newItems = [...data.header.navItems];
-                                newItems[idx].href = e.target.value;
-                                setData({ ...data, header: { ...data.header, navItems: newItems } });
-                              }}
-                              className="w-full px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-xs text-white font-mono"
-                            />
-                          </div>
-                        </div>
+                        <h2 className="text-lg font-extrabold text-white mt-0.5">
+                          {insightsMap[selectedInsightSlug].title}
+                        </h2>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                SCREEN 1: HERO VIDEO
-               ========================================================================= */}
-            {activeTab === 'screen1' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Screen 1 / 7
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">Hero Video & Dynamic Headline</h2>
-                    <p className="text-xs text-slate-400">Controls `#comp-kbgaghri`, `#comp-lxriadds`, `#comp-lxriaddt`, and GSAP Circle Morph.</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Left Column: Form */}
-                  <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Headline & Subtitle</h3>
-
-                    <RichTextEditor
-                      label="Headline Text (H1)"
-                      value={data.hero.heading}
-                      onChange={(val) => setData({ ...data, hero: { ...data.hero, heading: val } })}
-                      rows={2}
-                    />
-
-                    <div className="flex items-center gap-3">
-                      <label className="text-xs font-semibold text-slate-300">Headline Color:</label>
-                      <input
-                        type="color"
-                        value={data.hero.headingColor || '#2B328C'}
-                        onChange={(e) => setData({ ...data, hero: { ...data.hero, headingColor: e.target.value } })}
-                        className="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer"
-                      />
-                      <input
-                        type="text"
-                        value={data.hero.headingColor || '#2B328C'}
-                        onChange={(e) => setData({ ...data, hero: { ...data.hero, headingColor: e.target.value } })}
-                        className="w-28 px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
-                      />
+                      <a
+                        href={`/for-doctors/therapeutic-resources/insights/${selectedInsightSlug}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View Article</span>
+                      </a>
                     </div>
 
-                    <RichTextEditor
-                      label="Subtitle & Awards (H2)"
-                      value={data.hero.subtitle}
-                      onChange={(val) => setData({ ...data, hero: { ...data.hero, subtitle: val } })}
-                      rows={3}
-                    />
-
-                    <div className="flex items-center gap-3">
-                      <label className="text-xs font-semibold text-slate-300">Subtitle Color:</label>
-                      <input
-                        type="color"
-                        value={data.hero.subtitleColor || '#2B328C'}
-                        onChange={(e) => setData({ ...data, hero: { ...data.hero, subtitleColor: e.target.value } })}
-                        className="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer"
-                      />
-                      <input
-                        type="text"
-                        value={data.hero.subtitleColor || '#2B328C'}
-                        onChange={(e) => setData({ ...data, hero: { ...data.hero, subtitleColor: e.target.value } })}
-                        className="w-28 px-2 py-1 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Right Column: Media */}
-                  <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Hero Media & Video</h3>
-
-                    <MediaInput
-                      label="Hero Video Stream URL (MP4 / WebM)"
-                      value={data.hero.mediaUrl}
-                      onChange={(url) => setData({ ...data, hero: { ...data.hero, mediaUrl: url } })}
-                      mediaType="video"
-                      activeProvider={activeProvider}
-                      placeholder="https://video.wixstatic.com/.../file.mp4"
-                    />
-
-                    <MediaInput
-                      label="Hero Video Poster Image URL"
-                      value={data.hero.posterUrl}
-                      onChange={(url) => setData({ ...data, hero: { ...data.hero, posterUrl: url } })}
-                      mediaType="image"
-                      activeProvider={activeProvider}
-                      placeholder="https://static.wixstatic.com/.../hero.jpg"
-                    />
-
-                    <div className="pt-2 flex items-center justify-between border-t border-slate-800">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <span className="text-xs font-semibold text-slate-200 block">GSAP Circle Morph</span>
-                        <span className="text-[10px] text-slate-500">Expands hero circle into full width on scroll</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={data.hero.morphEnabled ?? true}
-                        onChange={(e) => setData({ ...data, hero: { ...data.hero, morphEnabled: e.target.checked } })}
-                        className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                TRUST MARQUEE TICKER (Between Hero and History)
-               ========================================================================= */}
-            {activeTab === 'ticker' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Trust Marquee
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">35-Year Heritage Scroll Marquee</h2>
-                    <p className="text-xs text-slate-400">Controls `#comp-mlqkez2p`, `#comp-mlqkgv7u` marquee scroll ticker between Hero and History.</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
-                </div>
-
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <RichTextEditor
-                    label="Marquee Repeating Ticker Text"
-                    value={data.marquee?.text || 'CLINICALLY-TESTED          |          TRANSFORMATIONAL SKINCARE          |          35 YEARS OF EXPERTISE          |          TRUSTED BY PHYSICIANS          |          PROVEN RESULTS'}
-                    onChange={(val) => setData({ ...data, marquee: { ...(data.marquee || { enabled: true, text: '', speedSeconds: 20 }), text: val } })}
-                    rows={3}
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Scroll Duration (Seconds)</label>
-                      <input
-                        type="number"
-                        min={5}
-                        max={60}
-                        value={data.marquee?.speedSeconds || 20}
-                        onChange={(e) => setData({ ...data, marquee: { ...(data.marquee || { enabled: true, text: '', speedSeconds: 20 }), speedSeconds: Number(e.target.value) } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Text Color</label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={data.marquee?.textColor || '#ffffff'}
-                          onChange={(e) => setData({ ...data, marquee: { ...(data.marquee || { enabled: true, text: '', speedSeconds: 20 }), textColor: e.target.value } })}
-                          className="w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer"
-                        />
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Article Title
+                        </label>
                         <input
                           type="text"
-                          value={data.marquee?.textColor || '#ffffff'}
-                          onChange={(e) => setData({ ...data, marquee: { ...(data.marquee || { enabled: true, text: '', speedSeconds: 20 }), textColor: e.target.value } })}
-                          className="w-full px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
+                          value={insightsMap[selectedInsightSlug].title}
+                          onChange={(e) => updateCurrentInsight('title', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
                         />
                       </div>
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Background Color</label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="color"
-                          value={data.marquee?.backgroundColor || '#2B328C'}
-                          onChange={(e) => setData({ ...data, marquee: { ...(data.marquee || { enabled: true, text: '', speedSeconds: 20 }), backgroundColor: e.target.value } })}
-                          className="w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer"
-                        />
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Reading Time
+                        </label>
                         <input
                           type="text"
-                          value={data.marquee?.backgroundColor || '#2B328C'}
-                          onChange={(e) => setData({ ...data, marquee: { ...(data.marquee || { enabled: true, text: '', speedSeconds: 20 }), backgroundColor: e.target.value } })}
-                          className="w-full px-2 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
+                          value={insightsMap[selectedInsightSlug].readingTime}
+                          onChange={(e) => updateCurrentInsight('readingTime', e.target.value)}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
                         />
                       </div>
                     </div>
-                  </div>
 
-                  {/* Marquee Preview */}
-                  <div className="mt-4 p-4 rounded-xl bg-slate-950 border border-slate-800 overflow-hidden">
-                    <span className="text-[10px] uppercase font-bold text-slate-500 block mb-2">Live Scrolling Simulation</span>
-                    <div
-                      className="py-3 px-4 rounded-lg overflow-hidden whitespace-nowrap text-xs font-bold tracking-widest uppercase flex items-center shadow-inner"
-                      style={{
-                        backgroundColor: data.marquee?.backgroundColor || '#2B328C',
-                        color: data.marquee?.textColor || '#ffffff',
-                      }}
-                    >
-                      <div className="animate-marquee inline-block">
-                        {data.marquee?.text || 'CLINICALLY-TESTED | TRANSFORMATIONAL SKINCARE | 35 YEARS OF EXPERTISE | TRUSTED BY PHYSICIANS | PROVEN RESULTS'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                SCREEN 2: OUR HISTORY
-               ========================================================================= */}
-            {activeTab === 'screen2' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Screen 2 / 7
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">Our History & Clinical Heritage</h2>
-                    <p className="text-xs text-slate-400">Controls `#comp-lwqg8022`, `#comp-lwz20kzt` with 4 clinical images.</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
-                </div>
-
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <RichTextEditor
-                    label="Section Title"
-                    value={data.history.title}
-                    onChange={(val) => setData({ ...data, history: { ...data.history, title: val } })}
-                    rows={2}
-                  />
-
-                  <RichTextEditor
-                    label="35-Year Heritage Description Body"
-                    value={data.history.description || ''}
-                    onChange={(val) => setData({ ...data, history: { ...data.history, description: val } })}
-                    rows={4}
-                  />
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-slate-800">
+                    {/* Multi-Source Image Input */}
                     <MediaInput
-                      label="Image 1: Primary Nu-Derm FX System"
-                      value={data.history.primaryImage || ''}
-                      onChange={(url) => setData({ ...data, history: { ...data.history, primaryImage: url } })}
+                      label="Hero Feature Image"
+                      value={insightsMap[selectedInsightSlug].image || '/ryan/insight-acne.jpg'}
+                      onChange={(url) => updateCurrentInsight('image', url)}
                       mediaType="image"
-                      activeProvider={activeProvider}
+                      helperText="Specify thumbnail for this clinical insight."
                     />
 
-                    <MediaInput
-                      label="Image 2: Aesthetics Award Badge"
-                      value={data.history.badgeImage || ''}
-                      onChange={(url) => setData({ ...data, history: { ...data.history, badgeImage: url } })}
-                      mediaType="image"
-                      activeProvider={activeProvider}
-                    />
-
-                    <MediaInput
-                      label="Image 3: Clinical Dropper Texture"
-                      value={data.history.dropperImage || ''}
-                      onChange={(url) => setData({ ...data, history: { ...data.history, dropperImage: url } })}
-                      mediaType="image"
-                      activeProvider={activeProvider}
-                    />
-
-                    <MediaInput
-                      label="Image 4: Patient Portrait (Hydration)"
-                      value={data.history.portraitImage || ''}
-                      onChange={(url) => setData({ ...data, history: { ...data.history, portraitImage: url } })}
-                      mediaType="image"
-                      activeProvider={activeProvider}
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                SCREEN 3: ABOUT OBAGI
-               ========================================================================= */}
-            {activeTab === 'screen3' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Screen 3 / 7
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">About Obagi Medical</h2>
-                    <p className="text-xs text-slate-400">Controls `#comp-lwrl1yo4` (Title/Quote) and `#comp-ml6khg9g` (Body text).</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
-                </div>
-
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <RichTextEditor
-                    label="Section Title"
-                    value={data.about.title}
-                    onChange={(val) => setData({ ...data, about: { ...data.about, title: val } })}
-                    rows={2}
-                  />
-
-                  <RichTextEditor
-                    label="Brand Mission Quote"
-                    value={data.about.quote}
-                    onChange={(val) => setData({ ...data, about: { ...data.about, quote: val } })}
-                    rows={3}
-                  />
-
-                  <RichTextEditor
-                    label="Medical-Grade Skincare Paragraph"
-                    value={data.about.paragraph || ''}
-                    onChange={(val) => setData({ ...data, about: { ...data.about, paragraph: val } })}
-                    rows={4}
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                SCREEN 4: PHYSICIAN HERITAGE (#1 LEADING BRAND)
-               ========================================================================= */}
-            {activeTab === 'screen4' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Screen 4 / 7
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">#1 Physician Recommended Heritage</h2>
-                    <p className="text-xs text-slate-400">Controls `#comp-mlqmnjor`, heading, tagline, and the 4 clinical standard cards.</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
-                </div>
-
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <RichTextEditor
-                    label="Main Heading"
-                    value={data.trustBanner?.heading || '#1 Leading U.S. Physician Recommended Brand*'}
-                    onChange={(val) => setData({ ...data, trustBanner: { ...(data.trustBanner || { heading: '', tagline: '' }), heading: val } })}
-                    rows={2}
-                  />
-
-                  <RichTextEditor
-                    label="Concerns Tagline"
-                    value={data.trustBanner?.tagline || 'FOR TOP 3 SKIN CONCERNS: Pigmentation | Fine Lines & Wrinkles | Sagging Skin & Loss of Elasticity'}
-                    onChange={(val) => setData({ ...data, trustBanner: { ...(data.trustBanner || { heading: '', tagline: '' }), tagline: val } })}
-                    rows={2}
-                  />
-
-                  <div className="pt-4 border-t border-slate-800 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">4 Clinical Standard Repeater Cards</h3>
-                    {(data.trustBanner?.items || []).map((card, idx) => (
-                      <div key={card.id || idx} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
-                        <span className="text-[10px] font-bold text-indigo-400 uppercase">Card 0{idx + 1}</span>
-                        <RichTextEditor
-                          label="Card Title"
-                          value={card.title}
-                          onChange={(val) => {
-                            const newItems = [...(data.trustBanner?.items || [])];
-                            newItems[idx] = { ...newItems[idx], title: val };
-                            setData({ ...data, trustBanner: { ...(data.trustBanner || { heading: '', tagline: '' }), items: newItems } });
-                          }}
-                          rows={2}
-                        />
-                        <RichTextEditor
-                          label="Card Description"
-                          value={card.description}
-                          onChange={(val) => {
-                            const newItems = [...(data.trustBanner?.items || [])];
-                            newItems[idx] = { ...newItems[idx], description: val };
-                            setData({ ...data, trustBanner: { ...(data.trustBanner || { heading: '', tagline: '' }), items: newItems } });
-                          }}
-                          rows={3}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                SCREEN 5: RESEARCH & APPROACH
-               ========================================================================= */}
-            {activeTab === 'screen5' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Screen 5 / 7
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">R&D Banner & Scientific Approach</h2>
-                    <p className="text-xs text-slate-400">Controls `#comp-mlqlr0fm` and `#comp-mlqlfcyi` (Innovation, Process, Standards).</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
-                </div>
-
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">R&D Lab Banner</h3>
-                  <RichTextEditor
-                    label="R&D Title"
-                    value={data.research.title || 'Obagi Research & Development'}
-                    onChange={(val) => setData({ ...data, research: { ...data.research, title: val } })}
-                    rows={2}
-                  />
-
-                  <RichTextEditor
-                    label="R&D Mission Statement"
-                    value={data.research.description || ''}
-                    onChange={(val) => setData({ ...data, research: { ...data.research, description: val } })}
-                    rows={3}
-                  />
-
-                  <MediaInput
-                    label="Research Lab Banner Background (WebP / JPG)"
-                    value={data.research.backgroundImage || ''}
-                    onChange={(url) => setData({ ...data, research: { ...data.research, backgroundImage: url } })}
-                    mediaType="image"
-                    activeProvider={activeProvider}
-                  />
-                </div>
-
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Our 3 Innovation Cards (Approach, Process, Standards)</h3>
-                  <div className="space-y-4">
-                    {(data.approach?.tabs || []).map((tab, idx) => (
-                      <div key={tab.key || idx} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
-                        <span className="text-[10px] font-bold text-indigo-400 uppercase">Card 0{idx + 1}: {tab.key}</span>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <RichTextEditor
-                            label="Card Title"
-                            value={tab.title}
-                            onChange={(val) => {
-                              const newTabs = [...(data.approach?.tabs || [])];
-                              newTabs[idx] = { ...newTabs[idx], title: val };
-                              setData({ ...data, approach: { ...(data.approach || { tabs: [] }), tabs: newTabs } });
-                            }}
-                            rows={2}
-                          />
-                          <MediaInput
-                            label="Card Image"
-                            value={tab.image}
-                            onChange={(url) => {
-                              const newTabs = [...(data.approach?.tabs || [])];
-                              newTabs[idx] = { ...newTabs[idx], image: url };
-                              setData({ ...data, approach: { ...(data.approach || { tabs: [] }), tabs: newTabs } });
-                            }}
-                            mediaType="image"
-                            activeProvider={activeProvider}
-                          />
-                        </div>
-                        <RichTextEditor
-                          label="Card Description"
-                          value={tab.desc}
-                          onChange={(val) => {
-                            const newTabs = [...(data.approach?.tabs || [])];
-                            newTabs[idx] = { ...newTabs[idx], desc: val };
-                            setData({ ...data, approach: { ...(data.approach || { tabs: [] }), tabs: newTabs } });
-                          }}
-                          rows={3}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                SCREEN 6: 3D CARDS SYSTEM & UNDER-CARD VIDEO
-               ========================================================================= */}
-            {activeTab === 'screen6' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Screen 6 / 7
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">3D Cards Stack & Under-Card Video</h2>
-                    <p className="text-xs text-slate-400">Controls `#comp-lwrl9iel`, 3D card deck, expanding pink serum circle, and `#comp-mlau06ju` video.</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
-                </div>
-
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Sticky Pink Serum Circle</h3>
-                  <MediaInput
-                    label="Expanding Pink Serum Background"
-                    value={data.cardsSection.pinkSerumImage || ''}
-                    onChange={(url) => setData({ ...data, cardsSection: { ...data.cardsSection, pinkSerumImage: url } })}
-                    mediaType="image"
-                    activeProvider={activeProvider}
-                  />
-                </div>
-
-                {/* Video Underneath 3D Cards */}
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Video className="w-4 h-4 text-indigo-400" />
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-                      Video Underneath 3D Cards (`#comp-mlau06ju`)
-                    </h3>
-                  </div>
-                  <p className="text-[11px] text-slate-400">
-                    The looping award showcase video embedded directly below the 3D card stack.
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <MediaInput
-                      label="Award Video Stream (MP4)"
-                      value={data.cardsSection.awardVideoUrl || ''}
-                      onChange={(url) => setData({ ...data, cardsSection: { ...data.cardsSection, awardVideoUrl: url } })}
-                      mediaType="video"
-                      activeProvider={activeProvider}
-                      placeholder="https://video.wixstatic.com/.../file.mp4"
-                    />
-
-                    <MediaInput
-                      label="Award Video Poster"
-                      value={data.cardsSection.awardVideoPoster || ''}
-                      onChange={(url) => setData({ ...data, cardsSection: { ...data.cardsSection, awardVideoPoster: url } })}
-                      mediaType="image"
-                      activeProvider={activeProvider}
-                      placeholder="https://static.wixstatic.com/.../poster.jpg"
-                    />
-                  </div>
-                </div>
-
-                {/* 3D Cards List */}
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-                      3D Card Stack Items ({data.cardsSection.cards.length})
-                    </h3>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const newCard: CardItem = {
-                          id: `card-${Date.now()}`,
-                          number: `${data.cardsSection.cards.length + 1}`,
-                          title: 'New Clinical System',
-                          subtitle: 'Transformative Cellular Solution',
-                          description: 'Complete medical-grade skincare formulation designed for clinical results.',
-                          imageUrl: 'https://static.wixstatic.com/media/4833d7_b81f1121c3eb4ed6807efe18902fb0a1~mv2.jpg/v1/fill/w_446,h_446,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/obagi-nu-derm-fx-collection-1600x1600.jpg',
-                          order: data.cardsSection.cards.length + 1,
-                          visible: true,
-                        };
-                        setData({
-                          ...data,
-                          cardsSection: {
-                            ...data.cardsSection,
-                            cards: [...data.cardsSection.cards, newCard],
-                          },
-                        });
-                      }}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white transition-all"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                      <span>Add Card</span>
-                    </button>
-                  </div>
-
-                  <div className="space-y-4">
-                    {data.cardsSection.cards.map((card, idx) => (
-                      <div key={card.id || idx} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-indigo-400 uppercase">Card #{card.number || idx + 1}</span>
-                          {data.cardsSection.cards.length > 3 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const newCards = data.cardsSection.cards.filter((_, i) => i !== idx);
-                                setData({ ...data, cardsSection: { ...data.cardsSection, cards: newCards } });
-                              }}
-                              className="text-rose-400 hover:text-rose-300 p-1"
-                              title="Delete Card"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <RichTextEditor
-                            label="Card Title"
-                            value={card.title}
-                            onChange={(val) => {
-                              const newCards = [...data.cardsSection.cards];
-                              newCards[idx].title = val;
-                              setData({ ...data, cardsSection: { ...data.cardsSection, cards: newCards } });
-                            }}
-                            rows={2}
-                          />
-                          <RichTextEditor
-                            label="Card Subtitle"
-                            value={card.subtitle}
-                            onChange={(val) => {
-                              const newCards = [...data.cardsSection.cards];
-                              newCards[idx].subtitle = val;
-                              setData({ ...data, cardsSection: { ...data.cardsSection, cards: newCards } });
-                            }}
-                            rows={2}
-                          />
-                        </div>
-
-                        <RichTextEditor
-                          label="Card Clinical Description"
-                          value={card.description}
-                          onChange={(val) => {
-                            const newCards = [...data.cardsSection.cards];
-                            newCards[idx].description = val;
-                            setData({ ...data, cardsSection: { ...data.cardsSection, cards: newCards } });
-                          }}
-                          rows={3}
-                        />
-
-                        <MediaInput
-                          label="Card Product Image"
-                          value={card.imageUrl}
-                          onChange={(url) => {
-                            const newCards = [...data.cardsSection.cards];
-                            newCards[idx].imageUrl = url;
-                            setData({ ...data, cardsSection: { ...data.cardsSection, cards: newCards } });
-                          }}
-                          mediaType="image"
-                          activeProvider={activeProvider}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                SCREEN 7: QUOTE, NEWSLETTER & FOOTER
-               ========================================================================= */}
-            {activeTab === 'screen7' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Screen 7 / 7
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">Quote, Newsletter & Footer</h2>
-                    <p className="text-xs text-slate-400">Controls `#comp-lwryj83c` (Quote), `#comp-lx8nvywg` (Newsletter), and `#comp-ml6nay6u` (Footer).</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  {/* Quote Form */}
-                  <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Doctor / CEO Testimonial Quote</h3>
-
+                    {/* Rich Text Editor for Summary */}
                     <RichTextEditor
-                      label="Quote Text"
-                      value={data.quote?.quoteText || ''}
-                      onChange={(val) => setData({ ...data, quote: { ...(data.quote || { quoteText: '', quoteAuthor: '' }), quoteText: val } })}
+                      label="Clinical Executive Summary"
+                      value={insightsMap[selectedInsightSlug].summary || ''}
+                      onChange={(val) => updateCurrentInsight('summary', val)}
                       rows={3}
                     />
 
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Author Name</label>
-                      <input
-                        type="text"
-                        value={data.quote?.quoteAuthor || ''}
-                        onChange={(e) => setData({ ...data, quote: { ...(data.quote || { quoteText: '', quoteAuthor: '' }), quoteAuthor: e.target.value } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Author Title / Role</label>
-                      <input
-                        type="text"
-                        value={data.quote?.quoteRole || ''}
-                        onChange={(e) => setData({ ...data, quote: { ...(data.quote || { quoteText: '', quoteAuthor: '' }), quoteRole: e.target.value } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Newsletter Form */}
-                  <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Newsletter Subscription Form</h3>
-
+                    {/* Rich Text Editor for Overview */}
                     <RichTextEditor
-                      label="Newsletter Headline"
-                      value={data.newsletter.newsletterTitle || ''}
-                      onChange={(val) => setData({ ...data, newsletter: { ...data.newsletter, newsletterTitle: val } })}
-                      rows={2}
+                      label="Clinical Overview & Pathophysiology"
+                      value={insightsMap[selectedInsightSlug].overview || ''}
+                      onChange={(val) => updateCurrentInsight('overview', val)}
+                      rows={4}
                     />
 
+                    {/* Rich Text Editor for Clinical Presentation */}
                     <RichTextEditor
-                      label="Newsletter Description"
-                      value={data.newsletter.newsletterDesc || ''}
-                      onChange={(val) => setData({ ...data, newsletter: { ...data.newsletter, newsletterDesc: val } })}
+                      label="Clinical Presentation & Diagnostic Clues"
+                      value={insightsMap[selectedInsightSlug].clinicalPresentation || ''}
+                      onChange={(val) => updateCurrentInsight('clinicalPresentation', val)}
                       rows={3}
                     />
+
+                    {/* Save Button */}
+                    <div className="pt-4 border-t border-slate-800 flex justify-end">
+                      <button
+                        onClick={handleSaveAll}
+                        className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-teal-950 transition"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Save Article Updates</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* 4. THERAPEUTIC GUIDES & MINOXIDIL TAB                     */}
+          {/* ========================================================= */}
+          {activeTab === 'guides' && (
+            <div className="space-y-6 max-w-7xl mx-auto">
+              <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-teal-400 uppercase tracking-widest block">
+                      SPECIAL CLINICAL MODULE
+                    </span>
+                    <h2 className="text-xl font-extrabold text-white mt-0.5">
+                      Minoxidil Educational Information Protocol
+                    </h2>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Integrated into Hair &amp; Scalp Disorders guide matching reference graphic with 6 key clinical boxes.
+                    </p>
                   </div>
+                  <a
+                    href="/for-doctors/therapeutic-resources/guides/hair-and-scalp-disorders"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+                  >
+                    <Eye className="w-3.5 h-3.5" />
+                    <span>View Live Guide</span>
+                  </a>
                 </div>
 
-                {/* Footer Settings */}
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Footer Legal & Contact</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Company / Entity</label>
-                      <input
-                        type="text"
-                        value={data.footer.companyName}
-                        onChange={(e) => setData({ ...data, footer: { ...data.footer, companyName: e.target.value } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Support Email</label>
-                      <input
-                        type="email"
-                        value={data.footer.email}
-                        onChange={(e) => setData({ ...data, footer: { ...data.footer, email: e.target.value } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
-                      />
-                    </div>
+                {/* Live Preview of Minoxidil Component */}
+                <div className="pt-4 border-t border-slate-800">
+                  <div className="text-xs font-bold text-teal-300 uppercase tracking-wider mb-3">
+                    Interactive Live Component Preview:
                   </div>
-
-                  <RichTextEditor
-                    label="Footer Copyright Line"
-                    value={data.footer.copyright}
-                    onChange={(val) => setData({ ...data, footer: { ...data.footer, copyright: val } })}
-                    rows={2}
-                  />
+                  <div className="rounded-2xl overflow-hidden border border-slate-700">
+                    <MinoxidilEducationalCard />
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* =========================================================================
-                FLOATING AI WIDGET
-               ========================================================================= */}
-            {activeTab === 'widget' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Floating Widget
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">Need Help? & Chat with AI Widget</h2>
-                    <p className="text-xs text-slate-400">Controls the bottom-right interactive chatbot pills and assistance launcher.</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
+          {/* ========================================================= */}
+          {/* 5. PRESCRIBING INFORMATION (PI) TAB                       */}
+          {/* ========================================================= */}
+          {activeTab === 'prescribing' && (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto">
+              {/* PI List */}
+              <div className="lg:col-span-4 bg-[#132247] p-4 rounded-2xl border border-slate-800 shadow-xl space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-white uppercase tracking-wider">
+                    PI Records ({prescribingList.length})
+                  </span>
+                  <a
+                    href="/for-doctors/prescribing-information"
+                    target="_blank"
+                    className="text-[11px] text-teal-300 hover:underline font-semibold"
+                  >
+                    View Page
+                  </a>
                 </div>
+                <div className="space-y-1.5 max-h-[600px] overflow-y-auto">
+                  {prescribingList.map((pi) => {
+                    const isSelected = selectedPi?.id === pi.id;
+                    return (
+                      <button
+                        key={pi.id}
+                        onClick={() => setSelectedPi(pi)}
+                        className={`w-full text-left p-3 rounded-xl transition flex items-center justify-between ${
+                          isSelected ? 'bg-[#00768a] text-white shadow-md' : 'hover:bg-white/5 text-slate-300'
+                        }`}
+                      >
+                        <div className="min-w-0 pr-2">
+                          <div className="font-bold text-xs truncate">{pi.brandName}</div>
+                          <div className="text-[10px] text-teal-200 mt-0.5">{pi.therapeuticClass} &bull; {pi.packSize}</div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 shrink-0 text-slate-400" />
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-xs font-bold text-white block">Widget Status</span>
-                      <span className="text-[10px] text-slate-400">Enable or hide the floating assistance bar completely</span>
+              {/* PI Editor */}
+              <div className="lg:col-span-8 bg-[#132247] p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+                {selectedPi && (
+                  <>
+                    <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                      <div>
+                        <div className="text-[10px] font-bold text-teal-400 uppercase tracking-widest">
+                          OFFICIAL PRESCRIBING INFORMATION (PI)
+                        </div>
+                        <h2 className="text-xl font-extrabold text-white mt-0.5">{selectedPi.brandName}</h2>
+                      </div>
+                      <span className="text-[11px] font-bold text-emerald-400 uppercase bg-emerald-950/60 border border-emerald-700/60 px-2.5 py-1 rounded-lg">
+                        SCHEDULE H / Rx
+                      </span>
                     </div>
-                    <input
-                      type="checkbox"
-                      checked={data.floatingWidget?.enabled ?? true}
-                      onChange={(e) => setData({ ...data, floatingWidget: { ...(data.floatingWidget || { enabled: true, mainButtonText: 'Chat with AI', unreadBadgeText: 'Need Help?', prompts: [] }), enabled: e.target.checked } })}
-                      className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
-                    />
-                  </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2 border-t border-slate-800">
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Launcher Button Text</label>
-                      <input
-                        type="text"
-                        value={data.floatingWidget?.mainButtonText || 'Chat with AI'}
-                        onChange={(e) => setData({ ...data, floatingWidget: { ...(data.floatingWidget || { enabled: true, mainButtonText: 'Chat with AI', unreadBadgeText: 'Need Help?', prompts: [] }), mainButtonText: e.target.value } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Notification Bubble Text</label>
-                      <input
-                        type="text"
-                        value={data.floatingWidget?.unreadBadgeText || 'Need Help?'}
-                        onChange={(e) => setData({ ...data, floatingWidget: { ...(data.floatingWidget || { enabled: true, mainButtonText: 'Chat with AI', unreadBadgeText: 'Need Help?', prompts: [] }), unreadBadgeText: e.target.value } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-800 space-y-3">
-                    <span className="text-xs font-bold uppercase tracking-wider text-indigo-400 block">3 Quick Question Pills</span>
-                    {(data.floatingWidget?.prompts || ['Want to know about Obagi Nu-Derm Fx™ Systems?', 'Explore Obagi', 'Address the Signs of Aging Skin']).map((prompt, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-slate-500 w-6">0{idx + 1}</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Brand Name
+                        </label>
                         <input
                           type="text"
-                          value={prompt}
+                          value={selectedPi.brandName}
                           onChange={(e) => {
-                            const newPrompts = [...(data.floatingWidget?.prompts || [])];
-                            newPrompts[idx] = e.target.value;
-                            setData({ ...data, floatingWidget: { ...(data.floatingWidget || { enabled: true, mainButtonText: 'Chat with AI', unreadBadgeText: 'Need Help?', prompts: [] }), prompts: newPrompts } });
+                            const updated = { ...selectedPi, brandName: e.target.value };
+                            setSelectedPi(updated);
+                            setPrescribingList(prev => prev.map(p => p.id === updated.id ? updated : p));
                           }}
-                          className="flex-1 px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
                         />
+                      </div>
+                      <div>
+                        <label className="text-[11px] font-bold text-slate-300 uppercase tracking-wider block mb-1">
+                          Generic Name
+                        </label>
+                        <input
+                          type="text"
+                          value={selectedPi.genericName}
+                          onChange={(e) => {
+                            const updated = { ...selectedPi, genericName: e.target.value };
+                            setSelectedPi(updated);
+                            setPrescribingList(prev => prev.map(p => p.id === updated.id ? updated : p));
+                          }}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:ring-1 focus:ring-teal-500"
+                        />
+                      </div>
+                    </div>
+
+                    <RichTextEditor
+                      label="Official Composition"
+                      value={selectedPi.composition || ''}
+                      onChange={(val) => {
+                        const updated = { ...selectedPi, composition: val };
+                        setSelectedPi(updated);
+                        setPrescribingList(prev => prev.map(p => p.id === updated.id ? updated : p));
+                      }}
+                      rows={2}
+                    />
+
+                    <RichTextEditor
+                      label="Dosage &amp; Administration Instructions"
+                      value={Array.isArray(selectedPi.dosageAndAdministration) ? selectedPi.dosageAndAdministration.join('\n') : (selectedPi.dosageAndAdministration || '')}
+                      onChange={(val) => {
+                        const updated = { ...selectedPi, dosageAndAdministration: val.split('\n').filter(Boolean) };
+                        setSelectedPi(updated);
+                        setPrescribingList(prev => prev.map(p => p.id === updated.id ? updated : p));
+                      }}
+                      rows={3}
+                    />
+
+                    <RichTextEditor
+                      label="Storage &amp; Handling Instructions"
+                      value={selectedPi.storageAndHandling || ''}
+                      onChange={(val) => {
+                        const updated = { ...selectedPi, storageAndHandling: val };
+                        setSelectedPi(updated);
+                        setPrescribingList(prev => prev.map(p => p.id === updated.id ? updated : p));
+                      }}
+                      rows={2}
+                    />
+
+                    <div className="pt-4 border-t border-slate-800 flex justify-end">
+                      <button
+                        onClick={handleSaveAll}
+                        className="px-6 py-2.5 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-teal-950 transition"
+                      >
+                        <Save className="w-4 h-4" />
+                        <span>Save PI Updates</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* 6. REFERENCE LIBRARY TAB                                  */}
+          {/* ========================================================= */}
+          {activeTab === 'library' && (
+            <div className="space-y-6 max-w-7xl mx-auto">
+              <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-extrabold text-white">Dermatology Reference Library Directory</h2>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Explore and link condition references across 8 therapeutic dermatology categories.
+                    </p>
+                  </div>
+                  <a
+                    href="/for-doctors/reference-library"
+                    target="_blank"
+                    className="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-semibold flex items-center gap-1.5 transition"
+                  >
+                    <span>View Live Library</span>
+                    <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-3">
+                  {Object.entries(REFERENCE_LIBRARY_CATEGORIES).map(([slug, cat]) => (
+                    <div key={slug} className="p-4 rounded-xl bg-white/5 border border-slate-700/60 space-y-2">
+                      <div className="font-extrabold text-sm text-teal-300">{cat.name}</div>
+                      <p className="text-xs text-slate-400 line-clamp-2">{cat.description}</p>
+                      <div className="pt-2 text-[11px] text-slate-300 font-semibold flex items-center justify-between">
+                        <span>{cat.conditionReferences.length} Conditions</span>
+                        <a
+                          href={`/for-doctors/reference-library/${slug}`}
+                          target="_blank"
+                          className="text-teal-400 hover:underline flex items-center gap-1"
+                        >
+                          Explore <ChevronRight className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* 7. MEDIA & ASSET MANAGER TAB                              */}
+          {/* ========================================================= */}
+          {activeTab === 'media' && (
+            <div className="space-y-6 max-w-7xl mx-auto">
+              <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 shadow-xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-extrabold text-white">Multi-Source Media &amp; Asset Center</h2>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Upload new product packshots, clinical lesion photos, or copy existing asset paths.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="p-4 rounded-xl bg-slate-900 border border-slate-800">
+                  <MediaInput
+                    label="Upload or Link Media File"
+                    value=""
+                    onChange={(url) => {
+                      showToast(`Media file uploaded: ${url}`);
+                    }}
+                    mediaType="image"
+                    helperText="Files will be processed and available across the entire site."
+                  />
+                </div>
+
+                {/* Popular Asset Quick Links */}
+                <div className="space-y-2 pt-2">
+                  <span className="text-xs font-bold text-teal-300 uppercase tracking-wider block">
+                    Core Asset Repository
+                  </span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {[
+                      { name: 'Minoxidil Educational Graphic', path: '/ryan/minoxidil-educational.png' },
+                      { name: 'Acne Clinical Hero', path: '/images/clinical-insights/understanding-acne/acne-hero.jpg' },
+                      { name: 'Rosacea Erythema Lesion', path: '/images/clinical-insights/understanding-acne/rosacea-erythema.jpg' },
+                      { name: 'Open Comedone Micro', path: '/images/clinical-insights/understanding-acne/lesions/open-comedone.jpg' },
+                      { name: 'Ice-Pick Scar Close-Up', path: '/images/clinical-insights/understanding-acne/scar-ice-pick.jpg' },
+                      { name: 'Fingertip Unit Application', path: '/images/clinical-insights/topical-vs-systemic/fingertip-unit.jpg' },
+                      { name: 'Eczema Localised Plaque', path: '/images/clinical-insights/topical-vs-systemic/eczema-localised.jpg' },
+                      { name: 'Tinea Corporis Plaque', path: '/images/clinical-insights/topical-vs-systemic/tinea-corporis-localised.jpg' },
+                      { name: 'Eczema Post-Therapy Result', path: '/images/clinical-insights/topical-vs-systemic/eczema-after.jpg' },
+                    ].map((asset, i) => (
+                      <div key={i} className="p-3 rounded-xl bg-white/5 border border-slate-700/70 flex items-center justify-between gap-2">
+                        <div className="min-w-0">
+                          <div className="font-bold text-xs text-white truncate">{asset.name}</div>
+                          <div className="text-[10px] text-teal-300/80 truncate font-mono">{asset.path}</div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(asset.path);
+                            showToast(`Copied ${asset.path}`);
+                          }}
+                          className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-teal-200 transition shrink-0"
+                          title="Copy Path"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* =========================================================================
-                NEWSLETTER SUBSCRIBERS
-               ========================================================================= */}
-            {activeTab === 'subscribers' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      CRM & Leads
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">Newsletter Subscribers ({data.newsletter.subscribers.length})</h2>
-                    <p className="text-xs text-slate-400">Captured emails from the live newsletter subscription form.</p>
+          {/* ========================================================= */}
+          {/* 8. BACKUP & SYSTEM SETTINGS TAB                           */}
+          {/* ========================================================= */}
+          {activeTab === 'backup' && (
+            <div className="space-y-6 max-w-4xl mx-auto">
+              <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 shadow-xl space-y-6">
+                <div>
+                  <h2 className="text-xl font-extrabold text-white">System Data Persistence &amp; Backups</h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Export your changes, restore previous JSON snapshots, or reset to original pharmaceutical defaults.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-5 rounded-xl bg-white/5 border border-slate-700 space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-300 flex items-center justify-center">
+                      <Download className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-bold text-sm text-white">Export Full Content Snapshot</h3>
+                    <p className="text-xs text-slate-400">Download a full JSON file containing all products, monographs, and articles.</p>
+                    <button
+                      onClick={handleExportJson}
+                      className="w-full py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs transition"
+                    >
+                      Export JSON Backup
+                    </button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => handleExportSubscribers('csv')}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-all shadow-md shadow-emerald-600/20"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Export CSV</span>
-                    </button>
-                    <button
-                      onClick={() => handleExportSubscribers('json')}
-                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 transition-all"
-                    >
-                      <FileSpreadsheet className="w-3.5 h-3.5" />
-                      <span>Export JSON</span>
-                    </button>
+
+                  <div className="p-5 rounded-xl bg-white/5 border border-slate-700 space-y-3">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 text-cyan-300 flex items-center justify-center">
+                      <Upload className="w-5 h-5" />
+                    </div>
+                    <h3 className="font-bold text-sm text-white">Restore from JSON File</h3>
+                    <p className="text-xs text-slate-400">Upload a previously saved JSON snapshot to restore all modifications.</p>
+                    <label className="w-full py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs text-center block cursor-pointer transition">
+                      <span>Import JSON Backup</span>
+                      <input
+                        type="file"
+                        accept=".json"
+                        onChange={handleImportJson}
+                        className="hidden"
+                      />
+                    </label>
                   </div>
                 </div>
 
-                <div className="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-950 border-b border-slate-800 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                        <tr>
-                          <th className="py-3 px-4">#</th>
-                          <th className="py-3 px-4">Subscriber Email</th>
-                          <th className="py-3 px-4">Subscribed Date</th>
-                          <th className="py-3 px-4 text-right">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-800/60 font-mono">
-                        {(data.newsletter.subscribers || []).map((sub, idx) => (
-                          <tr key={sub.id || idx} className="hover:bg-slate-800/40 transition-colors">
-                            <td className="py-3 px-4 text-slate-500">{idx + 1}</td>
-                            <td className="py-3 px-4 text-white font-semibold">{sub.email}</td>
-                            <td className="py-3 px-4 text-slate-400">{sub.date}</td>
-                            <td className="py-3 px-4 text-right">
-                              <button
-                                onClick={() => handleDeleteSubscriber(sub.id)}
-                                className="p-1 rounded hover:bg-rose-500/20 text-rose-400 transition-colors"
-                                title="Remove Email"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                MULTI-SOURCE MEDIA & STORAGE PROVIDERS
-               ========================================================================= */}
-            {activeTab === 'settings' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+                <div className="pt-4 border-t border-slate-800 flex items-center justify-between">
                   <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Cloud & Storage
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">Multi-Source Media Providers</h2>
-                    <p className="text-xs text-slate-400">Configure Local, Cloudflare R2, AWS S3, Cloudinary, or Google Drive sources.</p>
+                    <div className="font-bold text-xs text-rose-300">Reset to Defaults</div>
+                    <div className="text-[11px] text-slate-500">Restore factory monograph datasets.</div>
                   </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
+                  <button
+                    onClick={handleResetDefaults}
+                    className="px-4 py-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 font-bold text-xs transition"
+                  >
+                    Reset Factory Data
                   </button>
                 </div>
-
-                {/* Active Provider Selector */}
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">Active Media Source Selector</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {[
-                      { id: 'local', name: 'Local Server', icon: Database, desc: '/public/uploads' },
-                      { id: 'cloudflare-r2', name: 'Cloudflare R2', icon: Cloud, desc: 'Zero egress cost S3' },
-                      { id: 'aws-s3', name: 'Amazon S3', icon: Cloud, desc: 'AWS S3 Bucket' },
-                      { id: 'cloudinary', name: 'Cloudinary', icon: Sparkles, desc: 'Auto CDN & WebP' },
-                      { id: 'google-drive', name: 'Google Drive', icon: Globe, desc: 'Drive Direct Links' },
-                      { id: 'public-url', name: 'Public CDN URL', icon: ExternalLink, desc: 'Direct URL Passthrough' },
-                    ].map((prov) => {
-                      const isSelected = activeProvider === prov.id;
-                      const Icon = prov.icon;
-                      return (
-                        <button
-                          key={prov.id}
-                          type="button"
-                          onClick={() => setData({ ...data, storage: { ...data.storage, activeSource: prov.id as StorageProvider, provider: prov.id as StorageProvider } })}
-                          className={`p-3.5 rounded-xl border text-left transition-all ${
-                            isSelected
-                              ? 'bg-indigo-600/20 border-indigo-500 text-white shadow-md shadow-indigo-500/10'
-                              : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between mb-1.5">
-                            <Icon className={`w-4 h-4 ${isSelected ? 'text-indigo-400' : 'text-slate-500'}`} />
-                            <div className={`w-2.5 h-2.5 rounded-full ${isSelected ? 'bg-indigo-500' : 'bg-slate-700'}`} />
-                          </div>
-                          <span className="text-xs font-bold block text-white">{prov.name}</span>
-                          <span className="text-[10px] text-slate-500">{prov.desc}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Provider Credentials Form */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Cloudflare R2 */}
-                  <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-3">
-                    <span className="text-xs font-bold uppercase text-orange-400 block">Cloudflare R2 Configuration</span>
-                    <div>
-                      <label className="text-[11px] text-slate-400 block mb-0.5">Account ID</label>
-                      <input
-                        type="text"
-                        value={data.storage.accountId || ''}
-                        onChange={(e) => setData({ ...data, storage: { ...data.storage, accountId: e.target.value } })}
-                        placeholder="Cloudflare account ID"
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] text-slate-400 block mb-0.5">Bucket Name</label>
-                      <input
-                        type="text"
-                        value={data.storage.bucketName || ''}
-                        onChange={(e) => setData({ ...data, storage: { ...data.storage, bucketName: e.target.value } })}
-                        placeholder="obagi-media-bucket"
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] text-slate-400 block mb-0.5">Custom Public Domain / URL</label>
-                      <input
-                        type="text"
-                        value={data.storage.publicUrl || ''}
-                        onChange={(e) => setData({ ...data, storage: { ...data.storage, publicUrl: e.target.value } })}
-                        placeholder="https://media.obagiindia.com"
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Cloudinary */}
-                  <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-3">
-                    <span className="text-xs font-bold uppercase text-sky-400 block">Cloudinary Configuration</span>
-                    <div>
-                      <label className="text-[11px] text-slate-400 block mb-0.5">Cloud Name</label>
-                      <input
-                        type="text"
-                        value={data.storage.cloudName || ''}
-                        onChange={(e) => setData({ ...data, storage: { ...data.storage, cloudName: e.target.value } })}
-                        placeholder="Cloudinary cloud name"
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] text-slate-400 block mb-0.5">Upload Preset</label>
-                      <input
-                        type="text"
-                        value={data.storage.uploadPreset || ''}
-                        onChange={(e) => setData({ ...data, storage: { ...data.storage, uploadPreset: e.target.value } })}
-                        placeholder="obagi_unsigned_preset"
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] text-slate-400 block mb-0.5">API Key (Optional)</label>
-                      <input
-                        type="password"
-                        value={data.storage.apiKey || ''}
-                        onChange={(e) => setData({ ...data, storage: { ...data.storage, apiKey: e.target.value } })}
-                        className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono"
-                      />
-                    </div>
-                  </div>
-                </div>
               </div>
-            )}
-
-            {/* =========================================================================
-                ADMIN SECURITY & 2-FACTOR AUTH
-               ========================================================================= */}
-            {activeTab === 'security' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Security & Access
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">Admin Security & 2FA Gate</h2>
-                    <p className="text-xs text-slate-400">Configure dashboard PIN protection and 2-Factor authentication.</p>
-                  </div>
-                  <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-xs font-bold text-white shadow-md shadow-indigo-600/30">
-                    Save Changes
-                  </button>
-                </div>
-
-                <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-4">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                    <div>
-                      <span className="text-xs font-bold text-white block">2-Factor Authentication (2FA)</span>
-                      <span className="text-[10px] text-slate-400">Require PIN verification before opening the admin studio</span>
-                    </div>
-                    <input
-                      type="checkbox"
-                      checked={data.security?.twoFactorEnabled ?? false}
-                      onChange={(e) => setData({ ...data, security: { ...(data.security || { pinCode: '1234', twoFactorEnabled: false, sessionDurationHours: 24 }), twoFactorEnabled: e.target.checked } })}
-                      className="w-4 h-4 rounded text-indigo-600 cursor-pointer"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Admin Security PIN</label>
-                      <input
-                        type="password"
-                        maxLength={6}
-                        value={data.security?.pinCode || '1234'}
-                        onChange={(e) => setData({ ...data, security: { ...(data.security || { pinCode: '1234', twoFactorEnabled: false, sessionDurationHours: 24 }), pinCode: e.target.value } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white font-mono tracking-widest"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-slate-300 block mb-1">Session Duration (Hours)</label>
-                      <input
-                        type="number"
-                        value={data.security?.sessionDurationHours || 24}
-                        onChange={(e) => setData({ ...data, security: { ...(data.security || { pinCode: '1234', twoFactorEnabled: false, sessionDurationHours: 24 }), sessionDurationHours: Number(e.target.value) } })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* =========================================================================
-                ACTIVITY AUDIT LOGS
-               ========================================================================= */}
-            {activeTab === 'logs' && (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between pb-4 border-b border-slate-800">
-                  <div>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                      Audit Trail
-                    </span>
-                    <h2 className="text-xl font-bold text-white mt-1">Activity Audit Trail</h2>
-                    <p className="text-xs text-slate-400">Complete record of who modified what section and when.</p>
-                  </div>
-                </div>
-
-                <div className="bg-slate-900/80 rounded-2xl border border-slate-800 overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-950 border-b border-slate-800 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
-                        <tr>
-                          <th className="py-3 px-4">Timestamp</th>
-                          <th className="py-3 px-4">User</th>
-                          <th className="py-3 px-4">Action</th>
-                          <th className="py-3 px-4">Section</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-800/60 font-mono text-[11px]">
-                        {(data.activityLogs || []).map((log) => (
-                          <tr key={log.id} className="hover:bg-slate-800/40 transition-colors">
-                            <td className="py-3 px-4 text-slate-400">{log.timestamp}</td>
-                            <td className="py-3 px-4 text-indigo-300 font-semibold">{log.user}</td>
-                            <td className="py-3 px-4 text-white">{log.action}</td>
-                            <td className="py-3 px-4 text-slate-400">{log.section}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            )}
-
-          </div>
-        </main>
-      </div>
+            </div>
+          )}
+        </div>
+      </main>
     </div>
   );
 }

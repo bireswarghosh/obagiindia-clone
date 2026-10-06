@@ -24,10 +24,25 @@ import {
   Printer
 } from 'lucide-react';
 
+import MedicalReferenceView from '@/components/ryan/medical-reference/MedicalReferenceView';
+import { MEDICAL_REF_CSS, MEDICAL_REF_HTML } from '@/components/ryan/medical-reference/content';
+
 export default function ClinicalInsightArticlePage() {
   const params = useParams();
   const router = useRouter();
   const slug = (params?.slug as string) || 'understanding-acne';
+
+  if (slug === 'understanding-acne') {
+    return (
+      <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">
+        <RyanHeader />
+        <main className="py-4">
+          <MedicalReferenceView html={MEDICAL_REF_HTML} css={MEDICAL_REF_CSS} />
+        </main>
+        <RyanFooter />
+      </div>
+    );
+  }
 
   const article: ClinicalInsight = CLINICAL_INSIGHTS_DATA[slug] || CLINICAL_INSIGHTS_DATA['understanding-acne'];
 
@@ -117,6 +132,42 @@ export default function ClinicalInsightArticlePage() {
           <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
             {article.clinicalPresentation}
           </p>
+
+          {slug === 'topical-vs-systemic' && (
+            <div className="mt-4 p-4 rounded-2xl bg-white border border-teal-100 shadow-2xs space-y-3">
+              <h4 className="text-xs font-bold text-[#004f5e] uppercase tracking-wider flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-teal-500" />
+                Typical Clinical Presentations & Route Indications
+              </h4>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-50 text-center p-2.5">
+                  <div className="relative h-40 w-full rounded-lg overflow-hidden mb-2">
+                    <Image
+                      src="/images/clinical-insights/topical-vs-systemic/eczema-localised.jpg"
+                      alt="Localised eczema plaque"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="font-bold text-xs text-slate-900">Eczema (Localised Plaque)</div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Well-defined localised lesion suitable for targeted topical therapy.</p>
+                </div>
+
+                <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-50 text-center p-2.5">
+                  <div className="relative h-40 w-full rounded-lg overflow-hidden mb-2">
+                    <Image
+                      src="/images/clinical-insights/topical-vs-systemic/tinea-corporis-localised.jpg"
+                      alt="Tinea corporis localised"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="font-bold text-xs text-slate-900">Tinea Corporis (Localised)</div>
+                  <p className="text-[11px] text-slate-500 mt-0.5">Annular scaling lesion manageable with topical antifungals.</p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Section 3: Differential Diagnosis */}
@@ -165,6 +216,55 @@ export default function ClinicalInsightArticlePage() {
               </div>
             ))}
           </div>
+
+          {slug === 'topical-vs-systemic' && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3">
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                <div className="font-bold text-xs text-[#004f5e] mb-2 uppercase tracking-wider">
+                  How To Apply & Quantity (Fingertip Unit)
+                </div>
+                <div className="relative h-32 w-full rounded-lg overflow-hidden mb-2">
+                  <Image
+                    src="/images/clinical-insights/topical-vs-systemic/fingertip-unit.jpg"
+                    alt="Fingertip unit application quantity"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  One Fingertip Unit (FTU ~0.5g) covers approximately two adult handprints. Educate patients on exact dosage to prevent under-treatment or steroid skin atrophy.
+                </p>
+              </div>
+
+              <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
+                <div className="font-bold text-xs text-[#004f5e] mb-2 uppercase tracking-wider">
+                  Practical Response: Eczema Resolution
+                </div>
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <div className="relative h-28 rounded-lg overflow-hidden border border-slate-200">
+                    <Image
+                      src="/images/clinical-insights/topical-vs-systemic/eczema-before.jpg"
+                      alt="Localized eczema before therapy"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="relative h-28 rounded-lg overflow-hidden border border-slate-200">
+                    <Image
+                      src="/images/clinical-insights/topical-vs-systemic/eczema-after.jpg"
+                      alt="Localized eczema after 2-4 weeks therapy"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-between text-[10px] text-slate-500 font-bold px-1">
+                  <span>Baseline Plaque</span>
+                  <span>Week 4 Post-Therapy</span>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Section 6: References */}
