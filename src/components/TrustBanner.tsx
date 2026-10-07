@@ -28,7 +28,11 @@ export default function TrustBanner({ trust, theme }: TrustBannerProps) {
 
         {/* 3 Key Skin Concerns */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">
-          {[trust.concern1, trust.concern2, trust.concern3].map((concern, idx) => (
+          {[
+            trust?.concern1 || 'Topical Potency & Formulations',
+            trust?.concern2 || 'Oral & Systemic Therapies',
+            trust?.concern3 || 'Trichology & Scalp Care'
+          ].map((concern, idx) => (
             <div
               key={idx}
               className="p-5 rounded-2xl border bg-slate-50/60 flex items-center justify-center gap-3 transition-transform hover:-translate-y-1"

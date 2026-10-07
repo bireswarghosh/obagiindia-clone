@@ -197,7 +197,7 @@ export default function ForDoctorsLandingPage() {
           {/* 4 Feature Badges Underneath Hero */}
           <div className="mt-12 pt-8 border-t border-teal-200/60">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {content.hero.features.map(feat => (
+              {(content.hero?.features || []).map(feat => (
                 <div
                   key={feat.id}
                   className="flex items-center gap-3 p-3.5 sm:p-4 rounded-xl bg-white/80 backdrop-blur-xs border border-teal-100/90 shadow-2xs hover:shadow-sm hover:border-teal-300 transition-all"
@@ -233,7 +233,7 @@ export default function ForDoctorsLandingPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {content.quickAccess.cards.map(card => (
+            {(content.quickAccess?.cards || []).map(card => (
               <div
                 key={card.id}
                 className="group flex flex-col justify-between bg-[#fbfdfd] hover:bg-white rounded-2xl border border-teal-100/80 hover:border-teal-300 p-5 shadow-xs hover:shadow-md transition-all duration-300"
@@ -299,7 +299,7 @@ export default function ForDoctorsLandingPage() {
 
           {/* 8 Circles Grid */}
           <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 sm:gap-6">
-            {content.therapeuticAreas.categories.map(cat => (
+            {(content.therapeuticAreas?.categories || []).map(cat => (
               <Link
                 key={cat.id}
                 href={cat.link}
@@ -361,7 +361,7 @@ export default function ForDoctorsLandingPage() {
 
                 {/* 4 Badges in a row */}
                 <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  {content.scientificApproach.features.map(f => (
+                  {(content.scientificApproach?.features || []).map(f => (
                     <div
                       key={f.id}
                       className="flex flex-col items-start gap-2 p-3 rounded-xl bg-white/90 border border-teal-100/80 shadow-2xs"
@@ -409,7 +409,7 @@ export default function ForDoctorsLandingPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {content.stayUpdated.articles.map(art => (
+            {(content.stayUpdated?.articles || []).map(art => (
               <Link
                 key={art.id}
                 href={art.linkUrl}

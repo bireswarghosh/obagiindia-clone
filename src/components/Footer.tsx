@@ -45,7 +45,7 @@ export default function Footer({ footer, theme }: FooterProps) {
               Quick Navigation
             </h4>
             <ul className="space-y-2 text-xs text-slate-600">
-              {footer.quickLinks.map((link, idx) => (
+              {(footer?.quickLinks || []).map((link, idx) => (
                 <li key={idx}>
                   <Link href={link.href} className="hover:text-slate-900 transition-colors">
                     {link.title}
@@ -61,7 +61,7 @@ export default function Footer({ footer, theme }: FooterProps) {
               Connect With Us
             </h4>
             <div className="flex flex-wrap gap-3">
-              {footer.socialLinks.map((social, idx) => (
+              {(footer?.socialLinks || []).map((social, idx) => (
                 <a
                   key={idx}
                   href={social.url}

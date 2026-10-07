@@ -55,7 +55,7 @@ export default function Header({ header, theme }: HeaderProps) {
 
           {/* Desktop Nav Links */}
           <nav className="hidden md:flex items-center gap-8">
-            {header.navItems.map((item) => (
+            {(header?.navItems || []).map((item) => (
               <div
                 key={item.id}
                 className="relative"
@@ -79,7 +79,7 @@ export default function Header({ header, theme }: HeaderProps) {
                     className="absolute top-full left-0 w-64 bg-white shadow-xl rounded-xl p-2 border animate-fade-in"
                     style={{ borderColor: theme.borderColor }}
                   >
-                    {item.dropdown.map((sub, idx) => (
+                    {(item.dropdown || []).map((sub, idx) => (
                       <Link
                         key={idx}
                         href={sub.href}

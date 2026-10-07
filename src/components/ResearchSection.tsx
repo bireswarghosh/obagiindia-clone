@@ -32,7 +32,7 @@ export default function ResearchSection({ research, theme }: ResearchProps) {
 
         {/* 3 Research Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {research.items.map((item) => (
+          {(research?.items || []).map((item) => (
             <div
               key={item.id}
               className="group bg-white rounded-3xl overflow-hidden border shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-2 flex flex-col"

@@ -43,13 +43,56 @@ export default function HomePage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
 
   useEffect(() => {
+    const mergeSafe = (prev: FullSiteData, incoming: any): FullSiteData => ({
+      ...prev,
+      ...incoming,
+      history: {
+        ...prev.history,
+        ...(incoming.history || {}),
+        galleryImages: incoming.history?.galleryImages && Array.isArray(incoming.history.galleryImages) && incoming.history.galleryImages.length > 0
+          ? incoming.history.galleryImages
+          : prev.history.galleryImages
+      },
+      research: {
+        ...prev.research,
+        ...(incoming.research || {}),
+        items: incoming.research?.items && Array.isArray(incoming.research.items) && incoming.research.items.length > 0
+          ? incoming.research.items
+          : prev.research.items
+      },
+      cardsSection: {
+        ...prev.cardsSection,
+        ...(incoming.cardsSection || {}),
+        cards: incoming.cardsSection?.cards && Array.isArray(incoming.cardsSection.cards) && incoming.cardsSection.cards.length > 0
+          ? incoming.cardsSection.cards
+          : prev.cardsSection.cards
+      },
+      header: {
+        ...prev.header,
+        ...(incoming.header || {}),
+        navItems: incoming.header?.navItems && Array.isArray(incoming.header.navItems) && incoming.header.navItems.length > 0
+          ? incoming.header.navItems
+          : prev.header.navItems
+      },
+      footer: {
+        ...prev.footer,
+        ...(incoming.footer || {}),
+        quickLinks: incoming.footer?.quickLinks && Array.isArray(incoming.footer.quickLinks)
+          ? incoming.footer.quickLinks
+          : prev.footer.quickLinks,
+        socialLinks: incoming.footer?.socialLinks && Array.isArray(incoming.footer.socialLinks)
+          ? incoming.footer.socialLinks
+          : prev.footer.socialLinks
+      }
+    });
+
     try {
       // 1. Check local storage overrides from admin
       const local = localStorage.getItem('obagi_site_data');
       if (local) {
         try {
           const parsed = JSON.parse(local);
-          setSiteData(prev => ({ ...prev, ...parsed }));
+          setSiteData(prev => mergeSafe(prev, parsed));
         } catch (e) {}
       }
 
@@ -58,7 +101,7 @@ export default function HomePage() {
         .then(res => res.json())
         .then(data => {
           if (data && data.header) {
-            setSiteData(prev => ({ ...prev, ...data }));
+            setSiteData(prev => mergeSafe(prev, data));
           }
         })
         .catch(() => {});

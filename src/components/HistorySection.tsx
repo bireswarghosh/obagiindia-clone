@@ -58,7 +58,10 @@ export default function HistorySection({ history, theme }: HistoryProps) {
 
           {/* Right Product Gallery Images */}
           <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-6">
-            {history.galleryImages.map((imgUrl, idx) => (
+            {(history?.galleryImages && history.galleryImages.length > 0
+              ? history.galleryImages
+              : ['/ryan/about/about_hero_collage.png', '/ryan/about/ethics_building.png']
+            ).map((imgUrl, idx) => (
               <div
                 key={idx}
                 className="rounded-3xl overflow-hidden bg-white shadow-md border p-6 flex items-center justify-center transition-transform hover:-translate-y-1.5 duration-300"

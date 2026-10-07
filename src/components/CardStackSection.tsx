@@ -17,7 +17,45 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
   const stickyRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const displayCards = cardsSection.cards.slice(0, cardsSection.cardCount || 3);
+  const cardsList = cardsSection?.cards && cardsSection.cards.length > 0 ? cardsSection.cards : [
+    {
+      id: 'card-1',
+      number: '1',
+      title: 'TRESSICLE 5 & FORTE',
+      subtitle: 'Advanced Trichological Solutions',
+      description: 'Topical and oral formulations including Minoxidil 5% and Minoxidil + Finasteride combinations for androgenetic alopecia management.',
+      imageUrl: '/ryan/about/portfolio_hair.png',
+      bgColor: '#FFFFFF',
+      textColor: '#003d4d',
+      order: 1,
+      visible: true
+    },
+    {
+      id: 'card-2',
+      number: '2',
+      title: 'TENORIUM & POTENCY LADDER',
+      subtitle: 'Targeted Corticosteroid Therapeutics',
+      description: 'A structured corticosteroid ladder spanning superpotent Clobetasol Propionate (TENORIUM) through Mometasone and Fluticasone options.',
+      imageUrl: '/ryan/about/portfolio_topical.png',
+      bgColor: '#FFFFFF',
+      textColor: '#003d4d',
+      order: 2,
+      visible: true
+    },
+    {
+      id: 'card-3',
+      number: '3',
+      title: 'BLISMIN 20 & HIVOZIN 5',
+      subtitle: 'Modern H1 Antihistamines',
+      description: 'Second-generation non-sedating H1 antihistamines providing rapid, sustained relief in acute and chronic urticaria and allergic pruritus.',
+      imageUrl: '/ryan/about/portfolio_oral.png',
+      bgColor: '#FFFFFF',
+      textColor: '#003d4d',
+      order: 3,
+      visible: true
+    }
+  ];
+  const displayCards = cardsList.slice(0, cardsSection?.cardCount || 3);
   const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
   const totalTrackVh = isMobile ? (100 + displayCards.length * 80) : (100 + displayCards.length * 70);
 

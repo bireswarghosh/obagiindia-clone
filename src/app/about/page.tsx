@@ -44,10 +44,27 @@ export default function AboutRyanPage() {
   } | null>(null);
 
   useEffect(() => {
+    const mergeAbout = (incoming: any): RyanAboutContent => ({
+      ...defaultRyanAboutContent,
+      ...incoming,
+      hero: { ...defaultRyanAboutContent.hero, ...(incoming?.hero || {}) },
+      vision: { ...defaultRyanAboutContent.vision, ...(incoming?.vision || {}) },
+      approach: { ...defaultRyanAboutContent.approach, ...(incoming?.approach || {}) },
+      portfolio: { ...defaultRyanAboutContent.portfolio, ...(incoming?.portfolio || {}) },
+      quality: { ...defaultRyanAboutContent.quality, ...(incoming?.quality || {}) },
+      ethicsMedinova: { ...defaultRyanAboutContent.ethicsMedinova, ...(incoming?.ethicsMedinova || {}) },
+      qualityFramework: Array.isArray(incoming?.qualityFramework) && incoming.qualityFramework.length > 0
+        ? incoming.qualityFramework
+        : defaultRyanAboutContent.qualityFramework,
+      coreValues: Array.isArray(incoming?.coreValues) && incoming.coreValues.length > 0
+        ? incoming.coreValues
+        : defaultRyanAboutContent.coreValues,
+    });
+
     try {
       const local = localStorage.getItem('ryan_about_content');
       if (local) {
-        setAboutContent(JSON.parse(local));
+        setAboutContent(mergeAbout(JSON.parse(local)));
       }
     } catch (e) {}
 
@@ -55,7 +72,7 @@ export default function AboutRyanPage() {
       .then(res => res.json())
       .then(data => {
         if (data && data.ryanAbout) {
-          setAboutContent(data.ryanAbout);
+          setAboutContent(mergeAbout(data.ryanAbout));
           localStorage.setItem('ryan_about_content', JSON.stringify(data.ryanAbout));
         }
       })
@@ -166,7 +183,7 @@ export default function AboutRyanPage() {
 
               {/* 4 Feature Badges Underneath */}
               <div className="pt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 border-t border-teal-200/60 mt-6">
-                {aboutContent.hero.badges.map((b) => (
+                {(aboutContent.hero?.badges || []).map((b) => (
                   <div key={b.id} className="flex items-center gap-2.5">
                     <div className="w-8 h-8 rounded-lg bg-teal-100/90 text-[#00768a] flex items-center justify-center shrink-0 shadow-2xs">
                       {b.icon === 'Layers' ? (
@@ -247,7 +264,7 @@ export default function AboutRyanPage() {
 
             {/* Right: 3 Interactive Cards (Innovation, Trust, Growth) */}
             <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {aboutContent.vision.cards.map((c) => (
+              {(aboutContent.vision?.cards || []).map((c) => (
                 <div
                   key={c.id}
                   onClick={() => openCardModal(c)}
@@ -316,7 +333,7 @@ export default function AboutRyanPage() {
 
             {/* Right: 3 Interactive Cards (Dermatology Focus, Quality, Partnership) */}
             <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {aboutContent.approach.cards.map((c) => (
+              {(aboutContent.approach?.cards || []).map((c) => (
                 <div
                   key={c.id}
                   onClick={() => openCardModal(c)}
@@ -384,7 +401,7 @@ export default function AboutRyanPage() {
 
           {/* 4 Product Category Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {aboutContent.portfolio.categories.map((cat) => (
+            {(aboutContent.portfolio?.categories || []).map((cat) => (
               <Link
                 key={cat.id}
                 href={cat.link}
@@ -458,7 +475,7 @@ export default function AboutRyanPage() {
 
             {/* Right: 3 Badges */}
             <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {aboutContent.quality.badges.map((b) => (
+              {(aboutContent.quality?.badges || []).map((b) => (
                 <div
                   key={b.id}
                   onClick={() => openBadgeModal(b)}
@@ -536,7 +553,7 @@ export default function AboutRyanPage() {
 
               {/* 3 Foundation Badges */}
               <div className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border-t border-slate-100">
-                {aboutContent.ethicsMedinova.badges.map((b) => (
+                {(aboutContent.ethicsMedinova?.badges || []).map((b) => (
                   <div key={b.id} className="p-3 rounded-xl bg-slate-50 border border-slate-100">
                     <div className="w-8 h-8 rounded-lg bg-teal-50 text-[#00768a] flex items-center justify-center mb-2">
                       {b.icon === 'Building' ? (
@@ -605,7 +622,7 @@ export default function AboutRyanPage() {
 
           {/* 8 Quality Framework Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {aboutContent.qualityFramework.map((item) => (
+            {(aboutContent.qualityFramework || []).map((item) => (
               <div
                 key={item.id}
                 onClick={() => {
@@ -664,7 +681,7 @@ export default function AboutRyanPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {aboutContent.coreValues.map((val) => (
+              {(aboutContent.coreValues || []).map((val) => (
                 <div
                   key={val.id}
                   onClick={() => {
