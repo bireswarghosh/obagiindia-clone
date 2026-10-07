@@ -27,7 +27,11 @@ import {
   Activity,
   HeartPulse,
   Share2,
-  Check
+  Check,
+  Stethoscope,
+  ShieldCheck,
+  HelpCircle,
+  AlertCircle
 } from 'lucide-react';
 
 interface ProductDetailClientProps {
@@ -37,6 +41,9 @@ interface ProductDetailClientProps {
 export default function ProductDetailClient({ product }: ProductDetailClientProps) {
   // Accordion state
   const [openAccordions, setOpenAccordions] = useState<Record<string, boolean>>({
+    differential: true,
+    treatment: true,
+    specialSituations: true,
     dosage: true,
     specialPop: true,
     warnings: true,
@@ -44,6 +51,11 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
     interactions: true,
     counselling: true,
   });
+
+  // Track which specific sub-accordion is open in differential, treatment, special
+  const [openDiffIndex, setOpenDiffIndex] = useState<number | null>(0);
+  const [openTreatIndex, setOpenTreatIndex] = useState<number | null>(0);
+  const [openSpecIndex, setOpenSpecIndex] = useState<number | null>(0);
 
   const [copied, setCopied] = useState(false);
 
@@ -56,7 +68,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   };
 
   const handleShare = () => {
-    if (navigator.clipboard) {
+    if (typeof window !== 'undefined' && navigator.clipboard) {
       navigator.clipboard.writeText(window.location.href);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -76,8 +88,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
           <div className="lg:col-span-8 space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[11px] font-bold uppercase tracking-widest text-teal-200">
-              <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-              PRODUCT MONOGRAPH • 01
+              <span className={`w-2 h-2 rounded-full ${product.hasFullMonograph ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
+              {product.hasFullMonograph ? 'OFFICIAL CLINICAL MONOGRAPH • PART 1 RELEASE' : 'PRESCRIBING SUMMARY • PART 2 EDITORIAL REVIEW'}
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white uppercase">
@@ -106,6 +118,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               <span className="px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 font-semibold text-emerald-200">
                 {product.prescriptionStatus}
               </span>
+              {product.hasFullMonograph && (
+                <span className="px-3 py-1 rounded-full bg-teal-400/25 border border-teal-300/40 font-semibold text-teal-100 flex items-center gap-1.5 shadow-2xs">
+                  <Sparkles className="w-3 h-3 text-emerald-300" />
+                  Full Monograph Verified
+                </span>
+              )}
             </div>
           </div>
 
@@ -155,20 +173,35 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         </div>
       </section>
 
+      {/* Part 2 Editorial Notice Banner if monograph pending Part 2 */}
+      {!product.hasFullMonograph && (
+        <section className="bg-amber-50/80 border border-amber-200 rounded-2xl p-4 sm:p-5 text-amber-900 flex items-start gap-3.5 text-xs">
+          <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="space-y-1">
+            <h4 className="font-bold text-amber-950">
+              Standard Prescribing Summary Active • Full Clinical Monograph Coming in Part 2 Release
+            </h4>
+            <p className="text-amber-800 leading-relaxed">
+              This summary is compiled from registered prescribing data. The comprehensive multi-section monograph containing differential diagnostic accordions, stewardship algorithms, and extended pearls will be activated upon receipt of Part 2 clinical documentation.
+            </p>
+          </div>
+        </section>
+      )}
+
       {/* ========================================================= */}
       {/* 02. QUICK CLINICAL SUMMARY                                */}
       {/* ========================================================= */}
       <section className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-7 shadow-xs">
         <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase mb-4">
-          <Info className="w-4 h-4" />
+          <Sparkles className="w-4 h-4" />
           02 • QUICK CLINICAL SUMMARY
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-5">
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
             <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Active Ingredient</span>
             <span className="text-xs font-bold text-slate-800 leading-snug line-clamp-2">
-              {product.genericName.split('+')[0].trim()}
+              {product.genericName.split('+')[0] || product.brandName}
             </span>
           </div>
 
@@ -194,8 +227,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Therapeutic Area</span>
-            <span className="text-xs font-bold text-[#00768a] leading-snug">
+            <span className="text-[10px] uppercase font-bold text-slate-400 block mb-1">Therapeutic Category</span>
+            <span className="text-xs font-bold text-slate-800 leading-snug">
               {product.therapeuticArea}
             </span>
           </div>
@@ -228,7 +261,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
             <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
               <span className="text-xs font-bold text-slate-700 block">
-                {product.dosageForm === 'Tablet' || product.dosageForm === 'Capsule' ? 'Each unit contains:' : 'Each gram contains:'}
+                {product.dosageForm === 'Tablet' || product.dosageForm === 'Capsule' ? 'Each unit contains:' : 'Each gram/unit contains:'}
               </span>
               <ul className="space-y-1.5 text-xs text-slate-600">
                 {product.composition.map((comp, idx) => (
@@ -256,7 +289,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
               </div>
               <div className="p-3 rounded-xl bg-cyan-50 border border-cyan-100">
                 <span className="text-[10px] font-bold text-cyan-800 uppercase block mb-1">Route & Subtype</span>
-                <span className="text-xs font-bold text-[#006070]">{product.routeSubcategory}</span>
+                <span className="text-xs font-bold text-[#006070]">{product.routeSubcategory || product.route}</span>
               </div>
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
                 <span className="text-[10px] font-bold text-slate-500 uppercase block mb-1">Administration</span>
@@ -312,8 +345,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
                 </p>
               </div>
 
-              {idx < 2 && (
-                <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-teal-200 flex items-center justify-center text-[#00768a] z-10 shadow-xs">
+              {idx < product.mechanismOfAction.length - 1 && (
+                <div className="hidden md:block absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white border border-teal-200 flex items-center justify-center text-[#00768a] z-10 shadow-xs text-xs font-bold">
                   →
                 </div>
               )}
@@ -328,7 +361,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       <section className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-7 shadow-xs">
         <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase mb-3">
           <CheckCircle2 className="w-4 h-4" />
-          07 • INDICATIONS
+          07 • INDICATIONS & CLINICAL APPLICATIONS
         </div>
         <p className="text-xs text-slate-500 mb-4">
           Indicated for the clinical management of the following dermatological conditions:
@@ -347,7 +380,325 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 08. DOSAGE & ADMINISTRATION (Accordion)                   */}
+      {/* 08. DIFFERENTIAL CONSIDERATIONS (Matching Appstrice UI)   */}
+      {/* ========================================================= */}
+      {product.differentialConsiderations && product.differentialConsiderations.length > 0 && (
+        <section className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
+          <div className="p-6 sm:p-7 border-b border-slate-100 bg-gradient-to-r from-teal-50/50 via-white to-slate-50/50">
+            <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase mb-1">
+              <Stethoscope className="w-4 h-4 text-[#00768a]" />
+              08 • DIFFERENTIAL CONSIDERATIONS
+            </div>
+            <p className="text-xs sm:text-sm text-slate-600">
+              Not every presentation is typical. Consider alternative diagnoses when the clinical course is atypical or refractory.
+            </p>
+          </div>
+
+          <div className="p-6 sm:p-7 space-y-4">
+            {product.differentialConsiderations.map((diff, idx) => {
+              const isOpen = openDiffIndex === idx;
+              return (
+                <div 
+                  key={diff.id || idx}
+                  className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                    isOpen 
+                      ? 'border-[#00768a]/60 shadow-md bg-white ring-2 ring-teal-500/10' 
+                      : 'border-slate-200/80 bg-slate-50/40 hover:border-slate-300'
+                  }`}
+                >
+                  {/* Accordion Header */}
+                  <button
+                    onClick={() => setOpenDiffIndex(isOpen ? null : idx)}
+                    className="w-full p-4 sm:p-5 flex items-center justify-between text-left transition hover:bg-slate-50/80"
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-black transition ${
+                        isOpen 
+                          ? 'bg-[#00768a] text-white shadow-xs' 
+                          : 'bg-slate-200 text-slate-700'
+                      }`}>
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <h4 className="text-sm sm:text-base font-bold text-slate-900">
+                        {diff.condition}
+                      </h4>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-semibold text-slate-400 hidden sm:inline">
+                        {isOpen ? 'Collapse Details' : 'View Differential Clues'}
+                      </span>
+                      {isOpen ? (
+                        <ChevronUp className="w-5 h-5 text-[#00768a]" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-slate-400" />
+                      )}
+                    </div>
+                  </button>
+
+                  {/* Accordion Body (Clinical Grid matching screenshot) */}
+                  {isOpen && (
+                    <div className="p-4 sm:p-6 border-t border-slate-100 bg-white space-y-5">
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                        
+                        {/* Clinical Features / Clues */}
+                        {diff.clinicalClues && diff.clinicalClues.length > 0 && (
+                          <div className="p-4 sm:p-5 rounded-2xl bg-rose-50/40 border border-rose-100">
+                            <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-rose-800 uppercase mb-3">
+                              <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                              Clinical Features & Presentation
+                            </div>
+                            <ul className="space-y-1.5 text-xs text-rose-950">
+                              {diff.clinicalClues.map((clue, cIdx) => (
+                                <li key={cIdx} className="flex items-start gap-2">
+                                  <span className="text-rose-500 font-bold">•</span>
+                                  <span className="leading-relaxed">{clue}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Typical Clinical Appearance */}
+                        {diff.typicalAppearance && (
+                          <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col justify-between">
+                            <div>
+                              <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-slate-700 uppercase mb-3">
+                                <span className="w-2 h-2 rounded-full bg-slate-400"></span>
+                                Typical Clinical Appearance
+                              </div>
+                              <p className="text-xs text-slate-700 leading-relaxed">
+                                {diff.typicalAppearance}
+                              </p>
+                            </div>
+                            <div className="mt-3 pt-3 border-t border-slate-200/60 flex items-center justify-between text-[11px] text-slate-500 font-medium">
+                              <span>Dermatological Inspection</span>
+                              <span className="text-[#00768a] font-semibold">Morphology Assessment</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Key Distinguishing Points & Diagnostic Approach */}
+                        {diff.diagnosticApproach && diff.diagnosticApproach.length > 0 && (
+                          <div className="p-4 sm:p-5 rounded-2xl bg-teal-50/50 border border-teal-100">
+                            <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-[#006070] uppercase mb-3">
+                              <span className="w-2 h-2 rounded-full bg-teal-500"></span>
+                              Key Distinguishing Points & Diagnosis
+                            </div>
+                            <ul className="space-y-1.5 text-xs text-teal-950">
+                              {diff.diagnosticApproach.map((diag, dIdx) => (
+                                <li key={dIdx} className="flex items-start gap-2">
+                                  <span className="text-[#00768a] font-bold">•</span>
+                                  <span className="leading-relaxed">{diag}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {/* Management Considerations */}
+                        {diff.managementApproach && diff.managementApproach.length > 0 && (
+                          <div className="p-4 sm:p-5 rounded-2xl bg-sky-50/50 border border-sky-100">
+                            <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-sky-800 uppercase mb-3">
+                              <span className="w-2 h-2 rounded-full bg-sky-500"></span>
+                              Management Considerations
+                            </div>
+                            <ul className="space-y-1.5 text-xs text-sky-950">
+                              {diff.managementApproach.map((mgt, mIdx) => (
+                                <li key={mIdx} className="flex items-start gap-2">
+                                  <span className="text-sky-600 font-bold">•</span>
+                                  <span className="leading-relaxed">{mgt}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                      </div>
+
+                      {/* Clinical Pearl Callout */}
+                      {diff.clinicalPearl && (
+                        <div className="p-4 rounded-xl bg-gradient-to-r from-purple-50/70 via-indigo-50/50 to-teal-50/40 border border-indigo-200/80 flex items-start gap-3 text-xs">
+                          <Lightbulb className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold text-indigo-900 block mb-0.5">Diagnostic Clinical Pearl:</span>
+                            <p className="text-indigo-950 leading-relaxed font-medium">
+                              {diff.clinicalPearl}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ========================================================= */}
+      {/* 09. TREATMENT CONSIDERATIONS                              */}
+      {/* ========================================================= */}
+      {product.treatmentConsiderations && product.treatmentConsiderations.length > 0 && (
+        <section className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
+          <div className="p-6 sm:p-7 border-b border-slate-100 bg-gradient-to-r from-teal-50/40 to-slate-50/40">
+            <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase mb-1">
+              <Pill className="w-4 h-4 text-[#00768a]" />
+              09 • TREATMENT CONSIDERATIONS & CLINICAL APPLICATION
+            </div>
+            <p className="text-xs sm:text-sm text-slate-600">
+              Practical administration guidance, stewardship protocols, and treatment optimization.
+            </p>
+          </div>
+
+          <div className="p-6 sm:p-7 space-y-3">
+            {product.treatmentConsiderations.map((treat, idx) => {
+              const isOpen = openTreatIndex === idx;
+              return (
+                <div 
+                  key={idx}
+                  className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                    isOpen 
+                      ? 'border-teal-300 bg-white shadow-xs' 
+                      : 'border-slate-200/80 bg-slate-50/40 hover:border-slate-300'
+                  }`}
+                >
+                  <button
+                    onClick={() => setOpenTreatIndex(isOpen ? null : idx)}
+                    className="w-full p-4 flex items-center justify-between text-left transition hover:bg-slate-50/80"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xs font-black text-[#00768a] bg-teal-100/80 px-2 py-0.5 rounded-md">
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                        {treat.title}
+                      </h4>
+                    </div>
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-[#00768a]" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                  </button>
+
+                  {isOpen && (
+                    <div className="p-4 sm:p-5 border-t border-slate-100 bg-white space-y-3 text-xs">
+                      {treat.keyPoints && treat.keyPoints.length > 0 && (
+                        <div>
+                          <strong className="text-slate-900 block mb-1">Key Clinical Points:</strong>
+                          <ul className="space-y-1 text-slate-700">
+                            {treat.keyPoints.map((kp, kIdx) => (
+                              <li key={kIdx} className="flex items-start gap-2">
+                                <span className="text-[#00768a] font-bold">•</span>
+                                <span>{kp}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {treat.practicalExample && (
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700">
+                          <strong className="text-[#004f5e] block mb-0.5">Practical Guidance:</strong>
+                          <p>{treat.practicalExample}</p>
+                        </div>
+                      )}
+
+                      {treat.clinicalPearl && (
+                        <div className="p-3 rounded-xl bg-purple-50/60 border border-purple-100 text-purple-950 font-medium">
+                          <strong>Clinical Pearl: </strong>
+                          {treat.clinicalPearl}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ========================================================= */}
+      {/* 10. SPECIAL CLINICAL SITUATIONS                           */}
+      {/* ========================================================= */}
+      {product.specialClinicalSituations && product.specialClinicalSituations.length > 0 && (
+        <section className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
+          <div className="p-6 sm:p-7 border-b border-slate-100 bg-gradient-to-r from-teal-50/40 to-slate-50/40">
+            <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase mb-1">
+              <ShieldCheck className="w-4 h-4 text-[#00768a]" />
+              10 • SPECIAL CLINICAL SITUATIONS
+            </div>
+            <p className="text-xs sm:text-sm text-slate-600">
+              Managing complex cases, vulnerable populations, treatment resistance, and anatomical variants.
+            </p>
+          </div>
+
+          <div className="p-6 sm:p-7 space-y-3">
+            {product.specialClinicalSituations.map((spec, idx) => {
+              const isOpen = openSpecIndex === idx;
+              return (
+                <div 
+                  key={idx}
+                  className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                    isOpen 
+                      ? 'border-teal-300 bg-white shadow-xs' 
+                      : 'border-slate-200/80 bg-slate-50/40 hover:border-slate-300'
+                  }`}
+                >
+                  <button
+                    onClick={() => setOpenSpecIndex(isOpen ? null : idx)}
+                    className="w-full p-4 flex items-center justify-between text-left transition hover:bg-slate-50/80"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xs font-black text-slate-700 bg-slate-200 px-2 py-0.5 rounded-md">
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900">
+                        {spec.title}
+                      </h4>
+                    </div>
+                    {isOpen ? <ChevronUp className="w-4 h-4 text-[#00768a]" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
+                  </button>
+
+                  {isOpen && (
+                    <div className="p-4 sm:p-5 border-t border-slate-100 bg-white space-y-3 text-xs">
+                      {spec.keyPoints && spec.keyPoints.length > 0 && (
+                        <div>
+                          <strong className="text-slate-900 block mb-1">Key Considerations:</strong>
+                          <ul className="space-y-1 text-slate-700">
+                            {spec.keyPoints.map((kp, kIdx) => (
+                              <li key={kIdx} className="flex items-start gap-2">
+                                <span className="text-[#00768a] font-bold">•</span>
+                                <span>{kp}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {spec.managementApproach && (
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-slate-700">
+                          <strong className="text-[#004f5e] block mb-0.5">Management Approach:</strong>
+                          <p>{spec.managementApproach}</p>
+                        </div>
+                      )}
+
+                      {spec.clinicalPearl && (
+                        <div className="p-3 rounded-xl bg-purple-50/60 border border-purple-100 text-purple-950 font-medium">
+                          <strong>Clinical Pearl: </strong>
+                          {spec.clinicalPearl}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
+      {/* ========================================================= */}
+      {/* 11. DOSAGE & ADMINISTRATION (Accordion)                   */}
       {/* ========================================================= */}
       <section className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
         <button
@@ -356,7 +707,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         >
           <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase">
             <Pill className="w-4 h-4" />
-            08 • DOSAGE & ADMINISTRATION
+            11 • DOSAGE & ADMINISTRATION
           </div>
           {openAccordions.dosage ? (
             <ChevronUp className="w-5 h-5 text-slate-400" />
@@ -388,7 +739,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 09. SPECIAL POPULATION CONSIDERATIONS (Accordion)         */}
+      {/* 12. SPECIAL POPULATION CONSIDERATIONS (Accordion)         */}
       {/* ========================================================= */}
       <section className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
         <button
@@ -397,7 +748,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         >
           <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase">
             <Users className="w-4 h-4" />
-            09 • SPECIAL POPULATION CONSIDERATIONS
+            12 • SPECIAL POPULATION CONSIDERATIONS
           </div>
           {openAccordions.specialPop ? (
             <ChevronUp className="w-5 h-5 text-slate-400" />
@@ -429,12 +780,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 10. CONTRAINDICATIONS                                     */}
+      {/* 13. CONTRAINDICATIONS                                     */}
       {/* ========================================================= */}
       <section className="bg-rose-50/70 border border-rose-200 rounded-2xl p-6 sm:p-7 shadow-xs">
         <div className="flex items-center gap-2 text-xs font-black tracking-widest text-rose-800 uppercase mb-3">
           <ShieldAlert className="w-4 h-4 text-rose-600" />
-          10 • CONTRAINDICATIONS
+          13 • CONTRAINDICATIONS & IMPORTANT EXCLUSIONS
         </div>
         <ul className="space-y-2 text-xs text-rose-950 font-medium">
           {product.contraindications.map((contra, idx) => (
@@ -447,7 +798,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 11. WARNINGS & PRECAUTIONS (Accordion)                    */}
+      {/* 14. WARNINGS & PRECAUTIONS (Accordion)                    */}
       {/* ========================================================= */}
       <section className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
         <button
@@ -456,7 +807,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         >
           <div className="flex items-center gap-2 text-xs font-black tracking-widest text-amber-700 uppercase">
             <AlertTriangle className="w-4 h-4" />
-            11 • WARNINGS & PRECAUTIONS
+            14 • WARNINGS & PRECAUTIONS
           </div>
           {openAccordions.warnings ? (
             <ChevronUp className="w-5 h-5 text-slate-400" />
@@ -478,7 +829,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 12. ADVERSE EFFECTS (Accordion)                           */}
+      {/* 15. ADVERSE EFFECTS (Accordion)                           */}
       {/* ========================================================= */}
       <section className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
         <button
@@ -487,7 +838,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         >
           <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase">
             <Activity className="w-4 h-4" />
-            12 • ADVERSE EFFECTS
+            15 • ADVERSE EFFECTS
           </div>
           {openAccordions.adverse ? (
             <ChevronUp className="w-5 h-5 text-slate-400" />
@@ -498,44 +849,29 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         {openAccordions.adverse && (
           <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs bg-slate-50/30">
-            <div className="p-4 rounded-xl bg-white border border-slate-200">
-              <span className="font-bold text-slate-900 block mb-2 uppercase text-[10px] tracking-wider text-slate-500">
-                01 | Common
-              </span>
-              <ul className="space-y-1.5 text-slate-600">
-                {product.adverseEffects.common.map((adv, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5">
-                    <span className="text-teal-600">•</span>
-                    <span>{adv}</span>
-                  </li>
+            <div className="p-4 rounded-xl bg-white border border-slate-200/80">
+              <span className="font-bold text-amber-700 block mb-2">Common (≥1%):</span>
+              <ul className="space-y-1 text-slate-600">
+                {product.adverseEffects.common.map((eff, idx) => (
+                  <li key={idx}>• {eff}</li>
                 ))}
               </ul>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-slate-200">
-              <span className="font-bold text-slate-900 block mb-2 uppercase text-[10px] tracking-wider text-slate-500">
-                02 | Less Common
-              </span>
-              <ul className="space-y-1.5 text-slate-600">
-                {product.adverseEffects.lessCommon.map((adv, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5">
-                    <span className="text-amber-600">•</span>
-                    <span>{adv}</span>
-                  </li>
+            <div className="p-4 rounded-xl bg-white border border-slate-200/80">
+              <span className="font-bold text-slate-700 block mb-2">Less Common (&lt;1%):</span>
+              <ul className="space-y-1 text-slate-600">
+                {product.adverseEffects.lessCommon.map((eff, idx) => (
+                  <li key={idx}>• {eff}</li>
                 ))}
               </ul>
             </div>
 
-            <div className="p-4 rounded-xl bg-white border border-slate-200">
-              <span className="font-bold text-slate-900 block mb-2 uppercase text-[10px] tracking-wider text-slate-500">
-                03 | Rare / Significant
-              </span>
-              <ul className="space-y-1.5 text-slate-600">
-                {product.adverseEffects.rare.map((adv, idx) => (
-                  <li key={idx} className="flex items-start gap-1.5">
-                    <span className="text-rose-600">•</span>
-                    <span>{adv}</span>
-                  </li>
+            <div className="p-4 rounded-xl bg-white border border-slate-200/80">
+              <span className="font-bold text-rose-700 block mb-2">Rare (&lt;0.1%):</span>
+              <ul className="space-y-1 text-slate-600">
+                {product.adverseEffects.rare.map((eff, idx) => (
+                  <li key={idx}>• {eff}</li>
                 ))}
               </ul>
             </div>
@@ -544,7 +880,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 13. DRUG INTERACTIONS (Accordion)                         */}
+      {/* 16. DRUG INTERACTIONS (Accordion)                         */}
       {/* ========================================================= */}
       <section className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
         <button
@@ -552,8 +888,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           className="w-full p-6 flex items-center justify-between text-left hover:bg-slate-50/50 transition border-b border-slate-100"
         >
           <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase">
-            <Pill className="w-4 h-4" />
-            13 • DRUG INTERACTIONS
+            <Layers className="w-4 h-4" />
+            16 • DRUG INTERACTIONS
           </div>
           {openAccordions.interactions ? (
             <ChevronUp className="w-5 h-5 text-slate-400" />
@@ -564,12 +900,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
 
         {openAccordions.interactions && (
           <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs bg-slate-50/30">
-            <div className="p-4 rounded-xl bg-white border border-slate-200">
-              <span className="font-bold text-slate-900 block mb-1">01 | Topical Medications:</span>
+            <div className="p-4 rounded-xl bg-white border border-slate-200/80">
+              <span className="font-bold text-slate-900 block mb-1">Topical / Local Interactions:</span>
               <p className="text-slate-600 leading-relaxed">{product.drugInteractions.topical}</p>
             </div>
-            <div className="p-4 rounded-xl bg-white border border-slate-200">
-              <span className="font-bold text-slate-900 block mb-1">02 | Systemic Medications:</span>
+            <div className="p-4 rounded-xl bg-white border border-slate-200/80">
+              <span className="font-bold text-slate-900 block mb-1">Systemic Interactions:</span>
               <p className="text-slate-600 leading-relaxed">{product.drugInteractions.systemic}</p>
             </div>
           </div>
@@ -577,36 +913,27 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 14. STORAGE & HANDLING                                    */}
+      {/* 17. STORAGE & HANDLING                                    */}
       {/* ========================================================= */}
       <section className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-7 shadow-xs">
-        <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase mb-4">
-          <Thermometer className="w-4 h-4" />
-          14 • STORAGE & HANDLING
+        <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase mb-3">
+          <Lock className="w-4 h-4" />
+          17 • STORAGE & HANDLING
         </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2.5">
-            <Thermometer className="w-4 h-4 text-[#00768a] shrink-0" />
-            <span className="font-medium text-slate-700">Store below 30°C</span>
-          </div>
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2.5">
-            <Sun className="w-4 h-4 text-amber-500 shrink-0" />
-            <span className="font-medium text-slate-700">Protect from direct light</span>
-          </div>
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2.5">
-            <Lock className="w-4 h-4 text-[#00768a] shrink-0" />
-            <span className="font-medium text-slate-700">Keep container closed</span>
-          </div>
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-2.5">
-            <Users className="w-4 h-4 text-rose-500 shrink-0" />
-            <span className="font-medium text-slate-700">Keep out of reach of kids</span>
-          </div>
+        <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
+          <ul className="space-y-1.5 text-xs text-slate-700 font-medium">
+            {product.storageHandling.map((item, idx) => (
+              <li key={idx} className="flex items-start gap-2">
+                <span className="text-[#00768a] font-bold">•</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
       {/* ========================================================= */}
-      {/* 15. PATIENT COUNSELLING POINTS (Accordion)                */}
+      {/* 18. PATIENT COUNSELLING POINTS (Accordion)                */}
       {/* ========================================================= */}
       <section className="bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-xs">
         <button
@@ -615,7 +942,7 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         >
           <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase">
             <Users className="w-4 h-4" />
-            15 • PATIENT COUNSELLING POINTS
+            18 • PATIENT COUNSELLING POINTS
           </div>
           {openAccordions.counselling ? (
             <ChevronUp className="w-5 h-5 text-slate-400" />
@@ -625,11 +952,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         </button>
 
         {openAccordions.counselling && (
-          <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs bg-slate-50/30">
-            {product.patientCounselling.map((item, idx) => (
-              <div key={idx} className="p-4 rounded-xl bg-white border border-slate-200/80 space-y-1">
-                <span className="font-bold text-[#004f5e] block">{item.question}</span>
-                <p className="text-slate-600 leading-relaxed">{item.answer}</p>
+          <div className="p-6 space-y-3 text-xs bg-slate-50/30">
+            {product.patientCounselling.map((qa, idx) => (
+              <div key={idx} className="p-4 rounded-xl bg-white border border-slate-200/80">
+                <span className="font-bold text-slate-900 block mb-1 flex items-center gap-2">
+                  <span className="text-[#00768a] font-black">{String(idx + 1).padStart(2, '0')}.</span>
+                  {qa.question}
+                </span>
+                <p className="text-slate-600 leading-relaxed pl-6">{qa.answer}</p>
               </div>
             ))}
           </div>
@@ -637,16 +967,16 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 16. CLINICAL PEARL (Purple / Indigo Highlight Box)        */}
+      {/* 19. CLINICAL PEARL (Purple / Indigo Highlight Box)        */}
       {/* ========================================================= */}
       <section className="bg-gradient-to-r from-purple-50 via-indigo-50 to-teal-50 border-2 border-indigo-200 rounded-3xl p-6 sm:p-8 shadow-xs">
         <div className="flex items-start gap-4">
           <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md">
             <Lightbulb className="w-6 h-6" />
           </div>
-          <div>
-            <span className="text-[10px] font-black tracking-widest text-indigo-700 uppercase block mb-1">
-              16 • CLINICAL PEARL FOR DERMATOLOGISTS
+          <div className="space-y-1">
+            <span className="text-xs font-black tracking-widest text-indigo-700 uppercase">
+              19 • CLINICAL PEARL FOR HEALTHCARE PROFESSIONALS
             </span>
             <p className="text-sm sm:text-base font-semibold text-slate-900 leading-relaxed">
               "{product.clinicalPearl}"
@@ -656,12 +986,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 17. PRODUCT AT A GLANCE (Summary Table)                   */}
+      {/* 20. PRODUCT AT A GLANCE (Summary Table)                   */}
       {/* ========================================================= */}
       <section className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-7 shadow-xs">
         <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase mb-4">
           <FileText className="w-4 h-4" />
-          17 • PRODUCT AT A GLANCE
+          20 • PRODUCT AT A GLANCE
         </div>
 
         <div className="overflow-x-auto">
@@ -691,14 +1021,14 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       </section>
 
       {/* ========================================================= */}
-      {/* 18. RELATED RYAN PRODUCTS                                 */}
+      {/* 21. RELATED RYAN PRODUCTS                                 */}
       {/* ========================================================= */}
       {product.relatedProducts.length > 0 && (
         <section className="bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-7 shadow-xs">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#00768a] uppercase">
               <Layers className="w-4 h-4" />
-              18 • RELATED RYAN PRODUCTS
+              21 • RELATED RYAN PRODUCTS
             </div>
             <Link
               href="/products"
@@ -735,12 +1065,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
       )}
 
       {/* ========================================================= */}
-      {/* 19. REFERENCES                                            */}
+      {/* 22. REFERENCES                                            */}
       {/* ========================================================= */}
       <section className="bg-slate-50/80 rounded-2xl border border-slate-200/90 p-6 shadow-xs text-xs">
         <div className="flex items-center gap-2 text-xs font-black tracking-widest text-slate-500 uppercase mb-3">
           <FileText className="w-4 h-4" />
-          19 • REFERENCES & CLINICAL SOURCES
+          22 • REFERENCES & CLINICAL SOURCES
         </div>
         <ol className="list-decimal list-inside space-y-1 text-slate-600">
           {product.references.map((ref, idx) => (

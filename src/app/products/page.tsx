@@ -98,9 +98,15 @@ export default function ProductsPage() {
     selectedDosageForms.length > 0 || 
     selectedRoutes.length > 0;
 
+  const [monographFilter, setMonographFilter] = useState<'all' | 'full' | 'summary'>('all');
+
   // Filtered & Sorted Products
   const filteredProducts = useMemo(() => {
     let result = RYAN_PRODUCTS.filter(product => {
+      // Monograph status filter
+      if (monographFilter === 'full' && !product.hasFullMonograph) return false;
+      if (monographFilter === 'summary' && product.hasFullMonograph) return false;
+
       // Search query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
@@ -145,7 +151,7 @@ export default function ProductsPage() {
     }
 
     return result;
-  }, [searchQuery, selectedTherapeuticAreas, selectedDosageForms, selectedRoutes, sortBy]);
+  }, [searchQuery, selectedTherapeuticAreas, selectedDosageForms, selectedRoutes, sortBy, monographFilter]);
 
   // Dynamic counts for checkboxes
   const counts = useMemo(() => {
@@ -299,6 +305,43 @@ export default function ProductsPage() {
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
+                </div>
+              </div>
+
+              {/* Monograph Readiness Status Filter */}
+              <div className="pt-4 border-t border-slate-100 mt-4 space-y-1.5">
+                <span className="text-[10.5px] font-bold text-slate-500 uppercase tracking-wider block mb-2">Monograph Status</span>
+                <div className="grid grid-cols-1 gap-1.5 text-xs font-medium">
+                  <button
+                    onClick={() => setMonographFilter('all')}
+                    className={`px-3 py-1.5 rounded-lg text-left flex items-center justify-between transition ${
+                      monographFilter === 'all' ? 'bg-[#00768a] text-white font-bold' : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+                    }`}
+                  >
+                    <span>All Products</span>
+                    <span className="text-[10px] opacity-80">(53)</span>
+                  </button>
+                  <button
+                    onClick={() => setMonographFilter('full')}
+                    className={`px-3 py-1.5 rounded-lg text-left flex items-center justify-between transition ${
+                      monographFilter === 'full' ? 'bg-emerald-700 text-white font-bold' : 'bg-emerald-50 text-emerald-900 hover:bg-emerald-100'
+                    }`}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles className="w-3 h-3 text-emerald-500" />
+                      Full Monographs (Part 1)
+                    </span>
+                    <span className="text-[10px] opacity-80 font-bold">(32)</span>
+                  </button>
+                  <button
+                    onClick={() => setMonographFilter('summary')}
+                    className={`px-3 py-1.5 rounded-lg text-left flex items-center justify-between transition ${
+                      monographFilter === 'summary' ? 'bg-amber-700 text-white font-bold' : 'bg-amber-50 text-amber-900 hover:bg-amber-100'
+                    }`}
+                  >
+                    <span>Part 2 In Review</span>
+                    <span className="text-[10px] opacity-80 font-bold">(21)</span>
+                  </button>
                 </div>
               </div>
 
@@ -541,16 +584,26 @@ export default function ProductsPage() {
                         </div>
 
                         {/* Top Badges */}
-                        <span className="absolute top-2.5 right-2.5 text-[9.5px] font-bold tracking-wider text-[#006070] bg-white/90 border border-teal-100 px-2 py-0.5 rounded-full shadow-2xs">
-                          {product.route}
-                        </span>
+                        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+                          {product.hasFullMonograph && (
+                            <span className="text-[9px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100/95 border border-emerald-300 px-2 py-0.5 rounded-full shadow-2xs flex items-center gap-1">
+                              <Sparkles className="w-2.5 h-2.5 text-emerald-600" />
+                              Full Monograph
+                            </span>
+                          )}
+                          <span className="text-[9.5px] font-bold tracking-wider text-[#006070] bg-white/90 border border-teal-100 px-2 py-0.5 rounded-full shadow-2xs">
+                            {product.route}
+                          </span>
+                        </div>
                       </div>
 
                       {/* Brand & Composition */}
                       <div className="mt-4">
-                        <h3 className="text-base font-black text-slate-900 group-hover:text-[#00768a] transition-colors tracking-tight">
-                          {product.brandName}
-                        </h3>
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="text-base font-black text-slate-900 group-hover:text-[#00768a] transition-colors tracking-tight">
+                            {product.brandName}
+                          </h3>
+                        </div>
                         <p className="text-xs text-slate-500 font-medium line-clamp-2 mt-1 leading-snug">
                           {product.genericName}
                         </p>
@@ -608,6 +661,12 @@ export default function ProductsPage() {
                           <h3 className="text-sm font-black text-slate-900 group-hover:text-[#00768a] transition-colors">
                             {product.brandName}
                           </h3>
+                          {product.hasFullMonograph && (
+                            <span className="text-[9px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 border border-emerald-300 px-2 py-0.5 rounded-full flex items-center gap-1">
+                              <Sparkles className="w-2.5 h-2.5 text-emerald-600" />
+                              Full Monograph
+                            </span>
+                          )}
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-teal-50 text-[#00768a]">
                             {product.therapeuticArea}
                           </span>

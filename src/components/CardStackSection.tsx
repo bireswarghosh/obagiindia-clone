@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { CardsSectionSettings, StickyCircleSettings, ThemeColors } from '@/types/content';
-import { ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight, X, Sparkles, CheckCircle2 } from 'lucide-react';
 
 interface CardStackProps {
   cardsSection: CardsSectionSettings;
@@ -11,6 +11,7 @@ interface CardStackProps {
 }
 
 export default function CardStackSection({ cardsSection, stickyCircle, theme }: CardStackProps) {
+  const [activeModal, setActiveModal] = useState<any>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const pinkRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
@@ -246,19 +247,23 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
                     </p>
 
                     <div className="pt-2">
-                      <a
-                        href={card.linkUrl || '#'}
-                        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors hover:underline"
+                      <button
+                        type="button"
+                        onClick={() => setActiveModal(card)}
+                        className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider transition-colors hover:underline cursor-pointer"
                         style={{ color: theme.primaryNavy }}
                       >
                         <span>Explore Formulation Science</span>
                         <ArrowUpRight className="w-4 h-4" />
-                      </a>
+                      </button>
                     </div>
                   </div>
 
                   {/* Product Visual */}
-                  <div className="lg:col-span-4 h-64 sm:h-72 bg-slate-50 rounded-2xl overflow-hidden p-6 flex items-center justify-center border border-slate-100">
+                  <div
+                    onClick={() => setActiveModal(card)}
+                    className="lg:col-span-4 h-64 sm:h-72 bg-slate-50 rounded-2xl overflow-hidden p-6 flex items-center justify-center border border-slate-100 cursor-pointer"
+                  >
                     <img
                       src={card.imageUrl}
                       alt={card.title}
@@ -271,6 +276,68 @@ export default function CardStackSection({ cardsSection, stickyCircle, theme }: 
           </div>
         </div>
       </div>
+
+      {/* Interactive Clinical Popup Modal */}
+      {activeModal && (
+        <div className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-xl w-full p-6 sm:p-8 shadow-2xl border border-teal-100 animate-fade-in relative space-y-5">
+            <button
+              onClick={() => setActiveModal(null)}
+              className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="space-y-1">
+              <span className="text-[10px] font-bold tracking-widest text-[#00768a] uppercase bg-teal-50 px-2.5 py-1 rounded-full border border-teal-100">
+                CLINICAL POPUP • RYAN DERMACEUTICS
+              </span>
+              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 pt-2">{activeModal.title}</h3>
+              <p className="text-xs font-semibold text-[#00768a]">{activeModal.subtitle}</p>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              {activeModal.description}
+            </p>
+
+            <div className="p-4 rounded-xl bg-teal-50/60 border border-teal-100/80 space-y-2 text-xs">
+              <div className="font-bold text-[#004f5e] flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-teal-600" />
+                <span>Formulation & Prescription Highlights:</span>
+              </div>
+              <ul className="space-y-1 text-slate-600">
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>WHO-GMP Certified formulation & quality-controlled stability.</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>Targeted vehicle designed for optimum skin penetration and tolerability.</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span>Prescription guidance and full product monograph available in Doctor Portal.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="pt-2 flex items-center justify-between gap-3">
+              <a
+                href="/products"
+                className="px-5 py-2.5 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold uppercase tracking-wider transition shadow-sm"
+              >
+                View Full Monograph &rarr;
+              </a>
+              <button
+                onClick={() => setActiveModal(null)}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </section>
   );
 }

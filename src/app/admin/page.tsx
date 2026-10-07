@@ -42,6 +42,8 @@ import {
   Award
 } from 'lucide-react';
 import RichTextEditor from '@/components/admin/RichTextEditor';
+import RichColorTextEditor from '@/components/admin/RichColorTextEditor';
+import ImageUploader from '@/components/admin/ImageUploader';
 import MediaInput from '@/components/admin/MediaInput';
 import RyanAboutCms from '@/components/admin/RyanAboutCms';
 import RyanSeoCms, { defaultMultiPageSeo, MultiPageSeo } from '@/components/admin/RyanSeoCms';
@@ -942,17 +944,14 @@ export default function RyanAdminPortal() {
 
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1">
-                          Top Slogan Bar (Always Visible Across Site)
-                        </label>
-                        <input
-                          type="text"
+                        <RichColorTextEditor
+                          label="Top Slogan Bar (Always Visible Across Site)"
                           value={homeCmsData.slogan.bannerTop}
-                          onChange={(e) => setHomeCmsData(prev => ({
+                          onChange={(val) => setHomeCmsData(prev => ({
                             ...prev,
-                            slogan: { ...prev.slogan, bannerTop: e.target.value }
+                            slogan: { ...prev.slogan, bannerTop: val }
                           }))}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-teal-400 font-semibold"
+                          description="Main site-wide slogan displayed prominently in header and trust banners."
                         />
                       </div>
 
@@ -1037,27 +1036,23 @@ export default function RyanAdminPortal() {
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1">Hero Title Line 1</label>
-                          <input
-                            type="text"
+                          <RichColorTextEditor
+                            label="Hero Title Line 1"
                             value={homeCmsData.hero.titleLine1}
-                            onChange={(e) => setHomeCmsData(prev => ({
+                            onChange={(val) => setHomeCmsData(prev => ({
                               ...prev,
-                              hero: { ...prev.hero, titleLine1: e.target.value }
+                              hero: { ...prev.hero, titleLine1: val }
                             }))}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1">Hero Title Line 2</label>
-                          <input
-                            type="text"
+                          <RichColorTextEditor
+                            label="Hero Title Line 2"
                             value={homeCmsData.hero.titleLine2}
-                            onChange={(e) => setHomeCmsData(prev => ({
+                            onChange={(val) => setHomeCmsData(prev => ({
                               ...prev,
-                              hero: { ...prev.hero, titleLine2: e.target.value }
+                              hero: { ...prev.hero, titleLine2: val }
                             }))}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold"
                           />
                         </div>
                       </div>
@@ -1131,29 +1126,25 @@ export default function RyanAdminPortal() {
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-bold text-slate-300 mb-1">Headline</label>
-                          <input
-                            type="text"
+                          <RichColorTextEditor
+                            label="Headline"
                             value={homeCmsData.ourStory.title}
-                            onChange={(e) => setHomeCmsData(prev => ({
+                            onChange={(val) => setHomeCmsData(prev => ({
                               ...prev,
-                              ourStory: { ...prev.ourStory, title: e.target.value }
+                              ourStory: { ...prev.ourStory, title: val }
                             }))}
-                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold"
                           />
                         </div>
                       </div>
 
                       <div>
-                        <label className="block text-xs font-bold text-slate-300 mb-1">Opening Statement (Bold Lead)</label>
-                        <input
-                          type="text"
+                        <RichColorTextEditor
+                          label="Opening Statement (Bold Lead)"
                           value={homeCmsData.ourStory.leadParagraph}
-                          onChange={(e) => setHomeCmsData(prev => ({
+                          onChange={(val) => setHomeCmsData(prev => ({
                             ...prev,
-                            ourStory: { ...prev.ourStory, leadParagraph: e.target.value }
+                            ourStory: { ...prev.ourStory, leadParagraph: val }
                           }))}
-                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-medium"
                         />
                       </div>
 

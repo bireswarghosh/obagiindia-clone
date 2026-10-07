@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import RyanHeader from '@/components/ryan/RyanHeader';
 import RyanFooter from '@/components/ryan/RyanFooter';
 import {
@@ -22,7 +23,8 @@ import {
   Stethoscope,
   Info,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  ArrowRight
 } from 'lucide-react';
 
 export default function PrescribingInformationPortal() {
@@ -209,6 +211,16 @@ export default function PrescribingInformationPortal() {
                   <span>View PI</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
+
+                <Link
+                  href={`/products/${prod.id}`}
+                  title="Full Clinical Monograph & Differential Diagnoses"
+                  className="py-2 px-3 rounded-lg bg-slate-100 hover:bg-[#00768a] text-slate-700 hover:text-white font-bold text-xs transition flex items-center gap-1"
+                >
+                  <span>Monograph</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+
                 <button
                   onClick={() => {
                     setActiveProductModal(prod);
@@ -358,7 +370,7 @@ export default function PrescribingInformationPortal() {
             </div>
 
             {/* Modal Bottom Footer */}
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
               <button
                 onClick={() => window.print()}
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold transition"
@@ -367,12 +379,22 @@ export default function PrescribingInformationPortal() {
                 <span>Print Official PI</span>
               </button>
 
-              <button
-                onClick={() => setActiveProductModal(null)}
-                className="px-5 py-2 rounded-lg bg-[#00768a] text-white font-bold hover:bg-[#005f70] transition"
-              >
-                Close Prescribing Information
-              </button>
+              <div className="flex items-center gap-2.5">
+                <Link
+                  href={`/products/${activeProductModal.id}`}
+                  className="px-4 py-2 rounded-lg bg-teal-50 hover:bg-teal-100 text-[#006070] border border-teal-200 font-bold transition flex items-center gap-1.5"
+                >
+                  <span>Explore Full Monograph</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+
+                <button
+                  onClick={() => setActiveProductModal(null)}
+                  className="px-5 py-2 rounded-lg bg-[#00768a] text-white font-bold hover:bg-[#005f70] transition"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>

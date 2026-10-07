@@ -23,6 +23,7 @@ import {
   Heart
 } from 'lucide-react';
 import MediaInput from './MediaInput';
+import ImageUploader from './ImageUploader';
 
 interface RyanAboutCmsProps {
   data: RyanAboutContent;
@@ -269,32 +270,12 @@ export default function RyanAboutCms({ data, onChange, onSave }: RyanAboutCmsPro
 
             {/* Hero Image Collage */}
             <div className="pt-4 border-t border-slate-800">
-              <label className="text-xs text-teal-300 font-bold block mb-2">Hero Right-Side Visual Collage (Hexagons + Model)</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                <div className="md:col-span-2">
-                  <input
-                    type="text"
-                    value={data.hero.heroImage}
-                    onChange={(e) => updateHero('heroImage', e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-teal-500 focus:outline-none"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    Default: <code className="text-teal-300">/ryan/about/about_hero_collage.png</code> (Extracted from official client blueprint)
-                  </p>
-                </div>
-                <div className="relative h-24 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center">
-                  {data.hero.heroImage ? (
-                    <Image
-                      src={data.hero.heroImage}
-                      alt="Hero Collage"
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <span className="text-xs text-slate-500">No Image</span>
-                  )}
-                </div>
-              </div>
+              <ImageUploader
+                label="Hero Right-Side Visual Collage (Hexagons + Model)"
+                value={data.hero.heroImage}
+                onChange={(val) => updateHero('heroImage', val)}
+                description="Upload image from computer or enter direct URL. Default: /ryan/about/about_hero_collage.png"
+              />
             </div>
 
             {/* 4 Feature Badges Underneath */}
@@ -366,32 +347,12 @@ export default function RyanAboutCms({ data, onChange, onSave }: RyanAboutCmsPro
 
             {/* Target Image Graphic */}
             <div className="pt-3 border-t border-slate-800">
-              <label className="text-xs text-slate-300 font-bold block mb-1">Dart Target Graphic URL</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                <div className="md:col-span-2">
-                  <input
-                    type="text"
-                    value={data.vision.targetImage}
-                    onChange={(e) => updateVision('targetImage', e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-teal-500 focus:outline-none"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    Default: <code className="text-teal-300">/ryan/about/about_vision_target.png</code>
-                  </p>
-                </div>
-                <div className="relative h-20 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center">
-                  {data.vision.targetImage ? (
-                    <Image
-                      src={data.vision.targetImage}
-                      alt="Target"
-                      fill
-                      className="object-contain"
-                    />
-                  ) : (
-                    <span className="text-xs text-slate-500">No Image</span>
-                  )}
-                </div>
-              </div>
+              <ImageUploader
+                label="Dart Target Graphic Image"
+                value={data.vision.targetImage}
+                onChange={(val) => updateVision('targetImage', val)}
+                description="Upload image or enter direct URL. Default: /ryan/about/about_vision_target.png"
+              />
             </div>
 
             {/* 3 Vision Cards with Popups */}
@@ -480,32 +441,12 @@ export default function RyanAboutCms({ data, onChange, onSave }: RyanAboutCmsPro
 
             {/* Petri Dish Graphic */}
             <div className="pt-3 border-t border-slate-800">
-              <label className="text-xs text-slate-300 font-bold block mb-1">Petri Dish Graphic URL</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                <div className="md:col-span-2">
-                  <input
-                    type="text"
-                    value={data.approach.petriImage}
-                    onChange={(e) => updateApproach('petriImage', e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-teal-500 focus:outline-none"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    Default: <code className="text-teal-300">/ryan/about/about_approach_petri.png</code>
-                  </p>
-                </div>
-                <div className="relative h-20 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center">
-                  {data.approach.petriImage ? (
-                    <Image
-                      src={data.approach.petriImage}
-                      alt="Petri"
-                      fill
-                      className="object-contain"
-                    />
-                  ) : (
-                    <span className="text-xs text-slate-500">No Image</span>
-                  )}
-                </div>
-              </div>
+              <ImageUploader
+                label="Petri Dish Graphic Image"
+                value={data.approach.petriImage}
+                onChange={(val) => updateApproach('petriImage', val)}
+                description="Upload image or enter direct URL. Default: /ryan/about/about_approach_petri.png"
+              />
             </div>
 
             {/* 3 Approach Cards */}
@@ -608,19 +549,13 @@ export default function RyanAboutCms({ data, onChange, onSave }: RyanAboutCmsPro
                         className="w-full px-2 py-1.5 rounded-lg bg-slate-800 border border-slate-600 text-white text-[11px] focus:border-teal-400 focus:outline-none"
                       />
                     </div>
-                    <div>
-                      <label className="text-[11px] text-slate-400 block mb-1">Image URL</label>
-                      <input
-                        type="text"
+                    <div className="pt-1">
+                      <ImageUploader
+                        label="Category Thumbnail Image"
                         value={cat.image}
-                        onChange={(e) => updatePortfolioCat(idx, 'image', e.target.value)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-slate-800 border border-slate-600 text-white text-[11px] focus:border-teal-400 focus:outline-none"
+                        onChange={(val) => updatePortfolioCat(idx, 'image', val)}
+                        description="Upload or enter URL"
                       />
-                    </div>
-                    <div className="relative h-16 rounded-lg overflow-hidden border border-slate-700 bg-slate-950">
-                      {cat.image ? (
-                        <Image src={cat.image} alt={cat.title} fill className="object-cover" />
-                      ) : null}
                     </div>
                   </div>
                 ))}
@@ -674,32 +609,12 @@ export default function RyanAboutCms({ data, onChange, onSave }: RyanAboutCmsPro
 
             {/* Microscope Lab Graphic */}
             <div className="pt-3 border-t border-slate-800">
-              <label className="text-xs text-slate-300 font-bold block mb-1">Scientist Microscope Image URL</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                <div className="md:col-span-2">
-                  <input
-                    type="text"
-                    value={data.quality.labImage}
-                    onChange={(e) => updateQuality('labImage', e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-teal-500 focus:outline-none"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    Default: <code className="text-teal-300">/ryan/about/quality_microscope.png</code>
-                  </p>
-                </div>
-                <div className="relative h-20 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center">
-                  {data.quality.labImage ? (
-                    <Image
-                      src={data.quality.labImage}
-                      alt="Microscope"
-                      fill
-                      className="object-contain"
-                    />
-                  ) : (
-                    <span className="text-xs text-slate-500">No Image</span>
-                  )}
-                </div>
-              </div>
+              <ImageUploader
+                label="Scientist Microscope Lab Image"
+                value={data.quality.labImage}
+                onChange={(val) => updateQuality('labImage', val)}
+                description="Upload image or enter direct URL. Default: /ryan/about/quality_microscope.png"
+              />
             </div>
 
             {/* 3 Quality Badges */}
@@ -779,32 +694,12 @@ export default function RyanAboutCms({ data, onChange, onSave }: RyanAboutCmsPro
 
             {/* Corporate Building Graphic */}
             <div className="pt-3 border-t border-slate-800">
-              <label className="text-xs text-slate-300 font-bold block mb-1">Corporate Headquarters Building Image URL</label>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                <div className="md:col-span-2">
-                  <input
-                    type="text"
-                    value={data.ethicsMedinova.buildingImage}
-                    onChange={(e) => updateEthics('buildingImage', e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:border-teal-500 focus:outline-none"
-                  />
-                  <p className="text-[11px] text-slate-400 mt-1">
-                    Default: <code className="text-teal-300">/ryan/about/ethics_building.png</code> (Official signage)
-                  </p>
-                </div>
-                <div className="relative h-20 rounded-xl overflow-hidden border border-slate-700 bg-slate-950 flex items-center justify-center">
-                  {data.ethicsMedinova.buildingImage ? (
-                    <Image
-                      src={data.ethicsMedinova.buildingImage}
-                      alt="Building"
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <span className="text-xs text-slate-500">No Image</span>
-                  )}
-                </div>
-              </div>
+              <ImageUploader
+                label="Corporate Headquarters Building Image"
+                value={data.ethicsMedinova.buildingImage}
+                onChange={(val) => updateEthics('buildingImage', val)}
+                description="Upload image or enter direct URL. Default: /ryan/about/ethics_building.png"
+              />
             </div>
 
             {/* 3 Badges */}
