@@ -100,7 +100,7 @@ export default function Header({ header, theme }: HeaderProps) {
               <button
                 onClick={() => setSearchOpen(true)}
                 className="p-2 rounded-full hover:bg-slate-100 transition-colors text-slate-700"
-                aria-label="Search Obagi"
+                aria-label="Search Ryan Dermaceutics"
               >
                 <Search className="w-4 h-4" />
               </button>
@@ -132,25 +132,25 @@ export default function Header({ header, theme }: HeaderProps) {
               <X className="w-5 h-5" />
             </button>
             <h3 className="text-lg font-serif font-bold mb-3" style={{ color: theme.primaryNavy }}>
-              Search Obagi Medical India
+              Search Ryan Dermaceutics
             </h3>
             <div className="relative">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products, skin concerns, Nu-Derm, Hydro-Drops..."
-                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-600"
+                placeholder="Search formulations, Tressicle, Tenorium, Blismin, Flutirium..."
+                className="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-teal-600"
                 autoFocus
               />
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
             </div>
             <div className="mt-4 flex flex-wrap gap-2 text-xs">
               <span className="text-slate-400">Popular:</span>
-              <button onClick={() => setSearchQuery('Nu-Derm')} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-md">Nu-Derm</button>
-              <button onClick={() => setSearchQuery('Hydro-Drops')} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-md">Daily Hydro-Drops</button>
-              <button onClick={() => setSearchQuery('Pigmentation')} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-md">Pigmentation</button>
-              <button onClick={() => setSearchQuery('Nu-Cil')} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-md">Nu-Cil Hair</button>
+              <button onClick={() => setSearchQuery('Tressicle')} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-md">Tressicle</button>
+              <button onClick={() => setSearchQuery('Tenorium')} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-md">Tenorium</button>
+              <button onClick={() => setSearchQuery('Blismin')} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-md">Blismin 20</button>
+              <button onClick={() => setSearchQuery('Minoxidil')} className="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 rounded-md">Minoxidil 5%</button>
             </div>
           </div>
         </div>

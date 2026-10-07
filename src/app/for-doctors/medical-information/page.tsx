@@ -204,26 +204,27 @@ export default function MedicalInformationPage() {
               </div>
             </div>
 
-            {/* Right Graphic Banner (Doctor with tablet + hexagonal icons) */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md lg:max-w-none rounded-2xl overflow-hidden shadow-2xl border-2 border-white/80 bg-white group">
-                <div className="relative h-64 sm:h-72 w-full overflow-hidden">
+            {/* Right Graphic Banner (Seamless Organic Gradient Blending) */}
+            <div className="lg:col-span-5 relative flex justify-center">
+              <div className="absolute -inset-4 bg-gradient-to-tr from-teal-300/30 to-cyan-200/20 rounded-full blur-3xl pointer-events-none -z-10" />
+              <div className="relative mx-auto max-w-md lg:max-w-none w-full rounded-3xl overflow-hidden shadow-2xl">
+                <div className="relative h-64 sm:h-76 w-full overflow-hidden">
                   <Image
                     src="/ryan/hero-medical-doc.jpg"
                     alt="Your Questions Our Support - Ryan Medical Information"
                     fill
-                    className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                    className="object-cover object-center transition-transform duration-700 hover:scale-105"
                     priority
                   />
+                  <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#e6f4f7] via-[#e6f4f7]/40 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#003d4d]/90 via-[#003d4d]/40 to-transparent pointer-events-none" />
                   {/* Cursive overlay text */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#003d4d]/85 via-transparent to-transparent flex items-end p-5">
-                    <div className="text-white">
-                      <div className="font-serif italic text-xl sm:text-2xl text-teal-100 font-medium">
-                        "Your Questions, Our Support"
-                      </div>
-                      <div className="text-[11px] text-teal-200/80 font-medium tracking-wide mt-0.5">
-                        Direct scientific channel for healthcare practitioners
-                      </div>
+                  <div className="absolute bottom-4 left-5 right-5 text-white">
+                    <div className="font-serif italic text-xl sm:text-2xl text-teal-100 font-medium">
+                      "Your Questions, Our Support"
+                    </div>
+                    <div className="text-[11px] text-teal-200/80 font-medium tracking-wide mt-0.5">
+                      Direct scientific channel for healthcare practitioners
                     </div>
                   </div>
                 </div>

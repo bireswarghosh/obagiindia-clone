@@ -91,19 +91,25 @@ export default function ReferenceLibraryLandingPage() {
               </div>
             </div>
 
-            {/* Right Graphic Banner */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md rounded-2xl overflow-hidden shadow-xl border-2 border-white bg-white">
+            {/* Right Graphic Banner (Seamless Organic Gradient Blending) */}
+            <div className="lg:col-span-5 relative flex justify-center">
+              <div className="absolute -inset-4 bg-gradient-to-tr from-teal-300/30 to-cyan-200/20 rounded-full blur-3xl pointer-events-none -z-10" />
+              <div className="relative mx-auto max-w-md w-full rounded-3xl overflow-hidden shadow-2xl">
                 <div className="relative h-60 sm:h-64 w-full">
                   <Image
                     src="/ryan/library/library-hero.jpg"
                     alt="Dermatology Reference Library"
                     fill
-                    className="object-cover object-center"
+                    className="object-cover object-center transition-transform duration-700 hover:scale-105"
                     priority
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#003d4d]/75 via-transparent to-transparent flex items-end p-4">
-                    <span className="text-xs font-semibold text-white tracking-wide">
+                  <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#e6f4f7] via-[#e6f4f7]/40 to-transparent pointer-events-none" />
+                  <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#003d4d]/80 via-transparent to-transparent pointer-events-none" />
+                  <div className="absolute bottom-4 left-4 right-4 text-white">
+                    <span className="text-[10px] font-bold tracking-widest text-teal-300 uppercase block">
+                      CLINICAL REPOSITORY
+                    </span>
+                    <span className="text-xs font-semibold text-white/95">
                       Clinical Reference System • Ryan Dermaceutics
                     </span>
                   </div>

@@ -126,7 +126,7 @@ export default function ForDoctorsLandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-xs text-slate-500 mb-6">
-            <Link href="/home" className="hover:text-[#00768a] transition-colors">
+            <Link href="/" className="hover:text-[#00768a] transition-colors">
               Home
             </Link>
             <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
@@ -169,16 +169,27 @@ export default function ForDoctorsLandingPage() {
               </div>
             </div>
 
-            {/* Right Doctor Visual */}
+            {/* Right Doctor Visual (Seamless Blending) */}
             <div className="lg:col-span-5 relative flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-[460px] aspect-[4/3] sm:aspect-[1.1] rounded-2xl overflow-hidden shadow-xl border-4 border-white/80 bg-white/40">
+              <div className="absolute -inset-4 bg-gradient-to-tr from-teal-300/30 to-cyan-200/20 rounded-full blur-3xl pointer-events-none -z-10" />
+              <div className="relative w-full max-w-[460px] aspect-[4/3] sm:aspect-[1.1] rounded-3xl overflow-hidden shadow-2xl">
                 <Image
                   src={content.hero.doctorImage || '/ryan/doctors/hero-doctor.png'}
                   alt="Ryan Healthcare Professional"
                   fill
-                  className="object-cover object-center"
+                  className="object-cover object-center transition-transform duration-700 hover:scale-105"
                   priority
                 />
+                <div className="absolute inset-y-0 left-0 w-20 bg-gradient-to-r from-[#eaf4f7] via-[#eaf4f7]/40 to-transparent pointer-events-none" />
+                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#003d4d]/80 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-4 left-4 right-4 text-white">
+                  <span className="text-[10px] font-bold tracking-widest text-teal-300 uppercase block">
+                    CLINICAL EXPERTISE
+                  </span>
+                  <p className="text-xs font-semibold text-white/95">
+                    Supporting Dermatologists with Scientific Rigor
+                  </p>
+                </div>
               </div>
             </div>
           </div>

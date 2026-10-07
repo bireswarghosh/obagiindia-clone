@@ -18,7 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
       'Product Monographs',
       'Acne Management',
       'Hair and Scalp Disorders',
-      'Obagi Medical'
+      'Ethics Medinova',
+      'WHO-GMP Dermatology'
     ],
     authors: [{ name: 'Ryan Dermaceutics' }],
     creator: 'Ryan Dermaceutics Division',

@@ -99,7 +99,7 @@ export interface HistorySettings {
   galleryImages: string[];
 }
 
-// SCREEN 3: ABOUT OBAGI
+// SCREEN 3: ABOUT RYAN DERMACEUTICS
 export interface AboutSettings {
   title: string;
   titleColor?: string;

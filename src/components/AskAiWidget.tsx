@@ -21,7 +21,7 @@ export default function AskAiWidget({ enabled, theme }: AskAiProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       sender: 'ai',
-      text: 'Hello! I am the Obagi Skincare Assistant. How can I assist you with your skin concerns or clinical product recommendations today?'
+      text: 'Hello! I am the Ryan Dermaceutics Clinical Assistant. How can I assist you with our dermatology formulations, therapeutic guides, or product monographs today?'
     }
   ]);
   const [input, setInput] = useState('');
@@ -35,19 +35,21 @@ export default function AskAiWidget({ enabled, theme }: AskAiProps) {
     setMessages(newMessages);
     setInput('');
 
-    // Instant smart response based on Obagi product knowledge
+    // Instant smart response based on Ryan Dermaceutics product portfolio
     setTimeout(() => {
-      let reply = "Thank you for asking. Obagi Medical formulations are gold-standard physician-dispensed treatments. We recommend consulting a licensed clinic for an individualized protocol.";
+      let reply = "Thank you for asking. Ryan Dermaceutics formulations are physician-prescribed dermatological treatments developed under strict WHO-GMP standards. Please consult our Product Monographs or Prescribing Information for detailed clinical protocols.";
 
       const lower = userText.toLowerCase();
       if (lower.includes('pigment') || lower.includes('spot') || lower.includes('dark') || lower.includes('melasma')) {
-        reply = "For hyperpigmentation, age spots, and melasma, the Obagi Nu-Derm Fx™ System with Arbutin and Vitamin C is clinically proven to accelerate cellular renewal and even out skin tone.";
-      } else if (lower.includes('dry') || lower.includes('hydrate') || lower.includes('drop')) {
-        reply = "Obagi Daily Hydro-Drops™ with Isoplentix® microfluidic technology deliver pure Vitamin B3, Abyssinian Oil, and Hibiscus Oil for all-day luminous barrier hydration without clogging pores.";
-      } else if (lower.includes('hair') || lower.includes('lash') || lower.includes('brow') || lower.includes('nu-cil')) {
-        reply = "Obagi Nu-Cil® uses proprietary NouriPlex® technology combining biotin, panthenol, and bioactive lipid compounds to noticeably improve density and fullness.";
-      } else if (lower.includes('price') || lower.includes('buy') || lower.includes('order')) {
-        reply = "Obagi Medical India products are distributed exclusively by authorized clinics and medical aesthetic physicians. Please use the 'Find Obagi' section to locate an official provider near you.";
+        reply = "For hyperpigmentation and skin tone renewal, Ryan Dermaceutics offers specialized topical depigmenting and exfoliation formulations designed to restore barrier integrity.";
+      } else if (lower.includes('hair') || lower.includes('alopecia') || lower.includes('minoxidil') || lower.includes('tressicle')) {
+        reply = "For hair loss and androgenetic alopecia, our TRESSICLE portfolio includes TRESSICLE 5 (Minoxidil 5% Solution), TRESSICLE FORTE (Minoxidil 5% + Finasteride 0.1%), and oral TRESSICLE tablets.";
+      } else if (lower.includes('steroid') || lower.includes('corticosteroid') || lower.includes('tenorium') || lower.includes('momerium') || lower.includes('psoriasis')) {
+        reply = "Ryan Dermaceutics provides a structured corticosteroid potency ladder, including TENORIUM (Clobetasol Propionate), MOMERIUM (Mometasone Furoate), and FLUTIRIUM (Fluticasone Propionate) with steroid-sparing TCIs like ROLITAS (Tacrolimus).";
+      } else if (lower.includes('allergy') || lower.includes('pruritus') || lower.includes('itch') || lower.includes('blismin') || lower.includes('hivozin')) {
+        reply = "For acute and chronic pruritus and urticaria, our second-generation nonsedating H1 antihistamines include BLISMIN 20 (Bilastine 20mg), BLISMIN M, and HIVOZIN 5 (Levocetirizine 5mg).";
+      } else if (lower.includes('acne') || lower.includes('pimple') || lower.includes('isotretinoin')) {
+        reply = "Our acne portfolio combines targeted topical therapies (including benzoyl peroxide, adapalene, and clindamycin) and systemic interventions tailored according to global dermatologist guidelines.";
       }
 
       setMessages(prev => [...prev, { sender: 'ai', text: reply }]);
@@ -67,7 +69,7 @@ export default function AskAiWidget({ enabled, theme }: AskAiProps) {
             <Bot className="w-5 h-5 text-amber-300" />
             <span className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
           </div>
-          <span className="text-xs font-bold tracking-wide">Ask Obagi AI</span>
+          <span className="text-xs font-bold tracking-wide">Ask Ryan AI</span>
         </button>
       )}
 
@@ -81,7 +83,7 @@ export default function AskAiWidget({ enabled, theme }: AskAiProps) {
                 <Sparkles className="w-4 h-4 text-amber-300" />
               </div>
               <div>
-                <h4 className="font-bold text-sm leading-tight">Obagi Clinical AI</h4>
+                <h4 className="font-bold text-sm leading-tight">Ryan Clinical AI</h4>
                 <p className="text-[10px] text-white/70">Always online • Clinical Knowledge Base</p>
               </div>
             </div>

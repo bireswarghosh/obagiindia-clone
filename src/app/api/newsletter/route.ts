@@ -31,7 +31,7 @@ export async function GET(request: Request) {
       status: 200,
       headers: {
         'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': 'attachment; filename="obagi-subscribers.csv"',
+        'Content-Disposition': 'attachment; filename="ryan-dermaceutics-subscribers.csv"',
       },
     });
   }

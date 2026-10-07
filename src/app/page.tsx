@@ -170,27 +170,51 @@ export default function RyanHomePage() {
               </div>
             </div>
 
-            {/* Right Graphic Banner */}
-            <div className="lg:col-span-5 relative">
-              <div className="relative mx-auto max-w-md lg:max-w-none rounded-3xl overflow-hidden shadow-2xl border-4 border-white/90 bg-white group">
-                <div className="relative h-72 sm:h-88 w-full overflow-hidden">
+            {/* Right Graphic Banner (Seamless Organic Gradient Blending) */}
+            <div className="lg:col-span-5 relative flex items-center justify-center">
+              {/* Ambient Backlight Glow */}
+              <div className="absolute -inset-6 bg-gradient-to-tr from-teal-300/35 via-cyan-200/30 to-teal-400/20 rounded-full blur-3xl -z-10 pointer-events-none" />
+
+              <div className="relative w-full max-w-lg">
+                {/* Seamless Blended Image Container */}
+                <div className="relative h-72 sm:h-96 w-full rounded-3xl overflow-hidden shadow-2xl">
                   <Image
                     src="/ryan/hero-therapeutic-doc.jpg"
                     alt="Focused on Dermatology. Driven by Quality."
                     fill
-                    className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                    className="object-cover object-center transition-transform duration-700 hover:scale-105"
                     priority
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#003d4d]/85 via-transparent to-transparent flex items-end p-6">
-                    <div className="text-white space-y-1">
-                      <span className="text-[10px] font-bold tracking-widest text-teal-200 uppercase">
-                        RYAN DERMACEUTICS
-                      </span>
-                      <div className="text-base font-bold text-white">
-                        Science That Understands Skin
-                      </div>
+                  {/* Left edge soft gradient fade to blend into text */}
+                  <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-[#eef7f9] via-[#eef7f9]/50 to-transparent pointer-events-none" />
+                  {/* Bottom edge soft gradient fade to blend into base */}
+                  <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#003d4d]/90 via-[#003d4d]/40 to-transparent pointer-events-none" />
+
+                  {/* Bottom Caption Overlay */}
+                  <div className="absolute bottom-0 inset-x-0 p-6 text-white space-y-1">
+                    <span className="text-[10px] font-bold tracking-widest text-teal-300 uppercase block">
+                      RYAN DERMACEUTICS
+                    </span>
+                    <div className="text-base sm:text-lg font-bold text-white leading-tight">
+                      Science That Understands Skin
                     </div>
                   </div>
+                </div>
+
+                {/* Floating Glassmorphic Pill 1: Top Right */}
+                <div className="absolute -top-3 -right-3 hidden sm:flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/90 backdrop-blur-md border border-white/60 shadow-lg text-slate-800 animate-pulse">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[#003d4d]">
+                    WHO-GMP Standards
+                  </span>
+                </div>
+
+                {/* Floating Glassmorphic Pill 2: Bottom Left */}
+                <div className="absolute -bottom-3 -left-3 hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-white/90 backdrop-blur-md border border-white/60 shadow-lg text-slate-800">
+                  <ShieldCheck className="w-4 h-4 text-teal-600" />
+                  <span className="text-[11px] font-black uppercase tracking-wider text-[#003d4d]">
+                    Ethics Medinova Division
+                  </span>
                 </div>
               </div>
             </div>

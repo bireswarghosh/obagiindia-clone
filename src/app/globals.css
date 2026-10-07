@@ -4,13 +4,22 @@
 
 @layer base {
   :root {
-    --obagi-navy: #21275c;
-    --obagi-deep: #0e2238;
-    --obagi-gold: #b1843b;
-    --obagi-canvas: #f8f7f5;
-    --obagi-dark: #1a1c20;
-    --obagi-muted: #86868f;
-    --obagi-border: rgba(0, 0, 0, 0.08);
+    --ryan-primary: #003d4d;
+    --ryan-deep: #002530;
+    --ryan-teal: #00768a;
+    --ryan-canvas: #f8fafc;
+    --ryan-dark: #0f172a;
+    --ryan-muted: #64748b;
+    --ryan-border: rgba(0, 118, 138, 0.12);
+
+    /* Legacy Aliases */
+    --obagi-navy: var(--ryan-primary);
+    --obagi-deep: var(--ryan-deep);
+    --obagi-gold: var(--ryan-teal);
+    --obagi-canvas: var(--ryan-canvas);
+    --obagi-dark: var(--ryan-dark);
+    --obagi-muted: var(--ryan-muted);
+    --obagi-border: var(--ryan-border);
   }
 
   * {
@@ -21,8 +30,8 @@
 
   html {
     scroll-behavior: smooth;
-    background-color: var(--obagi-canvas);
-    color: var(--obagi-dark);
+    background-color: var(--ryan-canvas);
+    color: var(--ryan-dark);
   }
 
   body {

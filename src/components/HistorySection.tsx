@@ -66,7 +66,7 @@ export default function HistorySection({ history, theme }: HistoryProps) {
               >
                 <img
                   src={imgUrl}
-                  alt={`Obagi Product ${idx + 1}`}
+                  alt={`Ryan Dermaceutics Product ${idx + 1}`}
                   className="w-full h-64 object-contain transition-transform hover:scale-105 duration-300"
                 />
               </div>
