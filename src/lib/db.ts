@@ -107,8 +107,12 @@ export function updateSiteData(newData: Partial<FullSiteData>, user: string = 'A
     footer: { ...current.footer, ...(newData.footer || {}) },
     floatingWidget: { ...current.floatingWidget, ...(newData.floatingWidget || { enabled: true, mainButtonText: 'Chat with AI', unreadBadgeText: 'Need Help?', prompts: [] }) },
     security: { ...current.security, ...(newData.security || { pinCode: '1234', twoFactorEnabled: false, sessionDurationHours: 24 }) },
+    ryanHome: newData.ryanHome ? { ...current.ryanHome, ...newData.ryanHome } : current.ryanHome || defaultSiteData.ryanHome,
+    ryanAbout: newData.ryanAbout ? { ...current.ryanAbout, ...newData.ryanAbout } : current.ryanAbout || defaultSiteData.ryanAbout,
+    ryanDoctors: newData.ryanDoctors ? { ...current.ryanDoctors, ...newData.ryanDoctors } : current.ryanDoctors,
     activityLogs: logs
   };
+
 
   // Attempt atomic write
   try {

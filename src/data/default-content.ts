@@ -1,6 +1,9 @@
 import { FullSiteData } from '../types/content';
+import { defaultRyanHomeContent } from './ryan-home-content';
+import { defaultRyanAboutContent } from './ryan-about-content';
 
 export const defaultSiteData: FullSiteData = {
+
   theme: {
     primaryNavy: '#21275c',
     deepNavy: '#0e2238',
@@ -366,5 +369,8 @@ export const defaultSiteData: FullSiteData = {
       section: 'System',
       details: 'Obagi India Enterprise CMS initialized'
     }
-  ]
+  ],
+  ryanHome: defaultRyanHomeContent,
+  ryanAbout: defaultRyanAboutContent
 };
+

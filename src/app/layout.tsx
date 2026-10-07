@@ -7,24 +7,34 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = data.seo;
 
   return {
-    title: seo.metaTitle,
-    description: seo.metaDescription,
-    keywords: seo.keywords.split(',').map((k) => k.trim()),
-    authors: [{ name: 'Obagi Medical India' }],
-    creator: 'Specra Healthcare',
-    publisher: 'Obagi Cosmeceuticals LLC',
-    metadataBase: new URL(seo.canonicalUrl || 'https://www.obagiindia.com'),
+    title: 'Ryan Dermaceutics | Science That Understands Skin',
+    description: 'Ryan Dermaceutics is a specialized dermatology division bringing together topical, oral and supportive products across multiple therapeutic areas.',
+    keywords: [
+      'Ryan Dermaceutics',
+      'Science That Understands Skin',
+      'Dermatology India',
+      'Therapeutic Resources',
+      'Prescribing Information',
+      'Product Monographs',
+      'Acne Management',
+      'Hair and Scalp Disorders',
+      'Obagi Medical'
+    ],
+    authors: [{ name: 'Ryan Dermaceutics' }],
+    creator: 'Ryan Dermaceutics Division',
+    publisher: 'Ryan Dermaceutics',
+    metadataBase: new URL('https://obagiindia.vercel.app'),
     openGraph: {
-      title: seo.metaTitle,
-      description: seo.metaDescription,
-      url: seo.canonicalUrl,
-      siteName: 'Obagi Medical India',
+      title: 'Ryan Dermaceutics | Science That Understands Skin',
+      description: 'A specialized dermatology division bringing together topical, oral and supportive products across multiple therapeutic areas.',
+      url: 'https://obagiindia.vercel.app',
+      siteName: 'Ryan Dermaceutics',
       images: [
         {
-          url: seo.ogImage,
+          url: '/ryan/ryan-logo.png',
           width: 1200,
           height: 630,
-          alt: 'Obagi Medical India',
+          alt: 'Ryan Dermaceutics',
         },
       ],
       locale: 'en_IN',
@@ -32,9 +42,9 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     twitter: {
       card: 'summary_large_image',
-      title: seo.metaTitle,
-      description: seo.metaDescription,
-      images: [seo.ogImage],
+      title: 'Ryan Dermaceutics | Science That Understands Skin',
+      description: 'A specialized dermatology division bringing together topical, oral and supportive products across multiple therapeutic areas.',
+      images: ['/ryan/ryan-logo.png'],
     },
     robots: {
       index: true,
@@ -42,6 +52,7 @@ export async function generateMetadata(): Promise<Metadata> {
     },
   };
 }
+
 
 export default function RootLayout({
   children,
@@ -54,18 +65,19 @@ export default function RootLayout({
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'MedicalOrganization',
-    name: 'Obagi Medical India',
-    url: 'https://www.obagiindia.com',
-    logo: 'https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg',
-    description: data.seo.metaDescription,
-    telephone: data.footer.phone,
-    email: data.footer.email,
+    name: 'Ryan Dermaceutics',
+    url: 'https://obagiindia.vercel.app',
+    logo: 'https://obagiindia.vercel.app/ryan/ryan-logo.png',
+    description: 'Ryan Dermaceutics is a specialized dermatology division bringing together topical, oral and supportive products across multiple therapeutic areas.',
+    telephone: '+91 (022) 4890-7800',
+    email: 'info@ryandermaceutics.com',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: data.footer.address,
+      streetAddress: 'Mumbai, Maharashtra, India',
       addressCountry: 'IN',
     },
   };
+
 
   return (
     <html lang="en">

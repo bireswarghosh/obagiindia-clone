@@ -46,6 +46,23 @@ export default function ProductsPage() {
     route: true
   });
 
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const areaParam = params.get('area') || params.get('category');
+      if (areaParam) {
+        const matched = THERAPEUTIC_AREAS.find(
+          a => a.toLowerCase() === areaParam.toLowerCase() ||
+               a.toLowerCase().includes(areaParam.toLowerCase()) ||
+               areaParam.toLowerCase().includes(a.toLowerCase())
+        );
+        if (matched) {
+          setSelectedTherapeuticAreas([matched]);
+        }
+      }
+    }
+  }, []);
+
   const toggleSection = (section: 'therapeutic' | 'dosage' | 'route') => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };

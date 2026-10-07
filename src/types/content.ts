@@ -287,6 +287,10 @@ export interface SEOSettings {
   canonicalUrl: string;
 }
 
+import type { RyanHomeContent } from '../data/ryan-home-content';
+import type { RyanAboutContent } from '../data/ryan-about-content';
+import type { RyanDoctorsPageContent } from '../data/ryan-doctors-data';
+
 export interface FullSiteData {
   theme: ThemeColors;
   storage: StorageSettings;
@@ -307,4 +311,8 @@ export interface FullSiteData {
   security?: AdminSecuritySettings;
   activityLogs?: ActivityLog[];
   stickyCircle?: any;
+  ryanHome?: RyanHomeContent;
+  ryanAbout?: RyanAboutContent;
+  ryanDoctors?: RyanDoctorsPageContent;
 }
+

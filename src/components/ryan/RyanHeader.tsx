@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Search, Menu, X, ChevronDown, ExternalLink, ArrowRight } from 'lucide-react';
@@ -20,20 +21,21 @@ export default function RyanHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-teal-100/80 shadow-xs transition-all">
-      {/* Top Quick Bar for Doctor Portal navigation */}
-      <div className="bg-gradient-to-r from-[#004f5e] via-[#006070] to-[#007a8a] text-white text-xs py-1.5 px-4">
+      {/* Top Slogan Ticker & Doctor Portal Quick Bar (Matching Content_Home.docx) */}
+      <div className="bg-gradient-to-r from-[#0e4f63] via-[#006070] to-[#0e4f63] text-white text-xs py-1.5 px-4 shadow-inner">
         <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span className="font-bold tracking-wide">Doctor Portal:</span>
-            <span className="text-teal-100 hidden sm:inline">Direct Clinical & Scientific Resources</span>
+            <span className="font-extrabold tracking-wider uppercase text-[11px] text-teal-100">SCIENCE THAT UNDERSTANDS SKIN</span>
+            <span className="text-teal-300/40 hidden md:inline">•</span>
+            <span className="text-teal-200/90 hidden md:inline text-[11px] font-medium">Science | Efficacy • Skin Health | Quality • Clinical Confidence</span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-3 font-medium flex-wrap">
             <Link
               href="/for-doctors/therapeutic-resources"
               className={`px-2 py-0.5 rounded transition text-[11px] sm:text-xs ${
                 isTherapeutic
-                  ? 'bg-white text-[#006070] font-bold shadow-xs'
+                  ? 'bg-white text-[#0e4f63] font-bold shadow-xs'
                   : 'text-teal-100 hover:text-white hover:bg-white/10'
               }`}
             >
@@ -44,7 +46,7 @@ export default function RyanHeader() {
               href="/for-doctors/prescribing-information"
               className={`px-2 py-0.5 rounded transition text-[11px] sm:text-xs ${
                 isPrescribing
-                  ? 'bg-white text-[#006070] font-bold shadow-xs'
+                  ? 'bg-white text-[#0e4f63] font-bold shadow-xs'
                   : 'text-teal-100 hover:text-white hover:bg-white/10'
               }`}
             >
@@ -55,7 +57,7 @@ export default function RyanHeader() {
               href="/for-doctors/reference-library"
               className={`px-2 py-0.5 rounded transition text-[11px] sm:text-xs ${
                 isReferenceLib
-                  ? 'bg-white text-[#006070] font-bold shadow-xs'
+                  ? 'bg-white text-[#0e4f63] font-bold shadow-xs'
                   : 'text-teal-100 hover:text-white hover:bg-white/10'
               }`}
             >
@@ -66,7 +68,7 @@ export default function RyanHeader() {
               href="/for-doctors/medical-information"
               className={`px-2 py-0.5 rounded transition text-[11px] sm:text-xs ${
                 isMedicalInfo
-                  ? 'bg-white text-[#006070] font-bold shadow-xs'
+                  ? 'bg-white text-[#0e4f63] font-bold shadow-xs'
                   : 'text-teal-100 hover:text-white hover:bg-white/10'
               }`}
             >
@@ -80,28 +82,24 @@ export default function RyanHeader() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           
-          {/* Logo */}
-          <Link href="/home" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#00768a] to-[#004f5e] flex items-center justify-center text-white font-serif font-black text-2xl shadow-md shadow-teal-900/10 group-hover:scale-105 transition-transform">
-              R
-            </div>
-            <div className="flex flex-col">
-              <span className="font-serif font-black tracking-widest text-[#003d4d] text-xl sm:text-2xl leading-none">
-                RYAN
-              </span>
-              <span className="text-[10px] sm:text-[11px] font-bold tracking-[0.25em] text-[#00768a] uppercase mt-0.5 leading-none">
-                DERMACEUTICS
-              </span>
-              <span className="text-[7.5px] sm:text-[8px] font-semibold tracking-wider text-slate-400 uppercase mt-0.5">
-                A Specialized Dermatology Division
-              </span>
+          {/* Official Brand Logo */}
+          <Link href="/" className="flex items-center gap-3 group py-1">
+            <div className="relative h-12 w-44 sm:h-14 sm:w-52 transition-transform duration-300 group-hover:scale-[1.02]">
+              <Image
+                src="/ryan/ryan-logo.png"
+                alt="Ryan Dermaceutics - Science That Understands Skin"
+                fill
+                priority
+                className="object-contain object-left"
+              />
             </div>
           </Link>
+
 
           {/* Desktop Nav Items */}
           <nav className="hidden lg:flex items-center gap-6 xl:gap-8 text-[13.5px] font-medium text-slate-700">
             <Link 
-              href="/home" 
+              href="/" 
               className={`transition-colors py-1 ${isHome ? 'text-[#00768a] font-bold' : 'hover:text-[#00768a]'}`}
             >
               Home
@@ -115,7 +113,7 @@ export default function RyanHeader() {
             </Link>
 
             <Link 
-              href="/home#therapeutic-areas" 
+              href="/#therapeutic-areas" 
               className="hover:text-[#00768a] transition-colors py-1"
             >
               Therapeutic Areas
@@ -129,22 +127,36 @@ export default function RyanHeader() {
             </Link>
             
             {/* For Doctors dropdown */}
+            {/* For Doctors nav item with dropdown */}
             <div 
               className="relative"
               onMouseEnter={() => setDoctorsDropdown(true)}
               onMouseLeave={() => setDoctorsDropdown(false)}
             >
-              <button 
+              <Link 
+                href="/for-doctors"
                 className={`flex items-center gap-1 font-semibold transition-colors py-2 ${
-                  isTherapeutic || isMedicalInfo || isPrescribing || isReferenceLib ? 'text-[#00768a] border-b-2 border-[#00768a]' : 'hover:text-[#00768a]'
+                  pathname === '/for-doctors' || isTherapeutic || isMedicalInfo || isPrescribing || isReferenceLib ? 'text-[#00768a] border-b-2 border-[#00768a]' : 'hover:text-[#00768a]'
                 }`}
               >
                 For Doctors
                 <ChevronDown className="w-3.5 h-3.5 text-[#00768a]" />
-              </button>
+              </Link>
 
               {doctorsDropdown && (
                 <div className="absolute top-full left-0 w-80 bg-white rounded-2xl shadow-xl border border-teal-100 py-3 z-50 animate-fade-in divide-y divide-slate-100">
+                  <div className="py-1">
+                    <Link
+                      href="/for-doctors"
+                      className={`block px-4 py-2.5 text-xs transition ${
+                        pathname === '/for-doctors' ? 'bg-teal-50 text-[#00768a] font-bold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#00768a]'
+                      }`}
+                    >
+                      <div className="font-bold text-sm text-[#004f5e]">For Doctors Portal</div>
+                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Explore portfolio, therapeutic areas & clinical tools</div>
+                    </Link>
+                  </div>
+
                   <div className="py-1">
                     <Link
                       href="/for-doctors/therapeutic-resources"
@@ -239,6 +251,13 @@ export default function RyanHeader() {
           <div className="p-3 bg-teal-50/80 rounded-xl space-y-2 border border-teal-100">
             <div className="text-xs font-bold text-[#006070] uppercase tracking-wider">For Doctors Portal</div>
             <Link
+              href="/for-doctors"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block p-2 rounded-lg bg-white text-xs font-bold text-[#00768a] shadow-2xs border border-teal-100"
+            >
+              Doctor Portal Overview & Directory
+            </Link>
+            <Link
               href="/for-doctors/therapeutic-resources"
               onClick={() => setMobileMenuOpen(false)}
               className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
@@ -276,7 +295,7 @@ export default function RyanHeader() {
           </div>
 
           <div className="space-y-1 text-sm font-medium text-slate-700 divide-y divide-slate-100">
-            <Link href="/home" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
+            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
               Home
             </Link>
             <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
@@ -285,10 +304,10 @@ export default function RyanHeader() {
             <Link href="/products" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
               Products
             </Link>
-            <Link href="/home#therapeutic-areas" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
+            <Link href="/#therapeutic-areas" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
               Therapeutic Areas
             </Link>
-            <Link href="/home#contact" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
+            <Link href="/#contact" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
               Contact
             </Link>
           </div>

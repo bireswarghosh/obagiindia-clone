@@ -30,10 +30,21 @@ import {
   Copy,
   LayoutDashboard,
   Pipette,
-  Check
+  Check,
+  Target,
+  Phone,
+  Stethoscope,
+  Globe,
+  Lock,
+  Unlock,
+  Key,
+  LogOut,
+  Award
 } from 'lucide-react';
 import RichTextEditor from '@/components/admin/RichTextEditor';
 import MediaInput from '@/components/admin/MediaInput';
+import RyanAboutCms from '@/components/admin/RyanAboutCms';
+import RyanSeoCms, { defaultMultiPageSeo, MultiPageSeo } from '@/components/admin/RyanSeoCms';
 import MinoxidilEducationalCard from '@/components/ryan/MinoxidilEducationalCard';
 import { RYAN_PRODUCTS, RyanProduct, THERAPEUTIC_AREAS, ROUTES, DOSAGE_FORMS } from '@/data/ryan-products';
 import {
@@ -45,21 +56,51 @@ import {
   PrescribingInfoProduct,
   REFERENCE_LIBRARY_CATEGORIES
 } from '@/data/ryan-data';
+import { defaultRyanHomeContent, RyanHomeContent, RyanPillar } from '@/data/ryan-home-content';
+import { defaultRyanAboutContent, RyanAboutContent } from '@/data/ryan-about-content';
+import {
+  DEFAULT_DOCTORS_PAGE_CONTENT,
+  RyanDoctorsPageContent
+} from '@/data/ryan-doctors-data';
 
 type AdminTab =
   | 'dashboard'
+  | 'home-cms'
+  | 'about-cms'
+  | 'doctors-cms'
   | 'products'
   | 'insights'
   | 'guides'
   | 'prescribing'
   | 'library'
   | 'media'
+  | 'seo'
   | 'backup';
 
 export default function RyanAdminPortal() {
   const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Security PIN Auth State
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  const [pinInput, setPinInput] = useState('');
+  const [pinError, setPinError] = useState(false);
+
+  // Home Page Dynamic CMS State
+  const [homeCmsData, setHomeCmsData] = useState<RyanHomeContent>(defaultRyanHomeContent);
+  const [homeCmsSubTab, setHomeCmsSubTab] = useState<'hero' | 'story' | 'pillars' | 'quality' | 'contact'>('hero');
+  const [selectedPillarId, setSelectedPillarId] = useState<string>('dermatology-focus');
+
+  // About Page Dynamic CMS State
+  const [aboutCmsData, setAboutCmsData] = useState<RyanAboutContent>(defaultRyanAboutContent);
+
+  // Global SEO & Social Graph State
+  const [seoData, setSeoData] = useState<MultiPageSeo>(defaultMultiPageSeo);
+
+  // For Doctors Page Dynamic CMS State
+  const [doctorsCmsData, setDoctorsCmsData] = useState<RyanDoctorsPageContent>(DEFAULT_DOCTORS_PAGE_CONTENT);
+  const [doctorsCmsSubTab, setDoctorsCmsSubTab] = useState<'hero' | 'quick-access' | 'therapeutic' | 'science' | 'resources' | 'partner'>('hero');
 
   // Editable Datasets (initialized from defaults or localStorage)
   const [productsList, setProductsList] = useState<RyanProduct[]>(RYAN_PRODUCTS);
@@ -114,6 +155,65 @@ export default function RyanAdminPortal() {
 
       const savedPi = localStorage.getItem('ryan_admin_prescribing');
       if (savedPi) setPrescribingList(JSON.parse(savedPi));
+
+      const savedHome = localStorage.getItem('ryan_home_content');
+      if (savedHome) {
+        try {
+          setHomeCmsData(JSON.parse(savedHome));
+        } catch (e) {}
+      }
+
+      const savedDoctors = localStorage.getItem('ryan_admin_doctors_page');
+      if (savedDoctors) {
+        try {
+          setDoctorsCmsData(JSON.parse(savedDoctors));
+        } catch (e) {}
+      }
+
+      const savedAbout = localStorage.getItem('ryan_about_content');
+      if (savedAbout) {
+        try {
+          setAboutCmsData(JSON.parse(savedAbout));
+        } catch (e) {}
+      }
+
+      const savedSeo = localStorage.getItem('ryan_seo_settings');
+      if (savedSeo) {
+        try {
+          setSeoData(JSON.parse(savedSeo));
+        } catch (e) {}
+      }
+
+      // Check session authentication
+      const isAuth = sessionStorage.getItem('ryan_admin_authenticated');
+      if (isAuth === 'true') {
+        setIsAuthenticated(true);
+      }
+
+      // Fetch latest site data from server
+      fetch('/api/content')
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.ryanHome) {
+            setHomeCmsData(data.ryanHome);
+            localStorage.setItem('ryan_home_content', JSON.stringify(data.ryanHome));
+          }
+          if (data && data.ryanAbout) {
+            setAboutCmsData(data.ryanAbout);
+            localStorage.setItem('ryan_about_content', JSON.stringify(data.ryanAbout));
+          }
+          if (data && data.ryanDoctors) {
+            setDoctorsCmsData(data.ryanDoctors);
+            localStorage.setItem('ryan_admin_doctors_page', JSON.stringify(data.ryanDoctors));
+          }
+          if (data && data.seo) {
+            setSeoData(prev => ({
+              ...prev,
+              ...(typeof data.seo === 'object' ? data.seo : {})
+            }));
+          }
+        })
+        .catch(() => {});
     } catch (e) {
       console.error('Error loading stored admin data:', e);
     }
@@ -124,8 +224,94 @@ export default function RyanAdminPortal() {
     setTimeout(() => setToast(null), 3500);
   };
 
+  const handleSaveHomeCms = async () => {
+    try {
+      localStorage.setItem('ryan_home_content', JSON.stringify(homeCmsData));
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ryanHome: homeCmsData })
+      });
+      if (res.ok) {
+        showToast('Home Page CMS successfully published to live site!');
+      } else {
+        showToast('Saved to browser storage successfully!');
+      }
+    } catch (e) {
+      showToast('Saved to browser storage successfully!');
+    }
+  };
+
+  const handleSaveAboutCms = async () => {
+    try {
+      localStorage.setItem('ryan_about_content', JSON.stringify(aboutCmsData));
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ryanAbout: aboutCmsData })
+      });
+      if (res.ok) {
+        showToast('About Ryan Page CMS successfully published to live site!');
+      } else {
+        showToast('Saved to browser storage successfully!');
+      }
+    } catch (e) {
+      showToast('Saved to browser storage successfully!');
+    }
+  };
+
+  const handleSaveSeo = async () => {
+    try {
+      localStorage.setItem('ryan_seo_settings', JSON.stringify(seoData));
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ seo: seoData })
+      });
+      if (res.ok) {
+        showToast('SEO Settings successfully published to live site!');
+      } else {
+        showToast('Saved to browser storage successfully!');
+      }
+    } catch (e) {
+      showToast('Saved to browser storage successfully!');
+    }
+  };
+
+  const handleSaveDoctorsCms = async () => {
+    try {
+      localStorage.setItem('ryan_admin_doctors_page', JSON.stringify(doctorsCmsData));
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ryanDoctors: doctorsCmsData })
+      });
+      if (res.ok) {
+        showToast('For Doctors Portal CMS successfully published to live site!');
+      } else {
+        showToast('Saved to browser storage successfully!');
+      }
+    } catch (e) {
+      showToast('Saved to browser storage successfully!');
+    }
+  };
+
   const handleSaveAll = () => {
     try {
+      localStorage.setItem('ryan_home_content', JSON.stringify(homeCmsData));
+      localStorage.setItem('ryan_about_content', JSON.stringify(aboutCmsData));
+      localStorage.setItem('ryan_admin_doctors_page', JSON.stringify(doctorsCmsData));
+      localStorage.setItem('ryan_seo_settings', JSON.stringify(seoData));
+      fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ryanHome: homeCmsData, 
+          ryanAbout: aboutCmsData, 
+          ryanDoctors: doctorsCmsData,
+          seo: seoData
+        })
+      }).catch(() => {});
       localStorage.setItem('ryan_admin_products_v2', JSON.stringify(productsList));
       localStorage.setItem('ryan_admin_products', JSON.stringify(productsList));
       localStorage.setItem('ryan_admin_insights', JSON.stringify(insightsMap));
@@ -140,6 +326,8 @@ export default function RyanAdminPortal() {
   const handleExportJson = () => {
     const payload = {
       exportDate: new Date().toISOString(),
+      home: homeCmsData,
+      doctorsPage: doctorsCmsData,
       products: productsList,
       insights: insightsMap,
       guides: guidesMap,
@@ -162,6 +350,8 @@ export default function RyanAdminPortal() {
     reader.onload = (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
+        if (parsed.home) setHomeCmsData(parsed.home);
+        if (parsed.doctorsPage) setDoctorsCmsData(parsed.doctorsPage);
         if (parsed.products) setProductsList(parsed.products);
         if (parsed.insights) setInsightsMap(parsed.insights);
         if (parsed.guides) setGuidesMap(parsed.guides);
@@ -176,10 +366,14 @@ export default function RyanAdminPortal() {
 
   const handleResetDefaults = () => {
     if (confirm('Are you sure you want to reset all content to system defaults? Any unsaved local edits will be replaced.')) {
+      setHomeCmsData(defaultRyanHomeContent);
+      setDoctorsCmsData(DEFAULT_DOCTORS_PAGE_CONTENT);
       setProductsList(RYAN_PRODUCTS);
       setInsightsMap(CLINICAL_INSIGHTS_DATA);
       setGuidesMap(THERAPEUTIC_GUIDES_DATA);
       setPrescribingList(PRESCRIBING_INFO_PRODUCTS);
+      localStorage.removeItem('ryan_home_content');
+      localStorage.removeItem('ryan_admin_doctors_page');
       localStorage.removeItem('ryan_admin_products');
       localStorage.removeItem('ryan_admin_products_v2');
       localStorage.removeItem('ryan_admin_insights');
@@ -213,6 +407,90 @@ export default function RyanAdminPortal() {
     const matchesCat = productCategoryFilter === 'All' || p.therapeuticArea === productCategoryFilter;
     return matchesSearch && matchesCat;
   });
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-[#071326] text-white flex items-center justify-center p-4 font-sans">
+        <div className="max-w-md w-full bg-[#0e1d38] rounded-3xl border border-teal-900/60 p-8 shadow-2xl relative overflow-hidden text-center space-y-6">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-400 via-cyan-400 to-[#00768a]" />
+          
+          <div className="mx-auto w-16 h-16 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-300 shadow-lg">
+            <Lock className="w-8 h-8" />
+          </div>
+
+          <div className="space-y-1">
+            <div className="text-[10px] font-black uppercase tracking-widest text-teal-300">
+              Secured Clinical Control Center
+            </div>
+            <h1 className="text-2xl font-black text-white uppercase tracking-tight">
+              Ryan Dermaceutics Admin
+            </h1>
+            <p className="text-xs text-slate-400">
+              Enter your 4-digit security PIN to access the CMS &amp; portal settings.
+            </p>
+          </div>
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (pinInput === '1234') {
+                setIsAuthenticated(true);
+                sessionStorage.setItem('ryan_admin_authenticated', 'true');
+                setPinError(false);
+              } else {
+                setPinError(true);
+              }
+            }}
+            className="space-y-4"
+          >
+            <div className="relative">
+              <input
+                type="password"
+                maxLength={8}
+                value={pinInput}
+                autoFocus
+                onChange={(e) => {
+                  setPinInput(e.target.value);
+                  setPinError(false);
+                }}
+                placeholder="••••"
+                className={`w-full py-3.5 px-4 text-center tracking-[1em] font-mono text-2xl rounded-2xl bg-slate-900 border text-white focus:outline-none transition ${
+                  pinError ? 'border-rose-500 ring-2 ring-rose-500/30' : 'border-slate-700 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20'
+                }`}
+              />
+              {pinError && (
+                <div className="text-rose-400 text-xs font-bold mt-2">
+                  Incorrect PIN. Please try again.
+                </div>
+              )}
+            </div>
+
+            <button
+              type="submit"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-teal-600 to-[#00768a] hover:from-teal-500 hover:to-[#006070] text-white text-xs font-bold uppercase tracking-wider shadow-lg shadow-teal-950 transition cursor-pointer"
+            >
+              Verify &amp; Enter Portal
+            </button>
+          </form>
+
+          <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+            <span>Default PIN: <strong className="text-teal-300 font-mono">1234</strong></span>
+            <button
+              type="button"
+              onClick={() => {
+                setPinInput('1234');
+                setIsAuthenticated(true);
+                sessionStorage.setItem('ryan_admin_authenticated', 'true');
+              }}
+              className="text-teal-300 hover:underline cursor-pointer font-semibold"
+            >
+              Quick Unlock
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0f172a] text-slate-100 flex font-sans selection:bg-teal-500 selection:text-white">
@@ -260,14 +538,19 @@ export default function RyanAdminPortal() {
           <nav className="p-3 space-y-1.5">
             {[
               { id: 'dashboard', label: 'Dashboard Overview', icon: LayoutDashboard },
+              { id: 'home-cms', label: 'Home Page CMS', icon: Sparkles },
+              { id: 'about-cms', label: 'About Ryan CMS', icon: Award },
+              { id: 'doctors-cms', label: 'For Doctors CMS', icon: Stethoscope },
               { id: 'products', label: 'Products & Monographs', icon: Package, badge: productsList.length },
               { id: 'insights', label: 'Clinical Insights', icon: FileText, badge: Object.keys(insightsMap).length },
               { id: 'guides', label: 'Therapeutic Guides', icon: BookOpen, badge: Object.keys(guidesMap).length },
               { id: 'prescribing', label: 'Prescribing Info (PI)', icon: ShieldCheck, badge: prescribingList.length },
               { id: 'library', label: 'Reference Library', icon: Layers },
               { id: 'media', label: 'Media & Assets', icon: ImageIcon },
+              { id: 'seo', label: 'SEO & Meta Tags', icon: Globe },
               { id: 'backup', label: 'Backup & Settings', icon: Database }
             ].map((tab) => {
+
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
               return (
@@ -325,14 +608,37 @@ export default function RyanAdminPortal() {
               </div>
 
               <a
-                href="/home"
+                href="/"
                 target="_blank"
                 rel="noreferrer"
-                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition"
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-teal-500/20 hover:bg-teal-500/30 text-teal-100 text-xs font-bold transition border border-teal-500/30"
               >
-                <span>View Live Site</span>
+                <span>View Ryan Live (/)</span>
                 <ExternalLink className="w-3.5 h-3.5 text-teal-300" />
               </a>
+
+              <a
+                href="/about"
+                target="_blank"
+                rel="noreferrer"
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-800/30 hover:bg-teal-800/50 text-teal-200 text-[11px] font-bold transition border border-teal-500/30"
+              >
+                <span>View About Ryan (/about)</span>
+                <ExternalLink className="w-3 h-3 text-teal-300" />
+              </a>
+
+              <button
+                type="button"
+                onClick={() => {
+                  sessionStorage.removeItem('ryan_admin_authenticated');
+                  setIsAuthenticated(false);
+                  setPinInput('');
+                }}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 text-[11px] font-bold transition border border-slate-700 cursor-pointer"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span>Lock Portal</span>
+              </button>
             </div>
           )}
         </div>
@@ -348,24 +654,41 @@ export default function RyanAdminPortal() {
             <h1 className="text-base sm:text-lg font-extrabold text-white capitalize flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-teal-400" />
               {activeTab === 'dashboard' && 'Executive Management Dashboard'}
+              {activeTab === 'home-cms' && 'Ryan Dermaceutics Home Page CMS'}
+              {activeTab === 'about-cms' && 'About Ryan Dermaceutics CMS'}
+              {activeTab === 'doctors-cms' && 'Ryan Dermaceutics For Doctors Portal CMS'}
               {activeTab === 'products' && 'Product Monographs Directory'}
               {activeTab === 'insights' && 'Clinical Insights Articles'}
               {activeTab === 'guides' && 'Therapeutic Guides & Protocols'}
               {activeTab === 'prescribing' && 'Official Prescribing Information (PI)'}
               {activeTab === 'library' && 'Reference Library Knowledgebase'}
               {activeTab === 'media' && 'Media & Asset Center'}
+              {activeTab === 'seo' && 'Global SEO & OpenGraph Meta Tags'}
               {activeTab === 'backup' && 'System Backup & Export'}
             </h1>
           </div>
 
           <div className="flex items-center gap-2.5">
             <button
-              onClick={handleSaveAll}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-teal-950 transition"
+              onClick={
+                activeTab === 'home-cms' ? handleSaveHomeCms :
+                activeTab === 'about-cms' ? handleSaveAboutCms :
+                activeTab === 'doctors-cms' ? handleSaveDoctorsCms :
+                activeTab === 'seo' ? handleSaveSeo :
+                handleSaveAll
+              }
+              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-teal-950 transition cursor-pointer"
             >
               <Save className="w-3.5 h-3.5" />
-              <span>Save Changes</span>
+              <span>
+                {activeTab === 'home-cms' ? 'Publish Home CMS' :
+                 activeTab === 'about-cms' ? 'Publish About CMS' :
+                 activeTab === 'doctors-cms' ? 'Publish Doctors CMS' :
+                 activeTab === 'seo' ? 'Save SEO Settings' :
+                 'Save Changes'}
+              </span>
             </button>
+
 
             <button
               onClick={handleExportJson}
@@ -540,9 +863,1627 @@ export default function RyanAdminPortal() {
           )}
 
           {/* ========================================================= */}
+          {/* HOME PAGE CMS TAB (Matching Content_Home.docx)             */}
+          {/* ========================================================= */}
+          {activeTab === 'home-cms' && (
+            <div className="space-y-6 max-w-7xl mx-auto">
+              {/* Header card with Slogan Bar & Quick Action */}
+              <div className="bg-[#132247] p-6 rounded-2xl border border-teal-900/50 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] font-black uppercase tracking-widest">
+                      Live Dynamic CMS
+                    </span>
+                    <span className="text-xs text-slate-400">• Source: Content_Home.docx</span>
+                  </div>
+                  <h2 className="text-xl font-black text-white mt-2">
+                    Ryan Dermaceutics Home Page Visual CMS
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Manage headlines, slogan tickers, story text, the 4 core pillars with interactive modal pop-ups, and pharmaceutical compliance standards.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <a
+                    href="/"
+                    target="_blank"
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 text-xs font-bold flex items-center gap-1.5 border border-slate-700 transition"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Preview Live Home</span>
+                  </a>
+                  <button
+                    onClick={handleSaveHomeCms}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-teal-950 transition"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Publish Changes</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-Tabs / Section Selectors */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-800">
+                {[
+                  { id: 'hero', label: '1. Slogan & Hero Section', icon: Sparkles },
+                  { id: 'story', label: '2. Our Story Section', icon: FileText },
+                  { id: 'pillars', label: '3. Four Core Pillars & Modals', icon: Target },
+                  { id: 'quality', label: '4. Quality & Compliance Framework', icon: ShieldCheck },
+                  { id: 'contact', label: '5. Contact & Clinical Inquiries', icon: Phone }
+                ].map((st) => {
+                  const Icon = st.icon;
+                  const isCurrent = homeCmsSubTab === st.id;
+                  return (
+                    <button
+                      key={st.id}
+                      onClick={() => setHomeCmsSubTab(st.id as any)}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                        isCurrent
+                          ? 'bg-[#00768a] text-white shadow-md'
+                          : 'bg-slate-800/60 text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{st.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Sub-Tab 1: Hero & Slogan */}
+              {homeCmsSubTab === 'hero' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-8 bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
+                      <Sparkles className="w-4 h-4 text-teal-400" />
+                      Hero & Top Ticker Content
+                    </h3>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">
+                          Top Slogan Bar (Always Visible Across Site)
+                        </label>
+                        <input
+                          type="text"
+                          value={homeCmsData.slogan.bannerTop}
+                          onChange={(e) => setHomeCmsData(prev => ({
+                            ...prev,
+                            slogan: { ...prev.slogan, bannerTop: e.target.value }
+                          }))}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none focus:border-teal-400 font-semibold"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Sub-slogan 1</label>
+                          <input
+                            type="text"
+                            value={homeCmsData.slogan.subSlogan1}
+                            onChange={(e) => setHomeCmsData(prev => ({
+                              ...prev,
+                              slogan: { ...prev.slogan, subSlogan1: e.target.value }
+                            }))}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Sub-slogan 2</label>
+                          <input
+                            type="text"
+                            value={homeCmsData.slogan.subSlogan2}
+                            onChange={(e) => setHomeCmsData(prev => ({
+                              ...prev,
+                              slogan: { ...prev.slogan, subSlogan2: e.target.value }
+                            }))}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Sub-slogan 3</label>
+                          <input
+                            type="text"
+                            value={homeCmsData.slogan.subSlogan3}
+                            onChange={(e) => setHomeCmsData(prev => ({
+                              ...prev,
+                              slogan: { ...prev.slogan, subSlogan3: e.target.value }
+                            }))}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Hero Eyebrow Badge</label>
+                          <input
+                            type="text"
+                            value={homeCmsData.hero.badge}
+                            onChange={(e) => setHomeCmsData(prev => ({
+                              ...prev,
+                              hero: { ...prev.hero, badge: e.target.value }
+                            }))}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Primary CTA Button</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={homeCmsData.hero.primaryCtaText}
+                              onChange={(e) => setHomeCmsData(prev => ({
+                                ...prev,
+                                hero: { ...prev.hero, primaryCtaText: e.target.value }
+                              }))}
+                              placeholder="Text"
+                              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                            />
+                            <input
+                              type="text"
+                              value={homeCmsData.hero.primaryCtaLink}
+                              onChange={(e) => setHomeCmsData(prev => ({
+                                ...prev,
+                                hero: { ...prev.hero, primaryCtaLink: e.target.value }
+                              }))}
+                              placeholder="URL"
+                              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Hero Title Line 1</label>
+                          <input
+                            type="text"
+                            value={homeCmsData.hero.titleLine1}
+                            onChange={(e) => setHomeCmsData(prev => ({
+                              ...prev,
+                              hero: { ...prev.hero, titleLine1: e.target.value }
+                            }))}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Hero Title Line 2</label>
+                          <input
+                            type="text"
+                            value={homeCmsData.hero.titleLine2}
+                            onChange={(e) => setHomeCmsData(prev => ({
+                              ...prev,
+                              hero: { ...prev.hero, titleLine2: e.target.value }
+                            }))}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Division Introduction / Description</label>
+                        <textarea
+                          rows={3}
+                          value={homeCmsData.hero.description}
+                          onChange={(e) => setHomeCmsData(prev => ({
+                            ...prev,
+                            hero: { ...prev.hero, description: e.target.value }
+                          }))}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs leading-relaxed"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Live Hero Preview Card */}
+                  <div className="lg:col-span-4 bg-gradient-to-br from-[#eef7f9] to-[#cfe7ee] p-6 rounded-2xl border border-teal-200 text-slate-900 flex flex-col justify-between shadow-xl">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-black uppercase text-[#00768a] tracking-widest block">
+                        Live Preview (Section 1)
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#006070] block">
+                        {homeCmsData.hero.badge}
+                      </span>
+                      <h4 className="text-xl font-black text-[#003d4d] leading-tight uppercase">
+                        {homeCmsData.hero.titleLine1}<br />
+                        {homeCmsData.hero.titleLine2}
+                      </h4>
+                      <p className="text-xs text-slate-600 line-clamp-4 leading-relaxed">
+                        {homeCmsData.hero.description}
+                      </p>
+                    </div>
+
+                    <div className="pt-4 border-t border-teal-200/80 flex items-center gap-2">
+                      <span className="px-3 py-1.5 rounded-lg bg-[#00768a] text-white text-[10px] font-bold uppercase">
+                        {homeCmsData.hero.primaryCtaText}
+                      </span>
+                      <span className="px-3 py-1.5 rounded-lg bg-white border border-teal-300 text-[#006070] text-[10px] font-bold uppercase">
+                        {homeCmsData.hero.secondaryCtaText}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-Tab 2: Our Story */}
+              {homeCmsSubTab === 'story' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-8 bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
+                      <FileText className="w-4 h-4 text-teal-400" />
+                      Our Story Content (Content_Home.docx)
+                    </h3>
+
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Section Badge</label>
+                          <input
+                            type="text"
+                            value={homeCmsData.ourStory.badge}
+                            onChange={(e) => setHomeCmsData(prev => ({
+                              ...prev,
+                              ourStory: { ...prev.ourStory, badge: e.target.value }
+                            }))}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Headline</label>
+                          <input
+                            type="text"
+                            value={homeCmsData.ourStory.title}
+                            onChange={(e) => setHomeCmsData(prev => ({
+                              ...prev,
+                              ourStory: { ...prev.ourStory, title: e.target.value }
+                            }))}
+                            className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Opening Statement (Bold Lead)</label>
+                        <input
+                          type="text"
+                          value={homeCmsData.ourStory.leadParagraph}
+                          onChange={(e) => setHomeCmsData(prev => ({
+                            ...prev,
+                            ourStory: { ...prev.ourStory, leadParagraph: e.target.value }
+                          }))}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-medium"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Full Story Narrative</label>
+                        <textarea
+                          rows={5}
+                          value={homeCmsData.ourStory.fullParagraph}
+                          onChange={(e) => setHomeCmsData(prev => ({
+                            ...prev,
+                            ourStory: { ...prev.ourStory, fullParagraph: e.target.value }
+                          }))}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs leading-relaxed"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Scientific Mission Quote</label>
+                        <input
+                          type="text"
+                          value={homeCmsData.ourStory.quote}
+                          onChange={(e) => setHomeCmsData(prev => ({
+                            ...prev,
+                            ourStory: { ...prev.ourStory, quote: e.target.value }
+                          }))}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-4 bg-white p-6 rounded-2xl border border-slate-200 text-slate-900 shadow-xl flex flex-col justify-between">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-black uppercase text-[#00768a] tracking-widest block">
+                        Live Preview (Section 2)
+                      </span>
+                      <span className="text-[10px] font-bold uppercase text-[#006070] block">
+                        {homeCmsData.ourStory.badge}
+                      </span>
+                      <h4 className="text-base font-black text-[#003d4d] leading-snug">
+                        {homeCmsData.ourStory.title}
+                      </h4>
+                      <p className="text-xs font-bold text-slate-800 leading-relaxed">
+                        {homeCmsData.ourStory.leadParagraph}
+                      </p>
+                      <p className="text-xs text-slate-600 line-clamp-6 leading-relaxed">
+                        {homeCmsData.ourStory.fullParagraph}
+                      </p>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-100 text-[11px] italic text-[#00768a]">
+                      &ldquo;{homeCmsData.ourStory.quote}&rdquo;
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-Tab 3: 4 Core Pillars & Modals */}
+              {homeCmsSubTab === 'pillars' && (
+                <div className="space-y-6">
+                  {/* Pillar Selector Cards */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {homeCmsData.pillars.map((pillar) => (
+                      <button
+                        key={pillar.id}
+                        onClick={() => setSelectedPillarId(pillar.id)}
+                        className={`p-4 rounded-xl text-left border transition-all ${
+                          selectedPillarId === pillar.id
+                            ? 'bg-[#00768a] text-white border-teal-300 shadow-lg'
+                            : 'bg-[#132247] text-slate-200 border-slate-800 hover:border-slate-700'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-xs font-black">{pillar.number}</span>
+                          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${
+                            selectedPillarId === pillar.id ? 'bg-white/20 text-white' : 'bg-slate-800 text-teal-300'
+                          }`}>
+                            Pillar
+                          </span>
+                        </div>
+                        <div className="font-extrabold text-sm">{pillar.title}</div>
+                        <div className="text-[11px] opacity-80 mt-1 line-clamp-2">{pillar.shortDescription}</div>
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Selected Pillar Editor */}
+                  {(() => {
+                    const currentPillar = homeCmsData.pillars.find(p => p.id === selectedPillarId) || homeCmsData.pillars[0];
+                    if (!currentPillar) return null;
+
+                    const updatePillar = (updates: Partial<RyanPillar>) => {
+                      setHomeCmsData(prev => ({
+                        ...prev,
+                        pillars: prev.pillars.map(p => p.id === currentPillar.id ? { ...p, ...updates } : p)
+                      }));
+                    };
+
+                    return (
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        <div className="lg:col-span-7 bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-4">
+                          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                              <Target className="w-4 h-4 text-teal-400" />
+                              Editing Pillar {currentPillar.number}: {currentPillar.title}
+                            </h3>
+                            <span className="text-[11px] text-teal-300 font-semibold">
+                              Direct Pop-up Modal Config
+                            </span>
+                          </div>
+
+                          <div className="space-y-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-xs font-bold text-slate-300 mb-1">Card Title</label>
+                                <input
+                                  type="text"
+                                  value={currentPillar.title}
+                                  onChange={(e) => updatePillar({ title: e.target.value })}
+                                  className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs font-bold"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-xs font-bold text-slate-300 mb-1">Card Tagline</label>
+                                <input
+                                  type="text"
+                                  value={currentPillar.tagline}
+                                  onChange={(e) => updatePillar({ tagline: e.target.value })}
+                                  className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                                />
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-bold text-slate-300 mb-1">Short Card Summary (Visible on Home Grid)</label>
+                              <textarea
+                                rows={2}
+                                value={currentPillar.shortDescription}
+                                onChange={(e) => updatePillar({ shortDescription: e.target.value })}
+                                className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                              />
+                            </div>
+
+                            <div className="p-4 rounded-xl bg-slate-900/80 border border-teal-800/40 space-y-3">
+                              <div className="text-xs font-black uppercase tracking-wider text-teal-300 flex items-center gap-1.5">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                Interactive Modal Pop-up Content (&lsquo;Now after clicking the box...&rsquo;)
+                              </div>
+
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">Modal Badge</label>
+                                  <input
+                                    type="text"
+                                    value={currentPillar.popupBadge}
+                                    onChange={(e) => updatePillar({ popupBadge: e.target.value })}
+                                    className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[11px] font-semibold text-slate-400 mb-1">Modal Main Headline</label>
+                                  <input
+                                    type="text"
+                                    value={currentPillar.popupTitle}
+                                    onChange={(e) => updatePillar({ popupTitle: e.target.value })}
+                                    className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-bold"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Modal Lead Clinical Statement</label>
+                                <textarea
+                                  rows={2}
+                                  value={currentPillar.popupLead}
+                                  onChange={(e) => updatePillar({ popupLead: e.target.value })}
+                                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                                  Specifications &amp; Bullet Points (Enter one point per line)
+                                </label>
+                                <textarea
+                                  rows={4}
+                                  value={currentPillar.popupPoints.join('\n')}
+                                  onChange={(e) => updatePillar({
+                                    popupPoints: e.target.value.split('\n').filter(p => p.trim())
+                                  })}
+                                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-mono text-[11.5px]"
+                                />
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] font-semibold text-slate-400 mb-1">Clinical Practice Takeaway Note</label>
+                                <textarea
+                                  rows={2}
+                                  value={currentPillar.popupClinicalNote}
+                                  onChange={(e) => updatePillar({ popupClinicalNote: e.target.value })}
+                                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Interactive Modal Preview Window */}
+                        <div className="lg:col-span-5 bg-white rounded-2xl border border-slate-200 text-slate-900 shadow-2xl p-6 flex flex-col justify-between overflow-hidden">
+                          <div>
+                            <div className="bg-[#0e4f63] -mx-6 -mt-6 p-4 text-white rounded-t-2xl mb-4">
+                              <span className="text-[9px] font-black uppercase px-2 py-0.5 rounded-full bg-teal-400 text-teal-950 block w-max mb-1">
+                                {currentPillar.popupBadge}
+                              </span>
+                              <h4 className="text-sm font-black text-white">{currentPillar.popupTitle}</h4>
+                              <span className="text-[10px] text-teal-200">{currentPillar.tagline}</span>
+                            </div>
+
+                            <p className="text-xs font-bold text-slate-800 mb-3">
+                              {currentPillar.popupLead}
+                            </p>
+
+                            <div className="space-y-2 mb-4">
+                              <div className="text-[10px] font-black uppercase text-[#00768a]">Specifications:</div>
+                              {currentPillar.popupPoints.slice(0, 3).map((pt, idx) => (
+                                <div key={idx} className="flex items-start gap-2 text-[11px] text-slate-600 bg-slate-50 p-2 rounded-lg">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />
+                                  <span>{pt}</span>
+                                </div>
+                              ))}
+                            </div>
+
+                            <div className="p-3 rounded-xl bg-teal-50 border border-teal-200 text-[11px] text-slate-700">
+                              <span className="font-bold text-[#006070] block text-[10px] uppercase">Takeaway:</span>
+                              {currentPillar.popupClinicalNote}
+                            </div>
+                          </div>
+
+                          <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                            <span className="text-slate-400">Modal Simulation</span>
+                            <span className="px-3 py-1 bg-slate-100 text-slate-700 font-bold rounded-lg">Close</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+
+              {/* Sub-Tab 4: Quality & Compliance */}
+              {homeCmsSubTab === 'quality' && (
+                <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-4">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    Quality & Compliance Framework
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Badge</label>
+                      <input
+                        type="text"
+                        value={homeCmsData.qualitySection.badge}
+                        onChange={(e) => setHomeCmsData(prev => ({
+                          ...prev,
+                          qualitySection: { ...prev.qualitySection, badge: e.target.value }
+                        }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Main Headline</label>
+                      <input
+                        type="text"
+                        value={homeCmsData.qualitySection.title}
+                        onChange={(e) => setHomeCmsData(prev => ({
+                          ...prev,
+                          qualitySection: { ...prev.qualitySection, title: e.target.value }
+                        }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Description</label>
+                    <textarea
+                      rows={2}
+                      value={homeCmsData.qualitySection.description}
+                      onChange={(e) => setHomeCmsData(prev => ({
+                        ...prev,
+                        qualitySection: { ...prev.qualitySection, description: e.target.value }
+                      }))}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-3">
+                    {homeCmsData.qualitySection.standards.map((std, idx) => (
+                      <div key={idx} className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                        <label className="block text-[11px] font-bold text-teal-300">Standard {idx + 1}</label>
+                        <input
+                          type="text"
+                          value={std.title}
+                          onChange={(e) => {
+                            const updated = [...homeCmsData.qualitySection.standards];
+                            updated[idx] = { ...updated[idx], title: e.target.value };
+                            setHomeCmsData(prev => ({
+                              ...prev,
+                              qualitySection: { ...prev.qualitySection, standards: updated }
+                            }));
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-xs font-bold"
+                        />
+                        <textarea
+                          rows={2}
+                          value={std.desc}
+                          onChange={(e) => {
+                            const updated = [...homeCmsData.qualitySection.standards];
+                            updated[idx] = { ...updated[idx], desc: e.target.value };
+                            setHomeCmsData(prev => ({
+                              ...prev,
+                              qualitySection: { ...prev.qualitySection, standards: updated }
+                            }));
+                          }}
+                          className="w-full px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white text-[11px]"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-Tab 5: Contact Info */}
+              {homeCmsSubTab === 'contact' && (
+                <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-4">
+                  <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
+                    <Phone className="w-4 h-4 text-teal-400" />
+                    Contact &amp; Healthcare Inquiries
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Contact Title</label>
+                      <input
+                        type="text"
+                        value={homeCmsData.contactInfo.title}
+                        onChange={(e) => setHomeCmsData(prev => ({
+                          ...prev,
+                          contactInfo: { ...prev.contactInfo, title: e.target.value }
+                        }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Subtitle</label>
+                      <input
+                        type="text"
+                        value={homeCmsData.contactInfo.subtitle}
+                        onChange={(e) => setHomeCmsData(prev => ({
+                          ...prev,
+                          contactInfo: { ...prev.contactInfo, subtitle: e.target.value }
+                        }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Email</label>
+                      <input
+                        type="text"
+                        value={homeCmsData.contactInfo.email}
+                        onChange={(e) => setHomeCmsData(prev => ({
+                          ...prev,
+                          contactInfo: { ...prev.contactInfo, email: e.target.value }
+                        }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Phone</label>
+                      <input
+                        type="text"
+                        value={homeCmsData.contactInfo.phone}
+                        onChange={(e) => setHomeCmsData(prev => ({
+                          ...prev,
+                          contactInfo: { ...prev.contactInfo, phone: e.target.value }
+                        }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Operating Hours</label>
+                      <input
+                        type="text"
+                        value={homeCmsData.contactInfo.hours}
+                        onChange={(e) => setHomeCmsData(prev => ({
+                          ...prev,
+                          contactInfo: { ...prev.contactInfo, hours: e.target.value }
+                        }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Address</label>
+                    <textarea
+                      rows={2}
+                      value={homeCmsData.contactInfo.address}
+                      onChange={(e) => setHomeCmsData(prev => ({
+                        ...prev,
+                        contactInfo: { ...prev.contactInfo, address: e.target.value }
+                      }))}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* ABOUT RYAN PAGE CMS TAB                                   */}
+          {/* ========================================================= */}
+          {activeTab === 'about-cms' && (
+            <RyanAboutCms
+              data={aboutCmsData}
+              onChange={setAboutCmsData}
+              onSave={handleSaveAboutCms}
+            />
+          )}
+
+          {/* ========================================================= */}
+          {/* FOR DOCTORS PAGE CMS TAB                                 */}
+          {/* ========================================================= */}
+          {activeTab === 'doctors-cms' && (
+            <div className="space-y-6 max-w-7xl mx-auto">
+              {/* Header card with Quick Actions */}
+              <div className="bg-[#132247] p-6 rounded-2xl border border-teal-900/50 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] font-black uppercase tracking-widest">
+                      Live Dynamic CMS
+                    </span>
+                    <span className="text-xs text-slate-400">• Source: Content_For Doctors.png</span>
+                  </div>
+                  <h2 className="text-xl font-black text-white mt-2">
+                    Ryan Dermaceutics For Doctors Portal CMS
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Manage the hero banner, quick access cards, 8 clinical therapeutic categories, scientific dermatology framework, stay updated articles, and partnering banner.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <a
+                    href="/for-doctors"
+                    target="_blank"
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-teal-300 text-xs font-bold flex items-center gap-1.5 border border-slate-700 transition"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Preview /for-doctors</span>
+                  </a>
+                  <button
+                    onClick={handleSaveDoctorsCms}
+                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-2 shadow-lg shadow-teal-950 transition"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Publish Doctors CMS</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Sub-Tabs / Section Selectors */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 border-b border-slate-800">
+                {[
+                  { id: 'hero', label: '1. Hero & Badges', icon: Sparkles },
+                  { id: 'quick-access', label: '2. Quick Access (4 Cards)', icon: Layers },
+                  { id: 'therapeutic', label: '3. Therapeutic Areas (8 Circles)', icon: Target },
+                  { id: 'science', label: '4. Scientific Approach', icon: ShieldCheck },
+                  { id: 'resources', label: '5. Stay Updated Resources', icon: BookOpen },
+                  { id: 'partner', label: '6. Partnering Banner', icon: Phone }
+                ].map((st) => {
+                  const Icon = st.icon;
+                  const isCurrent = doctorsCmsSubTab === st.id;
+                  return (
+                    <button
+                      key={st.id}
+                      onClick={() => setDoctorsCmsSubTab(st.id as any)}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                        isCurrent
+                          ? 'bg-[#00768a] text-white shadow-md'
+                          : 'bg-slate-800/60 text-slate-300 hover:bg-slate-800 hover:text-white'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{st.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Sub-Tab 1: Hero & Badges */}
+              {doctorsCmsSubTab === 'hero' && (
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-8 bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2 border-b border-slate-800 pb-3">
+                      <Sparkles className="w-4 h-4 text-teal-400" />
+                      Hero Section Content
+                    </h3>
+
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">
+                          Eyebrow Badge
+                        </label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.hero.badge}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            hero: { ...prev.hero, badge: e.target.value }
+                          }))}
+                          className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold focus:outline-none focus:border-teal-400"
+                        />
+                      </div>
+
+                      <RichTextEditor
+                        label="Hero Heading (with color palette & rich styling)"
+                        value={doctorsCmsData.hero.heading}
+                        onChange={(val) => setDoctorsCmsData(prev => ({
+                          ...prev,
+                          hero: { ...prev.hero, heading: val }
+                        }))}
+                        rows={2}
+                      />
+
+                      <RichTextEditor
+                        label="Hero Description (with rich styling)"
+                        value={doctorsCmsData.hero.description}
+                        onChange={(val) => setDoctorsCmsData(prev => ({
+                          ...prev,
+                          hero: { ...prev.hero, description: val }
+                        }))}
+                        rows={3}
+                      />
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800">
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Primary CTA Button</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={doctorsCmsData.hero.primaryCtaText}
+                              onChange={(e) => setDoctorsCmsData(prev => ({
+                                ...prev,
+                                hero: { ...prev.hero, primaryCtaText: e.target.value }
+                              }))}
+                              placeholder="Text"
+                              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                            />
+                            <input
+                              type="text"
+                              value={doctorsCmsData.hero.primaryCtaLink}
+                              onChange={(e) => setDoctorsCmsData(prev => ({
+                                ...prev,
+                                hero: { ...prev.hero, primaryCtaLink: e.target.value }
+                              }))}
+                              placeholder="Link URL"
+                              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-xs font-bold text-slate-300 mb-1">Secondary CTA Button</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input
+                              type="text"
+                              value={doctorsCmsData.hero.secondaryCtaText}
+                              onChange={(e) => setDoctorsCmsData(prev => ({
+                                ...prev,
+                                hero: { ...prev.hero, secondaryCtaText: e.target.value }
+                              }))}
+                              placeholder="Text"
+                              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                            />
+                            <input
+                              type="text"
+                              value={doctorsCmsData.hero.secondaryCtaLink}
+                              onChange={(e) => setDoctorsCmsData(prev => ({
+                                ...prev,
+                                hero: { ...prev.hero, secondaryCtaLink: e.target.value }
+                              }))}
+                              placeholder="Link URL"
+                              className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-800">
+                        <MediaInput
+                          label="Doctor Hero Image"
+                          value={doctorsCmsData.hero.doctorImage}
+                          onChange={(url) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            hero: { ...prev.hero, doctorImage: url }
+                          }))}
+                          mediaType="image"
+                        />
+                      </div>
+
+                      <div className="pt-2 border-t border-slate-800">
+                        <label className="block text-xs font-bold text-slate-300 mb-2">
+                          4 Feature Badges Under Hero
+                        </label>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          {doctorsCmsData.hero.features.map((feat, idx) => (
+                            <div key={feat.id}>
+                              <label className="block text-[10px] font-bold text-slate-400 mb-1">
+                                Badge {idx + 1}
+                              </label>
+                              <input
+                                type="text"
+                                value={feat.title}
+                                onChange={(e) => {
+                                  const updated = [...doctorsCmsData.hero.features];
+                                  updated[idx] = { ...updated[idx], title: e.target.value };
+                                  setDoctorsCmsData(prev => ({
+                                    ...prev,
+                                    hero: { ...prev.hero, features: updated }
+                                  }));
+                                }}
+                                className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Live Hero Preview Card */}
+                  <div className="lg:col-span-4 bg-gradient-to-br from-[#eef7f9] to-[#cfe7ee] p-6 rounded-2xl border border-teal-200 text-slate-900 flex flex-col justify-between shadow-xl">
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-black uppercase text-[#00768a] tracking-widest block">
+                        Live Preview (Hero Section)
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#006070] block">
+                        {doctorsCmsData.hero.badge}
+                      </span>
+                      <h4
+                        className="text-lg font-black text-[#003d4d] leading-tight uppercase"
+                        dangerouslySetInnerHTML={{ __html: doctorsCmsData.hero.heading }}
+                      />
+                      <div
+                        className="text-xs text-slate-600 leading-relaxed font-normal"
+                        dangerouslySetInnerHTML={{ __html: doctorsCmsData.hero.description }}
+                      />
+                      <div className="flex gap-2 pt-2">
+                        <span className="px-3 py-1.5 rounded-lg bg-[#00768a] text-white text-[10px] font-bold uppercase">
+                          {doctorsCmsData.hero.primaryCtaText}
+                        </span>
+                        <span className="px-3 py-1.5 rounded-lg bg-white border border-teal-200 text-[#006070] text-[10px] font-bold uppercase">
+                          {doctorsCmsData.hero.secondaryCtaText}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-teal-200/60">
+                      <div className="relative w-full h-36 rounded-xl overflow-hidden bg-white/40 border border-teal-100">
+                        {doctorsCmsData.hero.doctorImage && (
+                          <img
+                            src={doctorsCmsData.hero.doctorImage}
+                            alt="Doctor Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-Tab 2: Quick Access Cards */}
+              {doctorsCmsSubTab === 'quick-access' && (
+                <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-6">
+                  <div className="border-b border-slate-800 pb-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Layers className="w-4 h-4 text-teal-400" />
+                      Quick Access Section (4 Cards)
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Badge</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.quickAccess.badge}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            quickAccess: { ...prev.quickAccess, badge: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Section Heading</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.quickAccess.heading}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            quickAccess: { ...prev.quickAccess, heading: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Section Subheading</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.quickAccess.subheading}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            quickAccess: { ...prev.quickAccess, subheading: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {doctorsCmsData.quickAccess.cards.map((card, idx) => (
+                      <div key={card.id} className="p-4 rounded-xl bg-slate-900 border border-slate-700 space-y-3">
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                          <span className="text-xs font-bold text-teal-300 uppercase">Card {idx + 1}</span>
+                          <span className="text-[10px] text-slate-400">ID: {card.id}</span>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Title</label>
+                          <input
+                            type="text"
+                            value={card.title}
+                            onChange={(e) => {
+                              const updated = [...doctorsCmsData.quickAccess.cards];
+                              updated[idx] = { ...updated[idx], title: e.target.value };
+                              setDoctorsCmsData(prev => ({
+                                ...prev,
+                                quickAccess: { ...prev.quickAccess, cards: updated }
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-955 border border-slate-700 text-white text-xs font-semibold"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Description</label>
+                          <textarea
+                            rows={2}
+                            value={card.description}
+                            onChange={(e) => {
+                              const updated = [...doctorsCmsData.quickAccess.cards];
+                              updated[idx] = { ...updated[idx], description: e.target.value };
+                              setDoctorsCmsData(prev => ({
+                                ...prev,
+                                quickAccess: { ...prev.quickAccess, cards: updated }
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-400 mb-1">Link Text</label>
+                            <input
+                              type="text"
+                              value={card.linkText}
+                              onChange={(e) => {
+                                const updated = [...doctorsCmsData.quickAccess.cards];
+                                updated[idx] = { ...updated[idx], linkText: e.target.value };
+                                setDoctorsCmsData(prev => ({
+                                  ...prev,
+                                  quickAccess: { ...prev.quickAccess, cards: updated }
+                                }));
+                              }}
+                              className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-400 mb-1">Link Destination</label>
+                            <input
+                              type="text"
+                              value={card.linkUrl}
+                              onChange={(e) => {
+                                const updated = [...doctorsCmsData.quickAccess.cards];
+                                updated[idx] = { ...updated[idx], linkUrl: e.target.value };
+                                setDoctorsCmsData(prev => ({
+                                  ...prev,
+                                  quickAccess: { ...prev.quickAccess, cards: updated }
+                                }));
+                              }}
+                              className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs"
+                            />
+                          </div>
+                        </div>
+
+                        <MediaInput
+                          label="Preview Graphic"
+                          value={card.image}
+                          onChange={(url) => {
+                            const updated = [...doctorsCmsData.quickAccess.cards];
+                            updated[idx] = { ...updated[idx], image: url };
+                            setDoctorsCmsData(prev => ({
+                              ...prev,
+                              quickAccess: { ...prev.quickAccess, cards: updated }
+                            }));
+                          }}
+                          mediaType="image"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-Tab 3: Therapeutic Areas (8 Circles) */}
+              {doctorsCmsSubTab === 'therapeutic' && (
+                <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-6">
+                  <div className="border-b border-slate-800 pb-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Target className="w-4 h-4 text-teal-400" />
+                      Explore by Therapeutic Area (8 Circular Categories)
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Badge</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.therapeuticAreas.badge}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            therapeuticAreas: { ...prev.therapeuticAreas, badge: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Heading</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.therapeuticAreas.heading}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            therapeuticAreas: { ...prev.therapeuticAreas, heading: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">View All Button Text</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.therapeuticAreas.viewAllText}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            therapeuticAreas: { ...prev.therapeuticAreas, viewAllText: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">View All Button Link</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.therapeuticAreas.viewAllLink}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            therapeuticAreas: { ...prev.therapeuticAreas, viewAllLink: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 8 Categories Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {doctorsCmsData.therapeuticAreas.categories.map((cat, idx) => (
+                      <div key={cat.id} className="p-3.5 rounded-xl bg-slate-900 border border-slate-700 space-y-2.5">
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
+                          <span className="text-xs font-bold text-teal-300">Category {idx + 1}</span>
+                          <span className="text-[10px] text-slate-400">{cat.id}</span>
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 mb-1">Category Name</label>
+                          <input
+                            type="text"
+                            value={cat.name}
+                            onChange={(e) => {
+                              const updated = [...doctorsCmsData.therapeuticAreas.categories];
+                              updated[idx] = { ...updated[idx], name: e.target.value };
+                              setDoctorsCmsData(prev => ({
+                                ...prev,
+                                therapeuticAreas: { ...prev.therapeuticAreas, categories: updated }
+                              }));
+                            }}
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs font-semibold"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 mb-1">Redirection Link</label>
+                          <input
+                            type="text"
+                            value={cat.link}
+                            onChange={(e) => {
+                              const updated = [...doctorsCmsData.therapeuticAreas.categories];
+                              updated[idx] = { ...updated[idx], link: e.target.value };
+                              setDoctorsCmsData(prev => ({
+                                ...prev,
+                                therapeuticAreas: { ...prev.therapeuticAreas, categories: updated }
+                              }));
+                            }}
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] font-semibold text-slate-400 mb-1">Action Text</label>
+                          <input
+                            type="text"
+                            value={cat.actionText}
+                            onChange={(e) => {
+                              const updated = [...doctorsCmsData.therapeuticAreas.categories];
+                              updated[idx] = { ...updated[idx], actionText: e.target.value };
+                              setDoctorsCmsData(prev => ({
+                                ...prev,
+                                therapeuticAreas: { ...prev.therapeuticAreas, categories: updated }
+                              }));
+                            }}
+                            className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs"
+                          />
+                        </div>
+
+                        <MediaInput
+                          label="Circle Photo"
+                          value={cat.image}
+                          onChange={(url) => {
+                            const updated = [...doctorsCmsData.therapeuticAreas.categories];
+                            updated[idx] = { ...updated[idx], image: url };
+                            setDoctorsCmsData(prev => ({
+                              ...prev,
+                              therapeuticAreas: { ...prev.therapeuticAreas, categories: updated }
+                            }));
+                          }}
+                          mediaType="image"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-Tab 4: Scientific Approach */}
+              {doctorsCmsSubTab === 'science' && (
+                <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-6">
+                  <div className="border-b border-slate-800 pb-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-teal-400" />
+                      Scientific Approach Section
+                    </h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Badge</label>
+                      <input
+                        type="text"
+                        value={doctorsCmsData.scientificApproach.badge}
+                        onChange={(e) => setDoctorsCmsData(prev => ({
+                          ...prev,
+                          scientificApproach: { ...prev.scientificApproach, badge: e.target.value }
+                        }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold"
+                      />
+                    </div>
+
+                    <RichTextEditor
+                      label="Section Heading (with color styling & HTML)"
+                      value={doctorsCmsData.scientificApproach.heading}
+                      onChange={(val) => setDoctorsCmsData(prev => ({
+                        ...prev,
+                        scientificApproach: { ...prev.scientificApproach, heading: val }
+                      }))}
+                      rows={2}
+                    />
+
+                    <RichTextEditor
+                      label="Section Description (with rich text)"
+                      value={doctorsCmsData.scientificApproach.description}
+                      onChange={(val) => setDoctorsCmsData(prev => ({
+                        ...prev,
+                        scientificApproach: { ...prev.scientificApproach, description: val }
+                      }))}
+                      rows={3}
+                    />
+
+                    <MediaInput
+                      label="Scientist & Microscope Image"
+                      value={doctorsCmsData.scientificApproach.image}
+                      onChange={(url) => setDoctorsCmsData(prev => ({
+                        ...prev,
+                        scientificApproach: { ...prev.scientificApproach, image: url }
+                      }))}
+                      mediaType="image"
+                    />
+
+                    <div className="pt-2 border-t border-slate-800">
+                      <label className="block text-xs font-bold text-slate-300 mb-2">
+                        4 Quality & Evidence Framework Badges
+                      </label>
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        {doctorsCmsData.scientificApproach.features.map((feat, idx) => (
+                          <div key={feat.id}>
+                            <label className="block text-[10px] font-bold text-slate-400 mb-1">Badge {idx + 1}</label>
+                            <input
+                              type="text"
+                              value={feat.title}
+                              onChange={(e) => {
+                                const updated = [...doctorsCmsData.scientificApproach.features];
+                                updated[idx] = { ...updated[idx], title: e.target.value };
+                                setDoctorsCmsData(prev => ({
+                                  ...prev,
+                                  scientificApproach: { ...prev.scientificApproach, features: updated }
+                                }));
+                              }}
+                              className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-Tab 5: Stay Updated Resources */}
+              {doctorsCmsSubTab === 'resources' && (
+                <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-6">
+                  <div className="border-b border-slate-800 pb-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <BookOpen className="w-4 h-4 text-teal-400" />
+                      Stay Updated Resources (4 Cards)
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-3">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Badge</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.stayUpdated.badge}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            stayUpdated: { ...prev.stayUpdated, badge: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">Heading</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.stayUpdated.heading}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            stayUpdated: { ...prev.stayUpdated, heading: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">View All Button Text</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.stayUpdated.viewAllText}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            stayUpdated: { ...prev.stayUpdated, viewAllText: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-400 mb-1">View All Button Link</label>
+                        <input
+                          type="text"
+                          value={doctorsCmsData.stayUpdated.viewAllLink}
+                          onChange={(e) => setDoctorsCmsData(prev => ({
+                            ...prev,
+                            stayUpdated: { ...prev.stayUpdated, viewAllLink: e.target.value }
+                          }))}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {doctorsCmsData.stayUpdated.articles.map((art, idx) => (
+                      <div key={art.id} className="p-4 rounded-xl bg-slate-900 border border-slate-700 space-y-3">
+                        <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                          <span className="text-xs font-bold text-teal-300">Article {idx + 1}</span>
+                          <span className="text-[10px] text-slate-400">{art.id}</span>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-400 mb-1">Category Tag</label>
+                            <input
+                              type="text"
+                              value={art.tag}
+                              onChange={(e) => {
+                                const updated = [...doctorsCmsData.stayUpdated.articles];
+                                updated[idx] = { ...updated[idx], tag: e.target.value };
+                                setDoctorsCmsData(prev => ({
+                                  ...prev,
+                                  stayUpdated: { ...prev.stayUpdated, articles: updated }
+                                }));
+                              }}
+                              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[10px] font-semibold text-slate-400 mb-1">Link Text</label>
+                            <input
+                              type="text"
+                              value={art.linkText}
+                              onChange={(e) => {
+                                const updated = [...doctorsCmsData.stayUpdated.articles];
+                                updated[idx] = { ...updated[idx], linkText: e.target.value };
+                                setDoctorsCmsData(prev => ({
+                                  ...prev,
+                                  stayUpdated: { ...prev.stayUpdated, articles: updated }
+                                }));
+                              }}
+                              className="w-full px-2.5 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs"
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Article Title</label>
+                          <input
+                            type="text"
+                            value={art.title}
+                            onChange={(e) => {
+                              const updated = [...doctorsCmsData.stayUpdated.articles];
+                              updated[idx] = { ...updated[idx], title: e.target.value };
+                              setDoctorsCmsData(prev => ({
+                                ...prev,
+                                stayUpdated: { ...prev.stayUpdated, articles: updated }
+                              }));
+                            }}
+                            className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs font-bold"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-semibold text-slate-400 mb-1">Destination URL</label>
+                          <input
+                            type="text"
+                            value={art.linkUrl}
+                            onChange={(e) => {
+                              const updated = [...doctorsCmsData.stayUpdated.articles];
+                              updated[idx] = { ...updated[idx], linkUrl: e.target.value };
+                              setDoctorsCmsData(prev => ({
+                                ...prev,
+                                stayUpdated: { ...prev.stayUpdated, articles: updated }
+                              }));
+                            }}
+                            className="w-full px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-white text-xs"
+                          />
+                        </div>
+
+                        <MediaInput
+                          label="Article Thumbnail"
+                          value={art.image}
+                          onChange={(url) => {
+                            const updated = [...doctorsCmsData.stayUpdated.articles];
+                            updated[idx] = { ...updated[idx], image: url };
+                            setDoctorsCmsData(prev => ({
+                              ...prev,
+                              stayUpdated: { ...prev.stayUpdated, articles: updated }
+                            }));
+                          }}
+                          mediaType="image"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Sub-Tab 6: Partnering Banner */}
+              {doctorsCmsSubTab === 'partner' && (
+                <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 space-y-6">
+                  <div className="border-b border-slate-800 pb-4">
+                    <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-teal-400" />
+                      Partnering For Better Skin Health (Bottom Banner)
+                    </h3>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-300 mb-1">Eyebrow Badge</label>
+                      <input
+                        type="text"
+                        value={doctorsCmsData.partnerBanner.badge}
+                        onChange={(e) => setDoctorsCmsData(prev => ({
+                          ...prev,
+                          partnerBanner: { ...prev.partnerBanner, badge: e.target.value }
+                        }))}
+                        className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs font-semibold"
+                      />
+                    </div>
+
+                    <RichTextEditor
+                      label="Banner Heading (with color styling & HTML)"
+                      value={doctorsCmsData.partnerBanner.heading}
+                      onChange={(val) => setDoctorsCmsData(prev => ({
+                        ...prev,
+                        partnerBanner: { ...prev.partnerBanner, heading: val }
+                      }))}
+                      rows={2}
+                    />
+
+                    <RichTextEditor
+                      label="Banner Description (with rich text)"
+                      value={doctorsCmsData.partnerBanner.description}
+                      onChange={(val) => setDoctorsCmsData(prev => ({
+                        ...prev,
+                        partnerBanner: { ...prev.partnerBanner, description: val }
+                      }))}
+                      rows={3}
+                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-800">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Primary Button</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            value={doctorsCmsData.partnerBanner.primaryCtaText}
+                            onChange={(e) => setDoctorsCmsData(prev => ({
+                              ...prev,
+                              partnerBanner: { ...prev.partnerBanner, primaryCtaText: e.target.value }
+                            }))}
+                            placeholder="Text"
+                            className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                          />
+                          <input
+                            type="text"
+                            value={doctorsCmsData.partnerBanner.primaryCtaLink}
+                            onChange={(e) => setDoctorsCmsData(prev => ({
+                              ...prev,
+                              partnerBanner: { ...prev.partnerBanner, primaryCtaLink: e.target.value }
+                            }))}
+                            placeholder="Link URL"
+                            className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-bold text-slate-300 mb-1">Secondary Button</label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <input
+                            type="text"
+                            value={doctorsCmsData.partnerBanner.secondaryCtaText}
+                            onChange={(e) => setDoctorsCmsData(prev => ({
+                              ...prev,
+                              partnerBanner: { ...prev.partnerBanner, secondaryCtaText: e.target.value }
+                            }))}
+                            placeholder="Text"
+                            className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                          />
+                          <input
+                            type="text"
+                            value={doctorsCmsData.partnerBanner.secondaryCtaLink}
+                            onChange={(e) => setDoctorsCmsData(prev => ({
+                              ...prev,
+                              partnerBanner: { ...prev.partnerBanner, secondaryCtaLink: e.target.value }
+                            }))}
+                            placeholder="Link URL"
+                            className="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-800">
+                      <MediaInput
+                        label="Doctor with Tablet Image"
+                        value={doctorsCmsData.partnerBanner.image}
+                        onChange={(url) => setDoctorsCmsData(prev => ({
+                          ...prev,
+                          partnerBanner: { ...prev.partnerBanner, image: url }
+                        }))}
+                        mediaType="image"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ========================================================= */}
           {/* 2. PRODUCTS & MONOGRAPHS TAB                              */}
           {/* ========================================================= */}
           {activeTab === 'products' && (
+
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 max-w-7xl mx-auto h-[calc(100vh-8.5rem)]">
               {/* Product Selector Sidebar */}
               <div className="lg:col-span-4 bg-[#132247] rounded-2xl border border-slate-800 flex flex-col overflow-hidden shadow-xl">
@@ -1235,6 +3176,17 @@ export default function RyanAdminPortal() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* SEO & SOCIAL GRAPH CMS TAB                                */}
+          {/* ========================================================= */}
+          {activeTab === 'seo' && (
+            <RyanSeoCms
+              seoData={seoData}
+              onChange={setSeoData}
+              onSave={handleSaveSeo}
+            />
           )}
 
           {/* ========================================================= */}
