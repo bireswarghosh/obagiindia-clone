@@ -49,11 +49,11 @@
   background: #f1f0ee;
 }
 ::-webkit-scrollbar-thumb {
-  background: #21275c;
+  background: #00768a;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #0e2238;
+  background: #003d4d;
 }
 
 /* 3D Perspective Utility */

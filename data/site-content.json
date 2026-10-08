@@ -1,16 +1,16 @@
 {
   "theme": {
-    "primaryNavy": "#21275c",
-    "deepNavy": "#0e2238",
-    "accentGold": "#b1843b",
-    "canvasBg": "#f8f7f5",
-    "textDark": "#1a1c20",
-    "textMuted": "#86868f",
-    "borderColor": "rgba(0, 0, 0, 0.08)"
+    "primaryNavy": "#003d4d",
+    "deepNavy": "#002530",
+    "accentGold": "#00768a",
+    "canvasBg": "#f8fafc",
+    "textDark": "#0f172a",
+    "textMuted": "#64748b",
+    "borderColor": "rgba(0, 118, 138, 0.12)"
   },
   "storage": {
     "provider": "local",
-    "bucketName": "obagi-media-bucket",
+    "bucketName": "ryan-media-bucket",
     "endpoint": "https://r2.cloudflare.com",
     "accessKeyId": "",
     "secretAccessKey": "",
@@ -25,369 +25,240 @@
     "region": "ap-south-1"
   },
   "seo": {
-    "metaTitle": "Obagi® Medical India | Transformational Skincare & Clinical Solutions",
-    "metaDescription": "Discover Obagi® Medical India - #1 Leading U.S. Physician Recommended Brand for Pigmentation, Fine Lines, and Skin Rejuvenation.",
-    "keywords": "Obagi® Medical, Nu-Derm, Hydro-Drops, Skincare India, Dermatologist Recommended, Anti-Aging",
-    "ogImage": "https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg",
-    "canonicalUrl": "https://www.obagiindia.com"
+    "metaTitle": "Ryan Dermaceutics | Science That Understands Skin",
+    "metaDescription": "Ryan Dermaceutics, a specialized dermatology division of Ethics Medinova Pvt. Ltd., delivers evidence-based topical, oral, and trichological formulations.",
+    "keywords": "Ryan Dermaceutics, Ethics Medinova, Dermatology India, Tressicle, Tenorium, Blismin, Kefin, Tofaplast, Topical Dermatology, Oral Dermatology",
+    "ogImage": "/ryan/home/home_client_image_7.png",
+    "canonicalUrl": "https://obagiindia.vercel.app/"
   },
   "header": {
-    "logoText": "OBAGI MEDICAL",
-    "logoImageUrl": "",
-    "broughtByText": "Brought to you in India by Specra",
+    "logoText": "RYAN DERMACEUTICS",
+    "logoImageUrl": "/ryan/ryan-logo.png",
+    "broughtByText": "A Specialized Division of Ethics Medinova Pvt. Ltd.",
     "broughtByLogoUrl": "",
+    "broughtByLinkUrl": "https://ethicsmedinova.com/",
     "searchEnabled": true,
+    "searchPlaceholder": "Search formulations, monographs, guides...",
     "navItems": [
       {
-        "id": "why-obagi",
-        "title": "Why Obagi?",
-        "href": "#about",
+        "id": "home",
+        "title": "Home",
+        "href": "/",
+        "dropdown": []
+      },
+      {
+        "id": "company",
+        "title": "Company",
+        "href": "/about",
         "dropdown": [
-          {
-            "title": "Our Science",
-            "href": "#research"
-          },
-          {
-            "title": "Clinical Results",
-            "href": "#history"
-          },
-          {
-            "title": "Physician Heritage",
-            "href": "#trust"
-          }
+          { "title": "About Ryan Dermaceutics", "href": "/about" },
+          { "title": "Our Vision & Approach", "href": "/about#vision" },
+          { "title": "Quality Framework", "href": "/about#quality" },
+          { "title": "Parent Company", "href": "/about#parent" }
         ]
       },
       {
-        "id": "skin-concern",
-        "title": "Skin Concern",
-        "href": "#trust",
+        "id": "products",
+        "title": "Products",
+        "href": "/products",
         "dropdown": [
-          {
-            "title": "Pigmentation & Sun Damage",
-            "href": "#cards"
-          },
-          {
-            "title": "Fine Lines & Wrinkles",
-            "href": "#cards"
-          },
-          {
-            "title": "Dry & Sensitive Skin",
-            "href": "#cards"
-          },
-          {
-            "title": "Acne & Blemishes",
-            "href": "#cards"
-          }
+          { "title": "All Formulations (54+)", "href": "/products" },
+          { "title": "Topical Formulations", "href": "/products?route=Topical" },
+          { "title": "Oral & Systemic", "href": "/products?route=Oral" },
+          { "title": "Trichology & Scalp", "href": "/products?area=Hair" }
         ]
       },
       {
-        "id": "product-range",
-        "title": "Product Range",
-        "href": "#cards",
+        "id": "for-doctors",
+        "title": "For Doctors",
+        "href": "/for-doctors",
         "dropdown": [
-          {
-            "title": "Nu-Derm Fx™ Systems",
-            "href": "#cards"
-          },
-          {
-            "title": "Daily Hydro-Drops™",
-            "href": "#cards"
-          },
-          {
-            "title": "Nu-Cil® Hair & Lash",
-            "href": "#cards"
-          }
+          { "title": "Therapeutic Resources", "href": "/for-doctors/therapeutic-resources" },
+          { "title": "Prescribing Information (PI)", "href": "/for-doctors/prescribing-information" },
+          { "title": "Reference Library", "href": "/for-doctors/reference-library" },
+          { "title": "Medical Information", "href": "/for-doctors/medical-information" }
         ]
       },
       {
-        "id": "find-obagi",
-        "title": "Find Obagi",
-        "href": "#newsletter"
+        "id": "contact",
+        "title": "Contact",
+        "href": "#contact",
+        "dropdown": []
       }
-    ],
-    "logoColor": "#ffffff",
-    "logoPosition": "left",
-    "broughtByLinkUrl": "https://www.spectramedicals.com/"
+    ]
+  },
+  "marquee": {
+    "enabled": true,
+    "text": "SCIENCE THAT UNDERSTANDS SKIN          |          SPECIALIZED DERMATOLOGY DIVISION          |          WHO-GMP COMPLIANT STANDARDS          |          COLLABORATIVE MEDICAL PARTNERSHIP",
+    "speedSeconds": 20,
+    "textColor": "#ffffff",
+    "backgroundColor": "#003d4d"
   },
   "hero": {
-    "heading": "Obagi® Medical India www",
-    "headingColor": "#ffffff",
-    "subtitle": "WINNER 2025\nSkin Product / Range of the Year\n-Aesthetic Awards",
-    "subtitleColor": "#ffffff",
-    "awardBadge": "WINNER 2025",
-    "awardText": "Skin Product / Range of the Year\n-Aesthetic Awards",
-    "mediaType": "video",
-    "mediaUrl": "https://video.wixstatic.com/video/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60/720p/mp4/file.mp4",
-    "posterUrl": "https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg/v1/fill/w_1265,h_585,al_c,q_85,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg",
+    "heading": "SCIENCE THAT UNDERSTAND SKIN",
+    "headingColor": "#003d4d",
+    "subtitle": "Science | Efficacy   •   Skin Health | Quality   •   Clinical Confidence",
+    "subtitleColor": "#00768a",
+    "awardBadge": "RYAN DERMACEUTICS",
+    "awardText": "Specialized Dermatology Division",
+    "mediaType": "image",
+    "mediaUrl": "/ryan/home/home_client_image_7.png",
+    "posterUrl": "/ryan/home/home_client_image_7.png",
     "backgroundColor": "",
     "autoPlay": true,
     "loop": true,
     "morphEnabled": true,
-    "morphSpeed": 1,
-    "admin_editable": true
+    "morphSpeed": 1
   },
   "trustBanner": {
-    "heading": "#1 Leading U.S. Physician Recommended Brand*",
-    "tagline": "FOR TOP 3 SKIN CONCERNS: Pigmentation | Fine Lines & Wrinkles | Sagging Skin & Loss of Elasticity",
-    "concern1": "Pigmentation & Melasma",
-    "concern2": "Fine Lines & Wrinkles",
-    "concern3": "Loss of Elasticity",
-    "experienceText": "Over 35 years of clinically proven transformational skincare.",
-    "disclaimer": "*Kline 2024 Physician-Dispensed Skincare Market Report.",
-    "headingColor": "#2B328C",
-    "taglineColor": "#2B328C",
-    "items": [
-      {
-        "id": "tb-1",
-        "title": "OBAGI® MEDICAL IS THE ORIGINAL",
-        "description": "As pioneers of medical-grade skincare, we transformed the industry with a commitment to science and unmatched standards. For over 35 years, our products have delivered trusted, transformative results across all skin types."
-      },
-      {
-        "id": "tb-2",
-        "title": "TRUST OVER TRENDS",
-        "description": "We transform skin through clinically proven, science backed solutions. We are obsessed with achieving skincare perfection and transforming lives by seeing skin differently. Trusted by professionals worldwide, serving over 80 countries across the globe."
-      },
-      {
-        "id": "tb-3",
-        "title": "PHARMA GRADE INGREDIENTS AND PRESCRIPTION STRENGTH TREATMENTS",
-        "description": "Our cutting-edge formulations are created with pure, potent ingredients at efficacious concentrations that produce the most optimal outcomes."
-      },
-      {
-        "id": "tb-4",
-        "title": "TIRELESSLY TESTED",
-        "description": "The deepest range of clinical testing (in-vitro and in-vivo) to assess the truly transformative and skin tolerated results on all skin types and tones."
-      }
-    ]
+    "heading": "SCIENCE THAT UNDERSTAND SKIN",
+    "headingColor": "#003d4d",
+    "tagline": "Science | Efficacy   •   Skin Health | Quality   •   Clinical Confidence",
+    "taglineColor": "#00768a",
+    "concern1": "Science | Efficacy",
+    "concern2": "Skin Health | Quality",
+    "concern3": "Clinical Confidence",
+    "experienceText": "At Ryan Dermaceutics, our purpose extends beyond treating the visible signs of a skin disorder. We strive to understand the clinical challenges behind dermatological conditions and provide therapeutic solutions that address them with precision, consistency and purpose.",
+    "disclaimer": "*Manufactured under WHO-GMP certified protocols with validated stability testing.",
+    "backgroundColor": ""
   },
   "history": {
-    "title": "Our History",
-    "titleColor": "#2B328C",
-    "description": "With over 35 years of clinically proven results, Obagi Medical Products are the Number 1 physician dispensed skin care brand. Obagi Medical products have grown from humble beginnings to having hundreds of thousands of devotees, our vision however hasn’t changed – to transform the skin industry and create a more confident and fearless future. We never take our eyes off tomorrow. That’s the secret behind creating a skin care future that is intelligent, accessible and healthier than ever.",
-    "textColor": "#2B328C",
+    "title": "Our Story",
+    "titleColor": "#003d4d",
+    "description": "Ryan Dermaceutics is a specialized dermatology division bringing together topical, oral and supportive products across multiple therapeutic areas. Our portfolio is designed around the evolving needs of dermatology practice and professional healthcare.",
+    "paragraph1": "Ryan Dermaceutics is a specialized dermatology division bringing together topical, oral and supportive products across multiple therapeutic areas. Our portfolio is designed around the evolving needs of dermatology practice and professional healthcare.",
+    "paragraph2": "Built on three guiding pillars—Focus, Quality, and Partnership—we work closely with dermatologists and healthcare institutions across India to deliver consistent, dependable clinical formulations.",
+    "textColor": "#003d4d",
     "backgroundColor": "",
     "layoutType": "grid",
-    "primaryImage": "https://static.wixstatic.com/media/4833d7_b81f1121c3eb4ed6807efe18902fb0a1~mv2.jpg/v1/fill/w_915,h_653,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/obagi-nu-derm-fx-collection-1600x1600.jpg",
-    "badgeAward": "Aesthetics Award Winner 2025",
-    "badgeYear": "2025",
-    "badgeImage": "https://static.wixstatic.com/media/4833d7_3a4748500da24047881d90f975d42006~mv2.jpg/v1/fill/w_401,h_222,al_c,lg_1,q_80,enc_avif,quality_auto/aaw2025.jpg",
-    "dropperImage": "https://static.wixstatic.com/media/4833d7_43702b8008e5402c8c805580c51dbcd8~mv2.jpg/v1/fill/w_458,h_653,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/OBAGI_Lifestyle_Model_Product_Texture_Dropper_HiRes.jpg",
-    "portraitImage": "https://static.wixstatic.com/media/4833d7_d3685f4b98c2433cb940f7111041fb92~mv2.jpg/v1/fill/w_458,h_297,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/20221111_Fitzpatrick1-PortraitWithProduct-Hydration-HydrateLuxe-DHD_3989_HIRES.jpg"
+    "primaryImage": "/ryan/home/home_client_image_1.png",
+    "badgeAward": "WHO-GMP Compliant",
+    "badgeYear": "2026",
+    "badgeImage": "/ryan/about/quality_microscope.png",
+    "dropperImage": "/ryan/about/portfolio_topical.png",
+    "portraitImage": "/ryan/about/portfolio_oral.png",
+    "galleryImages": [
+      "/ryan/home/home_client_image_1.png",
+      "/ryan/home/home_client_image_2.png"
+    ]
   },
   "about": {
-    "title": "About Obagi Medical",
-    "titleColor": "#2B328C",
-    "quote": "“We are a complete skin care company, designing transformational products that promote skin health — and build on our legacy of science and innovation.”",
-    "quoteColor": "#2B328C",
-    "paragraph": "Obagi Medical® Products have been specifically formulated to transform the skin from within to result in younger, healthier-looking skin. The Obagi Medical® Product range helps reduce the visible signs of ageing such as fine-lines, wrinkles, melasma (dark sports), hyper-pigmentation, laxity and uneven texture with additional targeted treatments for acne.",
-    "paragraphColor": "#2B328C",
-    "buttonText": "Explore Obagi",
-    "buttonLink": "#comp-lwrl9iel",
+    "title": "About Ryan Dermaceutics",
+    "titleColor": "#003d4d",
+    "quote": "To advance dermatology care by providing evidence-based formulations and supporting healthcare professionals with relevant clinical resources.",
+    "quoteColor": "#003d4d",
+    "paragraph": "Ryan Dermaceutics is built on three guiding principles: Dermatology Focus, High Standards of Quality, and Collaborative Medical Partnership. Our formulations undergo stringent quality control in WHO-GMP certified facilities to ensure optimal patient outcomes and consistent efficacy.",
+    "paragraphColor": "#003d4d",
+    "buttonText": "Explore Company",
+    "buttonLink": "/about",
     "backgroundColor": ""
   },
   "research": {
-    "title": "Obagi Research & Development",
+    "title": "Research & Quality Framework",
     "titleColor": "#FFFFFF",
-    "description": "At Obagi, we believe skin care is about more than “correcting” or even “preventing;” it’s about unleashing your skin’s full potential. That’s why we create inclusive products backed by scientifically proven formulations.",
+    "description": "At Ryan Dermaceutics, formulation integrity is paramount. We adhere to an 8-pillar quality framework covering active ingredient purity, vehicle optimization, stability, and patient compliance.",
     "textColor": "#FFFFFF",
-    "backgroundImage": "https://static.wixstatic.com/media/4833d7_638d2b9c993f41aeb733907173f188bc~mv2.webp/v1/fill/w_1898,h_309,fp_0.48_0.74,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/4833d7_638d2b9c993f41aeb733907173f188bc~mv2.webp",
-    "backgroundColor": "#161D6F",
+    "backgroundImage": "/ryan/about/quality_microscope.png",
+    "backgroundColor": "#003d4d",
     "items": [
       {
         "id": "res-1",
-        "icon": "Microscope",
-        "title": "Cellular Penetration",
-        "description": "Optimized molecular transport delivers active ingredients deep into dermal layers."
+        "title": "Formulation Optimization",
+        "description": "Vehicle selection tailored for target tissue penetration, minimal irritation, and high patient compliance.",
+        "imageUrl": "/ryan/about/about_approach_petri.png",
+        "hoverEffect": "zoom"
       },
       {
         "id": "res-2",
-        "icon": "Shield",
-        "title": "Clinical Efficacy",
-        "description": "Double-blind clinical trials validate significant reduction in visible hyperpigmentation."
+        "title": "Quality Assurance",
+        "description": "Systematic batch testing, assay verification, and microbiological compliance in WHO-GMP facilities.",
+        "imageUrl": "/ryan/about/quality_microscope.png",
+        "hoverEffect": "blur"
       },
       {
         "id": "res-3",
-        "icon": "Award",
-        "title": "Physician Tested",
-        "description": "Tested across all Fitzpatrick skin types (I - VI) for complete safety and biocompatibility."
+        "title": "Clinician Collaboration",
+        "description": "Formulations developed in close consultation with leading dermatology practitioners across India.",
+        "imageUrl": "/ryan/about/ethics_building.png",
+        "hoverEffect": "zoom"
       }
     ]
   },
-  "stickyCircle": {
-    "imageUrl": "https://static.wixstatic.com/media/c837a6_297eb5ebbb894e709a4ae04906201fa2~mv2.jpg/v1/fill/w_1898,h_1000,al_c,q_85/pexels-luu-thanh-truc-335871-9085814.jpg",
-    "startPercent": 18,
-    "endPercent": 90
-  },
   "cardsSection": {
-    "pinkSerumImage": "https://static.wixstatic.com/media/c837a6_297eb5ebbb894e709a4ae04906201fa2~mv2.jpg/v1/fill/w_1898,h_353,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/pexels-luu-thanh-truc-335871-9085814.jpg",
-    "morphSpeed": 1.2,
+    "pinkSerumImage": "/ryan/about/portfolio_topical.png",
+    "morphSpeed": 1.0,
+    "cardCount": 3,
+    "foldAngle": 12,
     "cards": [
       {
         "id": "card-1",
         "number": "1",
-        "title": "Obagi Nu-Derm Fx™ Systems",
-        "subtitle": "Reveal Younger, Healthier-Looking Skin",
-        "description": "Ideal for: Age Spots, Hyperpigmentation, Rough Skin, Sallowness, Redness. Specially formulated with 7% Arbutin to clear skin discoloration and promote cellular renewal.",
-        "imageUrl": "https://static.wixstatic.com/media/4833d7_b81f1121c3eb4ed6807efe18902fb0a1~mv2.jpg/v1/fill/w_446,h_446,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/obagi-nu-derm-fx-collection-1600x1600.jpg",
+        "title": "TRESSICLE 5 & FORTE",
+        "subtitle": "Advanced Trichological Solutions",
+        "description": "Topical and oral formulations including Minoxidil 5% and Minoxidil + Finasteride combinations for androgenetic alopecia management.",
+        "imageUrl": "/ryan/about/portfolio_hair.png",
         "bgColor": "#FFFFFF",
-        "textColor": "#2B328C",
+        "textColor": "#003d4d",
         "order": 1,
         "visible": true
       },
       {
         "id": "card-2",
         "number": "2",
-        "title": "Obagi Daily Hydro-Drops",
-        "subtitle": "Radiance in every drop",
-        "description": "Daily Hydro-Drops™ are hypoallergenic, non-comedogenic, so won’t block pores, dermatologist and ophthalmologist tested. Infused with Vitamin B3, Abyssinian Oil, and Hibiscus Oil.",
-        "imageUrl": "https://static.wixstatic.com/media/4833d7_0e709d6bf09f449a95982e60334a21d0~mv2.jpg/v1/fill/w_446,h_446,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/2022Q4WEBSHOOT_Hydrate_DHD_r2_PDPmacro_4400x4400_72dpi.jpg",
+        "title": "TENORIUM & POTENCY LADDER",
+        "subtitle": "Targeted Corticosteroid Therapeutics",
+        "description": "A structured corticosteroid ladder spanning superpotent Clobetasol Propionate (TENORIUM) through Mometasone and Fluticasone options.",
+        "imageUrl": "/ryan/about/portfolio_topical.png",
         "bgColor": "#FFFFFF",
-        "textColor": "#2B328C",
+        "textColor": "#003d4d",
         "order": 2,
         "visible": true
       },
       {
         "id": "card-3",
         "number": "3",
-        "title": "Nu-Cil® Hair & Lash",
-        "subtitle": "Powered by NouriPlex™ Technology",
-        "description": "Nourishes and visibly thickens thinning eyelashes and eyebrows. Tested and proven to enhance follicle volume and lash density.",
-        "imageUrl": "https://static.wixstatic.com/media/4833d7_e37f8725511940928a31982f09cceeeb~mv2.jpg/v1/fill/w_446,h_446,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/cohley_elastiderm-facial-serum_greta-berzonskiene_727612_RETOUCHED.jpg",
+        "title": "BLISMIN 20 & HIVOZIN 5",
+        "subtitle": "Modern H1 Antihistamines",
+        "description": "Second-generation non-sedating H1 antihistamines providing rapid, sustained relief in acute and chronic urticaria and allergic pruritus.",
+        "imageUrl": "/ryan/about/portfolio_oral.png",
         "bgColor": "#FFFFFF",
-        "textColor": "#2B328C",
+        "textColor": "#003d4d",
         "order": 3,
         "visible": true
       }
-    ],
-    "awardVideoUrl": "https://video.wixstatic.com/video/4833d7_958d8b59c22f449990b3c2a75c660389/720p/mp4/file.mp4",
-    "awardVideoPoster": "https://static.wixstatic.com/media/4833d7_958d8b59c22f449990b3c2a75c660389f001.jpg/v1/fill/w_1265,h_200,al_c,q_80,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_958d8b59c22f449990b3c2a75c660389f001.jpg",
-    "awardVideoLabel": "New beauty award 2024",
-    "awardVideoAutoPlay": true
+    ]
+  },
+  "stickyCircle": {
+    "imageUrl": "/ryan/about/quality_microscope.png",
+    "startPercent": 20,
+    "endPercent": 80
   },
   "newsletter": {
-    "newsletterTitle": "Join The OBAGI Newsletter",
-    "newsletterDesc": "Be the first to receive the latest scientific innovations, product launches, and exclusive clinical skincare updates.",
-    "newsletterImage": "https://static.wixstatic.com/media/4833d7_0e709d6bf09f449a95982e60334a21d0~mv2.jpg",
+    "heading": "STAY INFORMED ON DERMATOLOGY DEVELOPMENTS",
+    "description": "Receive product updates, scientific monographs, and clinical practice insights from Ryan Dermaceutics.",
     "buttonText": "Subscribe",
-    "subscribers": [
-      {
-        "id": "sub-1790324438384",
-        "email": "test.dermatology@obagi.in",
-        "date": "9/25/2026, 1:50:38 PM"
-      },
-      {
-        "id": "sub-1",
-        "email": "dr.sharma.clinic@example.com",
-        "date": "2026-09-24 10:30 AM"
-      },
-      {
-        "id": "sub-2",
-        "email": "aesthetics.mumbai@example.com",
-        "date": "2026-09-25 08:15 AM"
-      }
-    ]
+    "placeholder": "Enter your professional email address",
+    "disclaimer": "We respect medical privacy. Unsubscribe anytime."
   },
   "footer": {
-    "logoText": "OBAGI MEDICAL",
-    "companyName": "Specra Healthcare India",
-    "address": "Mumbai & New Delhi, India",
-    "email": "support@obagiindia.com",
-    "phone": "+91 22 6828 0000",
-    "copyright": "© 2026 Obagi Cosmeceuticals LLC. Brought to you in India by Specra Healthcare. All rights reserved.",
+    "brandName": "RYAN DERMACEUTICS",
+    "tagline": "A Specialized Division of Ethics Medinova Private Limited",
+    "description": "Delivering evidence-based dermatology and trichology formulations manufactured in WHO-GMP compliant facilities to serve healthcare practitioners across India.",
+    "complianceText": "Products manufactured under WHO-GMP compliance. Prescriptions are subject to applicable Schedule H / Rx drug laws in India.",
+    "copyrightText": "© 2026 Ryan Dermaceutics (Ethics Medinova Pvt. Ltd.). All Rights Reserved.",
     "askAiEnabled": true,
     "quickLinks": [
-      {
-        "title": "Why Obagi?",
-        "href": "#comp-lwrl1yo4"
-      },
-      {
-        "title": "Our Science",
-        "href": "#comp-mlqlr0fm"
-      },
-      {
-        "title": "Product Range",
-        "href": "#comp-lwrl9iel"
-      },
-      {
-        "title": "Newsletter",
-        "href": "#comp-lx8nvywg"
-      }
+      { "title": "Home", "href": "/" },
+      { "title": "Company / About Ryan", "href": "/about" },
+      { "title": "Product Catalog (54+)", "href": "/products" },
+      { "title": "Therapeutic Resources", "href": "/for-doctors/therapeutic-resources" },
+      { "title": "Prescribing Information (PI)", "href": "/for-doctors/prescribing-information" },
+      { "title": "Dermatology Reference Library", "href": "/for-doctors/reference-library" },
+      { "title": "Clinical Contact Desk", "href": "#contact" }
     ],
     "socialLinks": [
-      {
-        "platform": "Instagram",
-        "url": "https://instagram.com/obagimedical"
-      },
-      {
-        "platform": "LinkedIn",
-        "url": "https://linkedin.com/company/obagi"
-      }
+      { "platform": "linkedin", "url": "https://linkedin.com" },
+      { "platform": "email", "url": "mailto:medinfo@ryandermaceutics.com" }
     ]
-  },
-  "approach": {
-    "sectionTitle": "Our Scientific Philosophy",
-    "tabs": [
-      {
-        "key": "approach",
-        "title": "Our Approach to Innovation",
-        "desc": "At Obagi, breakthrough innovation begins with a deep understanding of skin biology and patient needs. We combine dermatologist insights with state-of-the-art biochemistry to formulate solutions that create visible, lasting cellular improvements.",
-        "image": "https://static.wixstatic.com/media/4833d7_8df05a975c034ffe9ab6011eff353dc0~mv2.webp/v1/fill/w_564,h_728,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/scientist-pouring-red-liquid_2560x.webp",
-        "visible": true
-      },
-      {
-        "key": "progress",
-        "title": "Our Process",
-        "desc": "Our rigorous product development process leaves no stone left unturned. No detail is too small when formulating transformational products that deliver clinically meaningful results.",
-        "image": "https://static.wixstatic.com/media/4833d7_89f2940aeb7f44dd80b03fba406941b4~mv2.webp/v1/fill/w_496,h_640,al_c,q_80,enc_avif,quality_auto/woman-scientist-doing-experiment_960x.webp",
-        "visible": true
-      },
-      {
-        "key": "standard",
-        "title": "Our Standards",
-        "desc": "Genuine Obagi - Obagi is committed to set and uphold the highest product testing standards. We conduct clinical testing across all Fitzpatrick skin phototypes to ensure universal safety and efficacy.",
-        "image": "https://static.wixstatic.com/media/4833d7_58d317fb587b4fe99de2c8ee9ed76531~mv2.webp/v1/fill/w_496,h_640,al_c,q_80,enc_avif,quality_auto/science-research-lab-microscope_960x.webp",
-        "visible": true
-      }
-    ]
-  },
-  "quote": {
-    "quoteText": "“Obagi transformed our approach to medical skincare. The clinical efficacy and cellular transformation speak for themselves.”",
-    "quoteAuthor": "Dr. Megan Brown, MD",
-    "quoteRole": "Dermatological Aesthetics & Clinical Advisor",
-    "quoteImage": "./Obagi India _ obagi products_files/CEO.jpg",
-    "textColor": "#2B328C",
-    "backgroundColor": "#FFFFFF"
-  },
-  "marquee": {
-    "enabled": true,
-    "text": "CLINICALLY-TESTED          |          TRANSFORMATIONAL SKINCARE          |          35 YEARS OF EXPERTISE          |          TRUSTED BY PHYSICIANS          |          PROVEN RESULTS",
-    "speedSeconds": 20,
-    "textColor": "#ffffff",
-    "backgroundColor": "#2B328C"
-  },
-  "floatingWidget": {
-    "enabled": true,
-    "mainButtonText": "Chat with AI",
-    "unreadBadgeText": "Need Help?",
-    "prompts": [
-      "Want to know about Obagi Nu-Derm Fx™ Systems?",
-      "Explore Obagi",
-      "Address the Signs of Aging Skin"
-    ],
-    "accentColor": "#161D6F"
-  },
-  "security": {
-    "pinCode": "1234",
-    "twoFactorEnabled": false,
-    "sessionDurationHours": 24
-  },
-  "activityLogs": [
-    {
-      "id": "log-init",
-      "timestamp": "9/25/2026, 10:00:05 PM",
-      "user": "Administrator",
-      "action": "System Initialized",
-      "section": "System",
-      "details": "Obagi India Enterprise CMS initialized"
-    }
-  ]
+  }
 }

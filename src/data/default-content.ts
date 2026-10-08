@@ -95,15 +95,15 @@ export const defaultSiteData: FullSiteData = {
     backgroundColor: '#003d4d'
   },
   hero: {
-    heading: 'Ryan Dermaceutics',
+    heading: 'SCIENCE THAT UNDERSTAND SKIN',
     headingColor: '#003d4d',
-    subtitle: 'A Specialized Focus on Dermatology\nBacked by Science & WHO-GMP Quality',
+    subtitle: 'Science | Efficacy   •   Skin Health | Quality   •   Clinical Confidence',
     subtitleColor: '#00768a',
-    awardBadge: 'ETHICS MEDINOVA',
+    awardBadge: 'RYAN DERMACEUTICS',
     awardText: 'Specialized Dermatology Division',
     mediaType: 'image',
-    mediaUrl: '/ryan/about/about_hero_collage.png',
-    posterUrl: '/ryan/about/about_hero_collage.png',
+    mediaUrl: '/ryan/home/home_client_image_7.png',
+    posterUrl: '/ryan/home/home_client_image_7.png',
     backgroundColor: '',
     autoPlay: true,
     loop: true,
@@ -111,21 +111,23 @@ export const defaultSiteData: FullSiteData = {
     morphSpeed: 1
   },
   history: {
-    title: 'Our Heritage & Foundation',
+    title: 'Our Story',
     titleColor: '#003d4d',
-    description: 'Ryan Dermaceutics operates as a dedicated dermatology division of Ethics Medinova Private Limited. With focused commitment on evidence-based formulation science and clinician collaboration, we address diverse dermatological conditions spanning acne, superficial fungal infections, chronic inflammatory dermatoses, and trichological disorders.',
+    description: 'Ryan Dermaceutics is a specialized dermatology division bringing together topical, oral and supportive products across multiple therapeutic areas. Our portfolio is designed around the evolving needs of dermatology practice and professional healthcare.',
+    paragraph1: 'Ryan Dermaceutics is a specialized dermatology division bringing together topical, oral and supportive products across multiple therapeutic areas. Our portfolio is designed around the evolving needs of dermatology practice and professional healthcare.',
+    paragraph2: 'Built on three guiding pillars—Focus, Quality, and Partnership—we work closely with dermatologists and healthcare institutions across India to deliver consistent, dependable clinical formulations.',
     textColor: '#003d4d',
     backgroundColor: '',
     layoutType: 'grid',
-    primaryImage: '/ryan/about/about_approach_petri.png',
+    primaryImage: '/ryan/home/home_client_image_1.png',
     badgeAward: 'WHO-GMP Compliant',
     badgeYear: '2026',
     badgeImage: '/ryan/about/quality_microscope.png',
     dropperImage: '/ryan/about/portfolio_topical.png',
     portraitImage: '/ryan/about/portfolio_oral.png',
     galleryImages: [
-      '/ryan/about/about_hero_collage.png',
-      '/ryan/about/ethics_building.png'
+      '/ryan/home/home_client_image_1.png',
+      '/ryan/home/home_client_image_2.png'
     ]
   },
   about: {

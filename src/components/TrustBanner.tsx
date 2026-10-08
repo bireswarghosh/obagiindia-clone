@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { TrustBannerSettings, ThemeColors } from '@/types/content';
-import { Sparkles, CheckCircle2 } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 
 interface TrustBannerProps {
   trust: TrustBannerSettings;
@@ -10,49 +10,61 @@ interface TrustBannerProps {
 }
 
 export default function TrustBanner({ trust, theme }: TrustBannerProps) {
+  const heading = trust?.heading || '#1 LEADING DERMATOLOGY-RECOMMENDED FORMULATIONS';
+  const concern1 = trust?.concern1 || 'Topical Potency & Formulations';
+  const concern2 = trust?.concern2 || 'Oral & Systemic Therapies';
+  const concern3 = trust?.concern3 || 'Trichology & Scalp Care';
+  const experienceText = trust?.experienceText || 'Developed by dermatology professionals for clinical efficacy and patient care.';
+  const disclaimer = trust?.disclaimer || '*Manufactured under WHO-GMP certified protocols with validated stability testing.';
+
   return (
-    <section id="trust" className="py-20 px-4 sm:px-6 lg:px-8 bg-white border-b" style={{ borderColor: theme.borderColor }}>
-      <div className="max-w-5xl mx-auto text-center">
-        {/* Main Brand Claim */}
+    <section
+      id="trust-banner"
+      className="py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-white border-b text-center relative"
+      style={{ borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)' }}
+    >
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+        {/* Main Heading matching Screen 4 of original Obagi layout */}
         <h2
-          className="font-serif text-3xl sm:text-5xl font-bold tracking-tight mb-6"
-          style={{ color: theme.primaryNavy }}
+          className="font-serif text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight leading-tight"
+          style={{ color: theme?.primaryNavy || '#003d4d' }}
         >
-          {trust.heading}
+          {heading}
         </h2>
 
-        {/* Tagline */}
-        <p className="text-base sm:text-lg font-semibold tracking-wide uppercase mb-10 text-slate-700">
-          {trust.tagline}
-        </p>
+        {/* 3 Horizontal Concern / Specialty Checkmarks */}
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 pt-2">
+          <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-full bg-slate-50 border border-slate-200 shadow-2xs">
+            <CheckCircle2 className="w-4 h-4 text-[#00768a] shrink-0" />
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800">
+              {concern1}
+            </span>
+          </div>
 
-        {/* 3 Key Skin Concerns */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">
-          {[
-            trust?.concern1 || 'Topical Potency & Formulations',
-            trust?.concern2 || 'Oral & Systemic Therapies',
-            trust?.concern3 || 'Trichology & Scalp Care'
-          ].map((concern, idx) => (
-            <div
-              key={idx}
-              className="p-5 rounded-2xl border bg-slate-50/60 flex items-center justify-center gap-3 transition-transform hover:-translate-y-1"
-              style={{ borderColor: theme.borderColor }}
-            >
-              <CheckCircle2 className="w-5 h-5 flex-shrink-0" style={{ color: theme.accentGold }} />
-              <span className="font-semibold text-sm" style={{ color: theme.deepNavy }}>
-                {concern}
-              </span>
-            </div>
-          ))}
+          <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-full bg-slate-50 border border-slate-200 shadow-2xs">
+            <CheckCircle2 className="w-4 h-4 text-[#00768a] shrink-0" />
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800">
+              {concern2}
+            </span>
+          </div>
+
+          <div className="inline-flex items-center gap-2.5 px-4 sm:px-5 py-2.5 rounded-full bg-slate-50 border border-slate-200 shadow-2xs">
+            <CheckCircle2 className="w-4 h-4 text-[#00768a] shrink-0" />
+            <span className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-800">
+              {concern3}
+            </span>
+          </div>
         </div>
 
-        {/* Experience statement & Disclaimer */}
-        <p className="text-slate-600 text-sm sm:text-base font-normal max-w-2xl mx-auto leading-relaxed">
-          {trust.experienceText}
+        {/* Subtext Statement */}
+        <p className="text-xs sm:text-sm md:text-base text-slate-600 max-w-3xl mx-auto leading-relaxed font-normal pt-1">
+          {experienceText}
         </p>
-        {trust.disclaimer && (
-          <p className="text-xs text-slate-400 mt-4 italic">
-            {trust.disclaimer}
+
+        {/* Compliance Footnote */}
+        {disclaimer && (
+          <p className="text-[11px] sm:text-xs text-slate-400 italic">
+            {disclaimer}
           </p>
         )}
       </div>
