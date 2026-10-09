@@ -3,7 +3,7 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     outputFileTracingIncludes: {
-      '/**': ['./Obagi India _ obagi products.html', './data/**/*'],
+      '/**': ['./public/obagi.html', './Obagi India _ obagi products.html', './data/**/*'],
     },
   },
   images: {

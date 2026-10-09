@@ -13,6 +13,6 @@ yarn-error.log*
 next-env.d.ts
 /Obagi India _ obagi products_files
 client resorce/
-data/
+/data/
 __pycache__/
 *.pyc

@@ -1,0 +1,907 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import {
+  Sparkles,
+  Save,
+  RotateCcw,
+  ExternalLink,
+  Layers,
+  Award,
+  BookOpen,
+  FlaskConical,
+  Package,
+  TrendingUp,
+  Briefcase,
+  Mail,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react';
+import RichColorTextEditor from './RichColorTextEditor';
+import ImageUploader from './ImageUploader';
+import { ObagiHomeContent, defaultObagiHomeContent } from '@/data/obagi-home-content';
+
+interface ObagiHomeCmsProps {
+  onNotify?: (message: string, type: 'success' | 'error') => void;
+}
+
+type PartKey = 'hero' | 'pillars' | 'story' | 'research' | 'products' | 'numbers' | 'careers-press' | 'footer';
+
+export default function ObagiHomeCms({ onNotify }: ObagiHomeCmsProps) {
+  const [content, setContent] = useState<ObagiHomeContent>(defaultObagiHomeContent);
+  const [activePart, setActivePart] = useState<PartKey>('hero');
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  // Load from API or localStorage
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch('/api/obagi-cms');
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.data && json.data.hero) {
+            setContent(json.data);
+            localStorage.setItem('obagi_home_cms', JSON.stringify(json.data));
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('API load failed, checking localStorage:', e);
+      }
+
+      try {
+        const saved = localStorage.getItem('obagi_home_cms');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.hero) {
+            setContent(parsed);
+          }
+        }
+      } catch (e) {}
+    }
+    loadData();
+  }, []);
+
+  const triggerToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type });
+    if (onNotify) onNotify(message, type);
+    setTimeout(() => setToast(null), 4000);
+  };
+
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      localStorage.setItem('obagi_home_cms', JSON.stringify(content));
+
+      const res = await fetch('/api/obagi-cms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(content),
+      });
+
+      if (res.ok) {
+        triggerToast('Home Page CMS updated and published live!', 'success');
+      } else {
+        triggerToast('Saved locally in browser cache (filesystem sync failed)', 'success');
+      }
+    } catch (err: any) {
+      console.error('Save failed:', err);
+      triggerToast('Saved locally in browser cache', 'success');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReset = () => {
+    if (confirm('Are you sure you want to reset all Home Page content to default?')) {
+      setContent(defaultObagiHomeContent);
+      localStorage.setItem('obagi_home_cms', JSON.stringify(defaultObagiHomeContent));
+      triggerToast('Reset to default Obagi content', 'success');
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Toast Alert */}
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-50 p-4 rounded-xl flex items-center gap-3 text-xs font-bold shadow-2xl transition-all ${
+            toast.type === 'success'
+              ? 'bg-emerald-600 text-white shadow-emerald-950'
+              : 'bg-rose-600 text-white shadow-rose-950'
+          }`}
+        >
+          {toast.type === 'success' ? <CheckCircle2 className="w-4 h-4" /> : <AlertCircle className="w-4 h-4" />}
+          <span>{toast.message}</span>
+        </div>
+      )}
+
+      {/* Header Bar */}
+      <div className="bg-[#132247] p-6 rounded-2xl border border-teal-900/50 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 border border-teal-500/30 text-[10px] font-black uppercase tracking-widest">
+              Live Home CMS
+            </span>
+            <span className="text-xs text-slate-400">Target: Home Page (/)</span>
+          </div>
+          <h2 className="text-xl font-black text-white mt-1">Obagi Medical Home Page Editor</h2>
+          <p className="text-xs text-slate-400 mt-0.5">
+            Break down the entire home page into 8 customizable sections with rich text, colors, and image uploader.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 transition border border-slate-700"
+          >
+            <ExternalLink className="w-3.5 h-3.5" />
+            <span>Open Live Home</span>
+          </a>
+
+          <button
+            type="button"
+            onClick={handleReset}
+            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold flex items-center gap-1.5 transition border border-slate-700"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Reset Default</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-lg shadow-teal-950 transition cursor-pointer disabled:opacity-50"
+          >
+            <Save className="w-3.5 h-3.5" />
+            <span>{saving ? 'Publishing...' : 'Publish Home CMS'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Parts Navigation Tabs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2 bg-[#0d1830] p-2 rounded-2xl border border-slate-800">
+        {[
+          { key: 'hero', label: 'Part 1: Hero', icon: Sparkles },
+          { key: 'pillars', label: 'Part 2: Pillars', icon: Award },
+          { key: 'story', label: 'Part 3: Story', icon: BookOpen },
+          { key: 'research', label: 'Part 4: R&D', icon: FlaskConical },
+          { key: 'products', label: 'Part 5: Systems', icon: Package },
+          { key: 'numbers', label: 'Part 6: Numbers', icon: TrendingUp },
+          { key: 'careers-press', label: 'Part 7: Jobs & Press', icon: Briefcase },
+          { key: 'footer', label: 'Part 8: Footer', icon: Mail }
+        ].map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activePart === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setActivePart(tab.key as PartKey)}
+              className={`p-3 rounded-xl text-left transition-all flex flex-col gap-1.5 ${
+                isActive
+                  ? 'bg-gradient-to-br from-teal-500/20 to-emerald-500/10 border border-teal-500/40 text-teal-300 shadow-md'
+                  : 'bg-slate-900/60 hover:bg-slate-800/60 border border-transparent text-slate-400 hover:text-slate-200'
+              }`}
+            >
+              <Icon className={`w-4 h-4 ${isActive ? 'text-teal-400' : 'text-slate-500'}`} />
+              <span className="text-[11px] font-bold truncate">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Part 1: Hero Section */}
+      {activePart === 'hero' && (
+        <div className="space-y-6 bg-[#0f1b35] p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <div className="border-b border-slate-800 pb-4">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-teal-400" />
+              <span>Part 1: Hero Section & Winner Banner</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Customize the main heading, Aesthetic Awards winner badge, background drop image, and 35+ years heritage text.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <RichColorTextEditor
+              label="Hero Main Title"
+              value={content.hero.title}
+              onChange={(val) => setContent({ ...content, hero: { ...content.hero, title: val } })}
+              color={content.hero.titleColor}
+              onColorChange={(col) => setContent({ ...content, hero: { ...content.hero, titleColor: col } })}
+              description="Primary headline rendered in the hero area (Default: Obagi® Medical India)"
+            />
+
+            <RichColorTextEditor
+              label="Aesthetic Awards Badge"
+              multiline
+              rows={3}
+              value={content.hero.awardBadge}
+              onChange={(val) => setContent({ ...content, hero: { ...content.hero, awardBadge: val } })}
+              color={content.hero.awardBadgeColor}
+              onColorChange={(col) => setContent({ ...content, hero: { ...content.hero, awardBadgeColor: col } })}
+              description="WINNER 2025 badge text"
+            />
+          </div>
+
+          <RichColorTextEditor
+            label="Hero / History Intro Text (35+ Years Banner)"
+            multiline
+            rows={4}
+            value={content.hero.historyIntroText}
+            onChange={(val) => setContent({ ...content, hero: { ...content.hero, historyIntroText: val } })}
+            color={content.hero.historyIntroTextColor}
+            onColorChange={(col) => setContent({ ...content, hero: { ...content.hero, historyIntroTextColor: col } })}
+            description="The leading narrative placed under the hero fold explaining clinically proven results."
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <ImageUploader
+              label="Hero Drop Image"
+              value={content.hero.heroImage}
+              onChange={(url) => setContent({ ...content, hero: { ...content.hero, heroImage: url } })}
+              description="Main product drop image displayed in the hero visual element."
+            />
+
+            <ImageUploader
+              label="Aesthetic Award Badge Image"
+              value={content.hero.awardBadgeImage}
+              onChange={(url) => setContent({ ...content, hero: { ...content.hero, awardBadgeImage: url } })}
+              description="Aesthetic award trophy/emblem badge."
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Part 2: Trust Banner & Brand Pillars */}
+      {activePart === 'pillars' && (
+        <div className="space-y-6 bg-[#0f1b35] p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <div className="border-b border-slate-800 pb-4">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Award className="w-4 h-4 text-teal-400" />
+              <span>Part 2: #1 Brand Banner & The 4 Core Pillars</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Edit the #1 Physician Recommended Brand claim, top skin concerns, and each of the 4 brand pillars.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <RichColorTextEditor
+              label="Physician Recommended Headline"
+              value={content.trustBanner.recommendedHeading}
+              onChange={(val) =>
+                setContent({ ...content, trustBanner: { ...content.trustBanner, recommendedHeading: val } })
+              }
+              color={content.trustBanner.recommendedHeadingColor}
+              onColorChange={(col) =>
+                setContent({ ...content, trustBanner: { ...content.trustBanner, recommendedHeadingColor: col } })
+              }
+              description="#1 Leading U.S. Physician Recommended Brand* headline"
+            />
+
+            <RichColorTextEditor
+              label="Top 3 Skin Concerns Text"
+              value={content.trustBanner.concernsText}
+              onChange={(val) =>
+                setContent({ ...content, trustBanner: { ...content.trustBanner, concernsText: val } })
+              }
+              color={content.trustBanner.concernsTextColor}
+              onColorChange={(col) =>
+                setContent({ ...content, trustBanner: { ...content.trustBanner, concernsTextColor: col } })
+              }
+              description="FOR TOP 3 SKIN CONCERNS text"
+            />
+          </div>
+
+          <div className="border-t border-slate-800 pt-4 space-y-4">
+            <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
+              The 4 Core Brand Pillars
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {content.trustBanner.pillars.map((pillar, idx) => (
+                <div key={pillar.id} className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+                  <div className="text-[10px] font-black text-teal-400 uppercase tracking-widest">
+                    Pillar #{idx + 1}
+                  </div>
+                  <RichColorTextEditor
+                    label="Pillar Title"
+                    value={pillar.title}
+                    onChange={(val) => {
+                      const updated = [...content.trustBanner.pillars];
+                      updated[idx].title = val;
+                      setContent({ ...content, trustBanner: { ...content.trustBanner, pillars: updated } });
+                    }}
+                    color={pillar.titleColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.trustBanner.pillars];
+                      updated[idx].titleColor = col;
+                      setContent({ ...content, trustBanner: { ...content.trustBanner, pillars: updated } });
+                    }}
+                  />
+                  <RichColorTextEditor
+                    label="Pillar Description"
+                    multiline
+                    rows={3}
+                    value={pillar.description}
+                    onChange={(val) => {
+                      const updated = [...content.trustBanner.pillars];
+                      updated[idx].description = val;
+                      setContent({ ...content, trustBanner: { ...content.trustBanner, pillars: updated } });
+                    }}
+                    color={pillar.textColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.trustBanner.pillars];
+                      updated[idx].textColor = col;
+                      setContent({ ...content, trustBanner: { ...content.trustBanner, pillars: updated } });
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Part 3: Story & About Obagi Story */}
+      {activePart === 'story' && (
+        <div className="space-y-6 bg-[#0f1b35] p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <div className="border-b border-slate-800 pb-4">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-teal-400" />
+              <span>Part 3: Our History & About Obagi Medical Story</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Edit the history narrative, quote, transformational skincare overview, and story imagery.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <RichColorTextEditor
+              label="Our History Section Title"
+              value={content.story.historyTitle}
+              onChange={(val) => setContent({ ...content, story: { ...content.story, historyTitle: val } })}
+              color={content.story.historyTitleColor}
+              onColorChange={(col) => setContent({ ...content, story: { ...content.story, historyTitleColor: col } })}
+            />
+
+            <ImageUploader
+              label="Our History Image"
+              value={content.story.historyImage}
+              onChange={(url) => setContent({ ...content, story: { ...content.story, historyImage: url } })}
+            />
+          </div>
+
+          <RichColorTextEditor
+            label="History Body Description"
+            multiline
+            rows={4}
+            value={content.story.historyBody}
+            onChange={(val) => setContent({ ...content, story: { ...content.story, historyBody: val } })}
+            color={content.story.historyBodyColor}
+            onColorChange={(col) => setContent({ ...content, story: { ...content.story, historyBodyColor: col } })}
+          />
+
+          <div className="border-t border-slate-800 pt-6 space-y-6">
+            <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
+              About Obagi Medical Details
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <RichColorTextEditor
+                label="About Obagi Title"
+                value={content.story.aboutTitle}
+                onChange={(val) => setContent({ ...content, story: { ...content.story, aboutTitle: val } })}
+                color={content.story.aboutTitleColor}
+                onColorChange={(col) => setContent({ ...content, story: { ...content.story, aboutTitleColor: col } })}
+              />
+
+              <ImageUploader
+                label="About Obagi Image (HydrateLuxe/Drop)"
+                value={content.story.aboutImage}
+                onChange={(url) => setContent({ ...content, story: { ...content.story, aboutImage: url } })}
+              />
+            </div>
+
+            <RichColorTextEditor
+              label="About Obagi Quote"
+              multiline
+              rows={3}
+              value={content.story.aboutQuote}
+              onChange={(val) => setContent({ ...content, story: { ...content.story, aboutQuote: val } })}
+              color={content.story.aboutQuoteColor}
+              onColorChange={(col) => setContent({ ...content, story: { ...content.story, aboutQuoteColor: col } })}
+              description="“We are a complete skin care company, designing transformational products...”"
+            />
+
+            <RichColorTextEditor
+              label="About Obagi Paragraph Text"
+              multiline
+              rows={4}
+              value={content.story.aboutParagraph}
+              onChange={(val) => setContent({ ...content, story: { ...content.story, aboutParagraph: val } })}
+              color={content.story.aboutParagraphColor}
+              onColorChange={(col) => setContent({ ...content, story: { ...content.story, aboutParagraphColor: col } })}
+              description="Full clinical description explaining Fitzpatrick skin types and results."
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Part 4: Research, Development & Science */}
+      {activePart === 'research' && (
+        <div className="space-y-6 bg-[#0f1b35] p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <div className="border-b border-slate-800 pb-4">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <FlaskConical className="w-4 h-4 text-teal-400" />
+              <span>Part 4: Obagi Research & Development</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Customize the R&D headline, philosophy text, and the 3 innovation pillars (Approach, Process, Standards).
+            </p>
+          </div>
+
+          <RichColorTextEditor
+            label="R&D Section Title"
+            value={content.research.rdTitle}
+            onChange={(val) => setContent({ ...content, research: { ...content.research, rdTitle: val } })}
+            color={content.research.rdTitleColor}
+            onColorChange={(col) => setContent({ ...content, research: { ...content.research, rdTitleColor: col } })}
+          />
+
+          <RichColorTextEditor
+            label="R&D Philosophy Description"
+            multiline
+            rows={4}
+            value={content.research.rdDescription}
+            onChange={(val) => setContent({ ...content, research: { ...content.research, rdDescription: val } })}
+            color={content.research.rdDescriptionColor}
+            onColorChange={(col) => setContent({ ...content, research: { ...content.research, rdDescriptionColor: col } })}
+          />
+
+          <div className="border-t border-slate-800 pt-6 space-y-6">
+            <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
+              Innovation Tabs (Approach, Process, Standards)
+            </h4>
+
+            <div className="space-y-6">
+              {content.research.tabs.map((tab, idx) => (
+                <div key={tab.id} className="p-5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-4">
+                  <div className="text-[10px] font-black text-teal-400 uppercase tracking-widest">
+                    Pillar Tab #{idx + 1}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <RichColorTextEditor
+                      label="Tab Title"
+                      value={tab.title}
+                      onChange={(val) => {
+                        const updated = [...content.research.tabs];
+                        updated[idx].title = val;
+                        setContent({ ...content, research: { ...content.research, tabs: updated } });
+                      }}
+                      color={tab.titleColor}
+                      onColorChange={(col) => {
+                        const updated = [...content.research.tabs];
+                        updated[idx].titleColor = col;
+                        setContent({ ...content, research: { ...content.research, tabs: updated } });
+                      }}
+                    />
+
+                    <ImageUploader
+                      label="Laboratory Image"
+                      value={tab.imageUrl}
+                      onChange={(url) => {
+                        const updated = [...content.research.tabs];
+                        updated[idx].imageUrl = url;
+                        setContent({ ...content, research: { ...content.research, tabs: updated } });
+                      }}
+                    />
+                  </div>
+
+                  <RichColorTextEditor
+                    label="Tab Description"
+                    multiline
+                    rows={3}
+                    value={tab.description}
+                    onChange={(val) => {
+                      const updated = [...content.research.tabs];
+                      updated[idx].description = val;
+                      setContent({ ...content, research: { ...content.research, tabs: updated } });
+                    }}
+                    color={tab.textColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.research.tabs];
+                      updated[idx].textColor = col;
+                      setContent({ ...content, research: { ...content.research, tabs: updated } });
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Part 5: Featured Collections / Systems */}
+      {activePart === 'products' && (
+        <div className="space-y-6 bg-[#0f1b35] p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <div className="border-b border-slate-800 pb-4">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Package className="w-4 h-4 text-teal-400" />
+              <span>Part 5: Featured Systems (Nu-Derm, Hydro-Drops, Nu-Cil)</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Edit the three flagship hero systems, their clinical benefits, target indications, and product photos.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {content.products.systems.map((system, idx) => (
+              <div key={system.id} className="p-5 rounded-xl bg-slate-900/80 border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest">
+                    Product System #{idx + 1}
+                  </span>
+                  <span className="text-xs text-slate-400">{system.title}</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <RichColorTextEditor
+                    label="System Name"
+                    value={system.title}
+                    onChange={(val) => {
+                      const updated = [...content.products.systems];
+                      updated[idx].title = val;
+                      setContent({ ...content, products: { ...content.products, systems: updated } });
+                    }}
+                    color={system.titleColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.products.systems];
+                      updated[idx].titleColor = col;
+                      setContent({ ...content, products: { ...content.products, systems: updated } });
+                    }}
+                  />
+
+                  <RichColorTextEditor
+                    label="Subtitle / Benefit"
+                    value={system.subtitle}
+                    onChange={(val) => {
+                      const updated = [...content.products.systems];
+                      updated[idx].subtitle = val;
+                      setContent({ ...content, products: { ...content.products, systems: updated } });
+                    }}
+                    color={system.subtitleColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.products.systems];
+                      updated[idx].subtitleColor = col;
+                      setContent({ ...content, products: { ...content.products, systems: updated } });
+                    }}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <RichColorTextEditor
+                    label="Indications / Description"
+                    multiline
+                    rows={3}
+                    value={system.description}
+                    onChange={(val) => {
+                      const updated = [...content.products.systems];
+                      updated[idx].description = val;
+                      setContent({ ...content, products: { ...content.products, systems: updated } });
+                    }}
+                    color={system.textColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.products.systems];
+                      updated[idx].textColor = col;
+                      setContent({ ...content, products: { ...content.products, systems: updated } });
+                    }}
+                  />
+
+                  <ImageUploader
+                    label="Product Packshot Image"
+                    value={system.imageUrl}
+                    onChange={(url) => {
+                      const updated = [...content.products.systems];
+                      updated[idx].imageUrl = url;
+                      setContent({ ...content, products: { ...content.products, systems: updated } });
+                    }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Part 6: Numbers & Key Statistics */}
+      {activePart === 'numbers' && (
+        <div className="space-y-6 bg-[#0f1b35] p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <div className="border-b border-slate-800 pb-4">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-teal-400" />
+              <span>Part 6: Key Numbers & Statistics</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Customize the "BGS in Numbers" title, metrics, labels, and text colors.
+            </p>
+          </div>
+
+          <RichColorTextEditor
+            label="Section Title"
+            value={content.numbers.title}
+            onChange={(val) => setContent({ ...content, numbers: { ...content.numbers, title: val } })}
+            color={content.numbers.titleColor}
+            onColorChange={(col) => setContent({ ...content, numbers: { ...content.numbers, titleColor: col } })}
+          />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+            {content.numbers.stats.map((stat, idx) => (
+              <div key={stat.id} className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+                <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest">
+                  Metric #{idx + 1}
+                </span>
+
+                <RichColorTextEditor
+                  label="Value"
+                  value={stat.value}
+                  onChange={(val) => {
+                    const updated = [...content.numbers.stats];
+                    updated[idx].value = val;
+                    setContent({ ...content, numbers: { ...content.numbers, stats: updated } });
+                  }}
+                  color={stat.valueColor}
+                  onColorChange={(col) => {
+                    const updated = [...content.numbers.stats];
+                    updated[idx].valueColor = col;
+                    setContent({ ...content, numbers: { ...content.numbers, stats: updated } });
+                  }}
+                />
+
+                <RichColorTextEditor
+                  label="Label"
+                  value={stat.label}
+                  onChange={(val) => {
+                    const updated = [...content.numbers.stats];
+                    updated[idx].label = val;
+                    setContent({ ...content, numbers: { ...content.numbers, stats: updated } });
+                  }}
+                  color={stat.labelColor}
+                  onColorChange={(col) => {
+                    const updated = [...content.numbers.stats];
+                    updated[idx].labelColor = col;
+                    setContent({ ...content, numbers: { ...content.numbers, stats: updated } });
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Part 7: Careers & Press Releases */}
+      {activePart === 'careers-press' && (
+        <div className="space-y-6 bg-[#0f1b35] p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <div className="border-b border-slate-800 pb-4">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Briefcase className="w-4 h-4 text-teal-400" />
+              <span>Part 7: Join Our Team & Press Publications</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Customize career openings and press releases with publication sources and dates.
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
+              Careers / Join Our Team
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <RichColorTextEditor
+                label="Careers Headline"
+                value={content.careers.title}
+                onChange={(val) => setContent({ ...content, careers: { ...content.careers, title: val } })}
+                color={content.careers.titleColor}
+                onColorChange={(col) => setContent({ ...content, careers: { ...content.careers, titleColor: col } })}
+              />
+
+              <RichColorTextEditor
+                label="Careers Subtitle"
+                value={content.careers.subtitle}
+                onChange={(val) => setContent({ ...content, careers: { ...content.careers, subtitle: val } })}
+                color={content.careers.subtitleColor}
+                onColorChange={(col) => setContent({ ...content, careers: { ...content.careers, subtitleColor: col } })}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              {content.careers.jobs.map((job, idx) => (
+                <div key={job.id} className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+                  <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest">
+                    Job Role #{idx + 1}
+                  </span>
+                  <RichColorTextEditor
+                    label="Position"
+                    value={job.title}
+                    onChange={(val) => {
+                      const updated = [...content.careers.jobs];
+                      updated[idx].title = val;
+                      setContent({ ...content, careers: { ...content.careers, jobs: updated } });
+                    }}
+                    color={job.titleColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.careers.jobs];
+                      updated[idx].titleColor = col;
+                      setContent({ ...content, careers: { ...content.careers, jobs: updated } });
+                    }}
+                  />
+                  <RichColorTextEditor
+                    label="Location"
+                    value={job.location}
+                    onChange={(val) => {
+                      const updated = [...content.careers.jobs];
+                      updated[idx].location = val;
+                      setContent({ ...content, careers: { ...content.careers, jobs: updated } });
+                    }}
+                    color={job.locationColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.careers.jobs];
+                      updated[idx].locationColor = col;
+                      setContent({ ...content, careers: { ...content.careers, jobs: updated } });
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-slate-800 pt-6 space-y-4">
+            <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
+              Press Publications
+            </h4>
+
+            <RichColorTextEditor
+              label="Press Section Title"
+              value={content.press.title}
+              onChange={(val) => setContent({ ...content, press: { ...content.press, title: val } })}
+              color={content.press.titleColor}
+              onColorChange={(col) => setContent({ ...content, press: { ...content.press, titleColor: col } })}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+              {content.press.items.map((item, idx) => (
+                <div key={item.id} className="p-4 rounded-xl bg-slate-900/80 border border-slate-800 space-y-3">
+                  <span className="text-[10px] font-black text-teal-400 uppercase tracking-widest">
+                    Press Article #{idx + 1}
+                  </span>
+                  <RichColorTextEditor
+                    label="Article Headline"
+                    multiline
+                    rows={2}
+                    value={item.headline}
+                    onChange={(val) => {
+                      const updated = [...content.press.items];
+                      updated[idx].headline = val;
+                      setContent({ ...content, press: { ...content.press, items: updated } });
+                    }}
+                    color={item.headlineColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.press.items];
+                      updated[idx].headlineColor = col;
+                      setContent({ ...content, press: { ...content.press, items: updated } });
+                    }}
+                  />
+                  <RichColorTextEditor
+                    label="Journal & Date"
+                    value={item.source}
+                    onChange={(val) => {
+                      const updated = [...content.press.items];
+                      updated[idx].source = val;
+                      setContent({ ...content, press: { ...content.press, items: updated } });
+                    }}
+                    color={item.sourceColor}
+                    onColorChange={(col) => {
+                      const updated = [...content.press.items];
+                      updated[idx].sourceColor = col;
+                      setContent({ ...content, press: { ...content.press, items: updated } });
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Part 8: Quote, Newsletter & Legal Footer */}
+      {activePart === 'footer' && (
+        <div className="space-y-6 bg-[#0f1b35] p-6 rounded-2xl border border-slate-800 shadow-xl">
+          <div className="border-b border-slate-800 pb-4">
+            <h3 className="text-base font-black text-white flex items-center gap-2">
+              <Mail className="w-4 h-4 text-teal-400" />
+              <span>Part 8: Quote, Newsletter & Legal Disclaimer</span>
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Edit the executive quote, founder photo, newsletter subscription banner, and footer copyright text.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <RichColorTextEditor
+              label="Quote Author Name"
+              value={content.quote.author}
+              onChange={(val) => setContent({ ...content, quote: { ...content.quote, author: val } })}
+              color={content.quote.authorColor}
+              onColorChange={(col) => setContent({ ...content, quote: { ...content.quote, authorColor: col } })}
+            />
+
+            <RichColorTextEditor
+              label="Author Designation"
+              value={content.quote.role}
+              onChange={(val) => setContent({ ...content, quote: { ...content.quote, role: val } })}
+              color={content.quote.roleColor}
+              onColorChange={(col) => setContent({ ...content, quote: { ...content.quote, roleColor: col } })}
+            />
+
+            <ImageUploader
+              label="Executive Portrait Photo"
+              value={content.quote.image}
+              onChange={(url) => setContent({ ...content, quote: { ...content.quote, image: url } })}
+            />
+          </div>
+
+          <div className="border-t border-slate-800 pt-6 space-y-4">
+            <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
+              Newsletter Subscription Banner
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <RichColorTextEditor
+                label="Newsletter Title"
+                value={content.newsletter.title}
+                onChange={(val) => setContent({ ...content, newsletter: { ...content.newsletter, title: val } })}
+                color={content.newsletter.titleColor}
+                onColorChange={(col) => setContent({ ...content, newsletter: { ...content.newsletter, titleColor: col } })}
+              />
+
+              <RichColorTextEditor
+                label="Newsletter Subtitle"
+                value={content.newsletter.subtitle}
+                onChange={(val) => setContent({ ...content, newsletter: { ...content.newsletter, subtitle: val } })}
+                color={content.newsletter.subtitleColor}
+                onColorChange={(col) => setContent({ ...content, newsletter: { ...content.newsletter, subtitleColor: col } })}
+              />
+            </div>
+          </div>
+
+          <div className="border-t border-slate-800 pt-6 space-y-4">
+            <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
+              Footer & Legal Disclaimer
+            </h4>
+
+            <RichColorTextEditor
+              label="Legal Disclaimer & Copyright Notice"
+              multiline
+              rows={3}
+              value={content.footer.copyright}
+              onChange={(val) => setContent({ ...content, footer: { ...content.footer, copyright: val } })}
+              color={content.footer.copyrightColor}
+              onColorChange={(col) => setContent({ ...content, footer: { ...content.footer, copyrightColor: col } })}
+              description="Physician-dispensed warning and copyright line at the bottom of the page."
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
