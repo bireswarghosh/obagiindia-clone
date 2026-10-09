@@ -1,7 +1,7 @@
 /**
- * Obagi India Dynamic CMS Synchronizer
- * Injected automatically on the homepage to sync CMS edits from localStorage or server state
- * without touching or breaking any of the original Obagi website HTML, JS, animations, or styling.
+ * Obagi India Dynamic CMS Synchronizer (Updated)
+ * Synchronizes CMS edits across Header/Navbar, Hero (4 images), History, About,
+ * Pillars, R&D, Featured Systems, Mobile Banner, Quotes, Numbers, Careers, Press, and Footer.
  */
 (function () {
   function getCmsData() {
@@ -9,7 +9,7 @@
       var local = localStorage.getItem('obagi_home_cms');
       if (local) {
         var parsed = JSON.parse(local);
-        if (parsed && parsed.hero) return parsed;
+        if (parsed && (parsed.hero || parsed.header)) return parsed;
       }
     } catch (e) {
       console.warn('Could not read local CMS data:', e);
@@ -24,10 +24,8 @@
     if (!text && !color) return;
     var el = document.getElementById(id);
     if (!el) return;
-    // Find richText inner container or span/p/h
     var target = el.querySelector('p, h1, h2, h3, h4, span, blockquote') || el;
     if (text !== undefined && text !== null) {
-      // If text contains HTML tags, use innerHTML, else innerText
       if (text.indexOf('<') !== -1) {
         target.innerHTML = text;
       } else {
@@ -45,7 +43,6 @@
     var img = document.querySelector(selector);
     if (img) {
       img.src = src;
-      // Also update srcset if present to prevent Wix from overriding
       if (img.hasAttribute('srcset')) {
         img.removeAttribute('srcset');
       }
@@ -53,19 +50,108 @@
   }
 
   function applyCms() {
+    // 0. Remove any frozen vibe-annotations-root
+    var vibe = document.getElementById('vibe-annotations-root');
+    if (vibe) {
+      vibe.remove();
+    }
+
+    // 1. Mobile Banner Image Visibility Fix for wow-image#comp-mlau0bjm_img > img
+    var mobilePoster = document.getElementById('comp-mlau0bjm_img');
+    if (mobilePoster) {
+      mobilePoster.style.setProperty('opacity', '1', 'important');
+      mobilePoster.style.setProperty('visibility', 'visible', 'important');
+      mobilePoster.style.setProperty('display', 'block', 'important');
+      var mImg = mobilePoster.querySelector('img');
+      if (mImg) {
+        mImg.style.setProperty('opacity', '1', 'important');
+        mImg.style.setProperty('visibility', 'visible', 'important');
+        mImg.style.setProperty('display', 'block', 'important');
+        if (window.innerWidth <= 768) {
+          mImg.style.setProperty('width', '100%', 'important');
+          mImg.style.setProperty('max-width', '100%', 'important');
+          mImg.style.setProperty('height', 'auto', 'important');
+        }
+      }
+    }
+
     var data = getCmsData();
     if (!data) return;
 
-    // Part 1: Hero
+    // Section 1: Header / Navbar
+    if (data.header) {
+      // Custom logo with background remover support
+      if (data.header.logoUrl) {
+        var logoContainer = document.querySelector('[data-testid="svgRoot-comp-lw3c3n7z_r_comp-lw3c38vb"]');
+        if (logoContainer) {
+          logoContainer.innerHTML = '<img src="' + data.header.logoUrl + '" alt="' + (data.header.logoAlt || 'Obagi Logo') + '" style="max-height: 44px; width: auto; object-fit: contain; display: block;" />';
+        }
+      }
+
+      // Brought to you in India by SPECTRA
+      if (data.header.broughtByText) {
+        var allSpans = document.querySelectorAll('header span, header p, header div');
+        for (var i = 0; i < allSpans.length; i++) {
+          if (allSpans[i].innerText && allSpans[i].innerText.includes('Brought to you in India')) {
+            allSpans[i].innerText = data.header.broughtByText;
+            if (data.header.broughtByColor) allSpans[i].style.color = data.header.broughtByColor;
+            break;
+          }
+        }
+      }
+
+      // Nav menu items
+      var menuLabels = document.querySelectorAll('.wixui-horizontal-menu__item-label');
+      menuLabels.forEach(function (lbl) {
+        var txt = lbl.innerText.trim();
+        if (txt.includes('Why Obagi') && data.header.whyObagiText) {
+          lbl.innerText = data.header.whyObagiText;
+          if (data.header.whyObagiColor) lbl.style.color = data.header.whyObagiColor;
+        } else if (txt.includes('Skin Concern') && data.header.skinConcernTitle) {
+          lbl.innerText = data.header.skinConcernTitle;
+          if (data.header.skinConcernColor) lbl.style.color = data.header.skinConcernColor;
+        } else if (txt.includes('Product Range') && data.header.productRangeTitle) {
+          lbl.innerText = data.header.productRangeTitle;
+          if (data.header.productRangeColor) lbl.style.color = data.header.productRangeColor;
+        } else if (txt.includes('Find Obagi') && data.header.findObagiTitle) {
+          lbl.innerText = data.header.findObagiTitle;
+          if (data.header.findObagiColor) lbl.style.color = data.header.findObagiColor;
+        }
+      });
+    }
+
+    // Section 2: Hero Section (4 Images)
     if (data.hero) {
       setElementText('comp-lxriadds', data.hero.title, data.hero.titleColor);
       setElementText('comp-lxriaddt', data.hero.awardBadge, data.hero.awardBadgeColor);
       setElementText('comp-lwqgbmmr', data.hero.historyIntroText, data.hero.historyIntroTextColor);
-      if (data.hero.heroImage) setImageSrc('img[alt="drop"]', data.hero.heroImage);
-      if (data.hero.awardBadgeImage) setImageSrc('img[alt="aesthetics award winner 2025"]', data.hero.awardBadgeImage);
+
+      // Hero 4 Images
+      if (data.hero.heroImage1) setImageSrc('img[alt="drop"]', data.hero.heroImage1);
+      if (data.hero.heroImage2) setImageSrc('img[alt="aesthetics award winner 2025"]', data.hero.heroImage2);
+      if (data.hero.heroImage3) setImageSrc('img[alt="obagi-nu-derm-fx-collection"]', data.hero.heroImage3);
+      if (data.hero.heroImage4) {
+        var topBannerImg = document.querySelector('section:first-of-type img');
+        if (topBannerImg) topBannerImg.src = data.hero.heroImage4;
+      }
     }
 
-    // Part 2: Trust Banner & Pillars
+    // Section 4: History
+    if (data.history) {
+      setElementText('comp-lwqg9o89', data.history.title, data.history.titleColor);
+      setElementText('comp-lwqgbmmr', data.history.body, data.history.bodyColor);
+      if (data.history.image) setImageSrc('img[alt="obagi-nu-derm-fx-collection"]', data.history.image);
+    }
+
+    // Section 5: About Obagi Medical
+    if (data.about) {
+      setElementText('comp-lwrl1yoo7', data.about.title, data.about.titleColor);
+      setElementText('comp-lwrl46my', data.about.quote, data.about.quoteColor);
+      setElementText('comp-ml6km44m', data.about.paragraph, data.about.paragraphColor);
+      if (data.about.image) setImageSrc('img[alt="Hydration-HydrateLuxe-DHD"]', data.about.image);
+    }
+
+    // Section 6: Trust Banner & 4 Core Pillars
     if (data.trustBanner) {
       setElementText('comp-mlqmnjp2', data.trustBanner.recommendedHeading, data.trustBanner.recommendedHeadingColor);
       setElementText('comp-mlqmnjoy8', data.trustBanner.concernsText, data.trustBanner.concernsTextColor);
@@ -91,19 +177,7 @@
       }
     }
 
-    // Part 3: Story & About
-    if (data.story) {
-      setElementText('comp-lwqg9o89', data.story.historyTitle, data.story.historyTitleColor);
-      setElementText('comp-lwqgbmmr', data.story.historyBody, data.story.historyBodyColor);
-      if (data.story.historyImage) setImageSrc('img[alt="obagi-nu-derm-fx-collection"]', data.story.historyImage);
-
-      setElementText('comp-lwrl1yoo7', data.story.aboutTitle, data.story.aboutTitleColor);
-      setElementText('comp-lwrl46my', data.story.aboutQuote, data.story.aboutQuoteColor);
-      setElementText('comp-ml6km44m', data.story.aboutParagraph, data.story.aboutParagraphColor);
-      if (data.story.aboutImage) setImageSrc('img[alt="Hydration-HydrateLuxe-DHD"]', data.story.aboutImage);
-    }
-
-    // Part 4: Research & Innovation
+    // Section 7: Research & Development
     if (data.research) {
       setElementText('comp-mlqlr0fr2', data.research.rdTitle, data.research.rdTitleColor);
       setElementText('comp-mlqlr0fq4', data.research.rdDescription, data.research.rdDescriptionColor);
@@ -128,7 +202,7 @@
       }
     }
 
-    // Part 5: Featured Collections / Systems
+    // Section 8: Featured Collections / Systems
     if (data.products && Array.isArray(data.products.systems)) {
       var s = data.products.systems;
       if (s[0]) {
@@ -151,7 +225,26 @@
       }
     }
 
-    // Part 6: Numbers & Key Statistics
+    // Section 9: Video / Banner
+    if (data.videoBanner) {
+      if (data.videoBanner.bannerImage) {
+        setImageSrc('wow-image#comp-mlau0bjm_img > img', data.videoBanner.bannerImage);
+      }
+      if (data.videoBanner.videoUrl) {
+        var v = document.getElementById('comp-mlau0bjm_video');
+        if (v) v.src = data.videoBanner.videoUrl;
+      }
+    }
+
+    // Section 10: Testimonial Quote & Executive
+    if (data.quote) {
+      var quoteText = data.quote.author;
+      if (data.quote.role) quoteText += '<br class="wixui-rich-text__text">' + data.quote.role;
+      setElementText('comp-lwsx7nk7', quoteText, data.quote.authorColor);
+      if (data.quote.image) setImageSrc('img[alt="nill"]', data.quote.image);
+    }
+
+    // Section 11: Numbers & Key Statistics
     if (data.numbers) {
       setElementText('comp-lwt3cjw9', data.numbers.title, data.numbers.titleColor);
       if (Array.isArray(data.numbers.stats)) {
@@ -175,7 +268,7 @@
       }
     }
 
-    // Part 7: Careers & Press
+    // Section 12: Careers
     if (data.careers) {
       setElementText('comp-lwxn7qhu8', data.careers.title, data.careers.titleColor);
       setElementText('comp-lwxn7qhx8', data.careers.subtitle, data.careers.subtitleColor);
@@ -195,6 +288,8 @@
         }
       }
     }
+
+    // Section 13: Press
     if (data.press) {
       setElementText('comp-lwyy1hag1', data.press.title, data.press.titleColor);
       if (Array.isArray(data.press.items)) {
@@ -214,23 +309,18 @@
       }
     }
 
-    // Part 8: Quote, Newsletter & Footer
-    if (data.quote) {
-      var quoteText = data.quote.author;
-      if (data.quote.role) quoteText += '<br class="wixui-rich-text__text">' + data.quote.role;
-      setElementText('comp-lwsx7nk7', quoteText, data.quote.authorColor);
-      if (data.quote.image) setImageSrc('img[alt="nill"]', data.quote.image);
-    }
+    // Section 14: Newsletter
     if (data.newsletter) {
       setElementText('comp-lx8nyczk6', data.newsletter.title, data.newsletter.titleColor);
       setElementText('comp-lx8nzrma', data.newsletter.subtitle, data.newsletter.subtitleColor);
     }
+
+    // Section 15: Footer
     if (data.footer) {
       setElementText('comp-ml6nay6u_r_comp-lx0hp721', data.footer.copyright, data.footer.copyrightColor);
     }
   }
 
-  // Execute on DOM ready and after a short delay for dynamic hydration
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', applyCms);
   } else {
