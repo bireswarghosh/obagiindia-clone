@@ -45,15 +45,63 @@ function getActiveFilePath(): string {
   }
 }
 
+function mergeWithDefaults(saved: any): ObagiHomeContent {
+  if (!saved || typeof saved !== 'object') return { ...defaultObagiHomeContent };
+  return {
+    ...defaultObagiHomeContent,
+    ...saved,
+    header: { ...defaultObagiHomeContent.header, ...(saved.header || {}) },
+    hero: { ...defaultObagiHomeContent.hero, ...(saved.hero || {}) },
+    ticker: { ...defaultObagiHomeContent.ticker, ...(saved.ticker || {}) },
+    history: { ...defaultObagiHomeContent.history, ...(saved.history || {}) },
+    about: { ...defaultObagiHomeContent.about, ...(saved.about || {}) },
+    trustBanner: {
+      ...defaultObagiHomeContent.trustBanner,
+      ...(saved.trustBanner || {}),
+      pillars: saved.trustBanner?.pillars || defaultObagiHomeContent.trustBanner.pillars
+    },
+    research: {
+      ...defaultObagiHomeContent.research,
+      ...(saved.research || {}),
+      tabs: saved.research?.tabs || defaultObagiHomeContent.research.tabs
+    },
+    products: {
+      ...defaultObagiHomeContent.products,
+      ...(saved.products || {}),
+      systems: saved.products?.systems || defaultObagiHomeContent.products.systems
+    },
+    videoBanner: { ...defaultObagiHomeContent.videoBanner, ...(saved.videoBanner || {}) },
+    quote: { ...defaultObagiHomeContent.quote, ...(saved.quote || {}) },
+    numbers: {
+      ...defaultObagiHomeContent.numbers,
+      ...(saved.numbers || {}),
+      stats: saved.numbers?.stats || defaultObagiHomeContent.numbers.stats
+    },
+    careers: {
+      ...defaultObagiHomeContent.careers,
+      ...(saved.careers || {}),
+      jobs: saved.careers?.jobs || defaultObagiHomeContent.careers.jobs
+    },
+    press: {
+      ...defaultObagiHomeContent.press,
+      ...(saved.press || {}),
+      items: saved.press?.items || defaultObagiHomeContent.press.items
+    },
+    newsletter: { ...defaultObagiHomeContent.newsletter, ...(saved.newsletter || {}) },
+    footer: { ...defaultObagiHomeContent.footer, ...(saved.footer || {}) },
+  };
+}
+
 export function getObagiHomeContent(): ObagiHomeContent {
   try {
     const file = getActiveFilePath();
     if (fs.existsSync(file)) {
       const raw = fs.readFileSync(file, 'utf8');
       const parsed = JSON.parse(raw);
-      if (parsed && parsed.hero) {
-        memoryCache = parsed;
-        return parsed;
+      if (parsed) {
+        const merged = mergeWithDefaults(parsed);
+        memoryCache = merged;
+        return merged;
       }
     }
   } catch (err) {
