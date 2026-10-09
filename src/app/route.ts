@@ -13,10 +13,13 @@ export async function GET() {
     let html = fs.readFileSync(htmlPath, 'utf8');
 
     // Fetch active CMS content
-    const cmsData = getObagiHomeContent();
+    const cmsData = await getObagiHomeContent();
 
     // Inject CMS data and synchronizer script before </body>
     const injection = `
+      <script>
+        window.__OBAGI_CMS_RAW_DATA__ = ${JSON.stringify(cmsData)};
+      </script>
       <script id="__OBAGI_CMS_DATA__" type="application/json">${JSON.stringify(cmsData)}</script>
       <script src="/obagi-cms-sync.js"></script>
     `;

@@ -16,3 +16,5 @@ client resorce/
 /data/
 __pycache__/
 *.pyc
+
+.env*

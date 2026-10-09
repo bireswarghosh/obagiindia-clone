@@ -62,15 +62,19 @@ export interface ObagiHomeContent {
     broughtByColor?: string;
     whyObagiText: string;
     whyObagiColor?: string;
+    whyObagiLink?: string;
     skinConcernTitle: string;
     skinConcernColor?: string;
     skinConcernItems: string[];
+    skinConcernLinks?: string[];
     productRangeTitle: string;
     productRangeColor?: string;
     productRangeItems: string[];
+    productRangeLinks?: string[];
     findObagiTitle: string;
     findObagiColor?: string;
     findObagiItems: string[];
+    findObagiLinks?: string[];
     searchText: string;
   };
 

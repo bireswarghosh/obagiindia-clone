@@ -1,8 +1,13 @@
 import fs from 'fs';
 import path from 'path';
+import { put } from '@vercel/blob';
 import { ObagiHomeContent, defaultObagiHomeContent } from '@/data/obagi-home-content';
 
 const IS_VERCEL = !!process.env.VERCEL;
+const BLOB_URL = 'https://atlkh9ztzm3kfmnr.public.blob.vercel-storage.com/obagi-cms-data.json';
+const BLOB_FILENAME = 'obagi-cms-data.json';
+const DEFAULT_TOKEN = 'vercel_blob_rw_Atlkh9ZtzM3kfMnr_exDGXwl4vKdyHoPM82UEA8RW7gfjJa';
+
 const LOCAL_DATA_DIR = path.join(process.cwd(), 'data');
 const LOCAL_DATA_FILE = path.join(LOCAL_DATA_DIR, 'obagi-home-content.json');
 
@@ -10,6 +15,7 @@ const VERCEL_DATA_DIR = '/tmp/data';
 const VERCEL_DATA_FILE = '/tmp/data/obagi-home-content.json';
 
 let memoryCache: ObagiHomeContent | null = null;
+let lastBlobFetchTime = 0;
 
 function getActiveFilePath(): string {
   if (IS_VERCEL) {
@@ -45,7 +51,7 @@ function getActiveFilePath(): string {
   }
 }
 
-function mergeWithDefaults(saved: any): ObagiHomeContent {
+export function mergeWithDefaults(saved: any): ObagiHomeContent {
   if (!saved || typeof saved !== 'object') return { ...defaultObagiHomeContent };
   return {
     ...defaultObagiHomeContent,
@@ -92,7 +98,27 @@ function mergeWithDefaults(saved: any): ObagiHomeContent {
   };
 }
 
-export function getObagiHomeContent(): ObagiHomeContent {
+export async function fetchFromBlob(): Promise<ObagiHomeContent | null> {
+  try {
+    const res = await fetch(BLOB_URL, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && (data.hero || data.header)) {
+        const merged = mergeWithDefaults(data);
+        memoryCache = merged;
+        lastBlobFetchTime = Date.now();
+        return merged;
+      }
+    }
+  } catch (err) {
+    // Blob not yet seeded or network error
+  }
+  return null;
+}
+
+export function getObagiHomeContentSync(): ObagiHomeContent {
+  if (memoryCache) return memoryCache;
+
   try {
     const file = getActiveFilePath();
     if (fs.existsSync(file)) {
@@ -108,20 +134,47 @@ export function getObagiHomeContent(): ObagiHomeContent {
     console.error('Failed reading obagi-home-content.json:', err);
   }
 
-  if (memoryCache) return memoryCache;
   return defaultObagiHomeContent;
 }
 
-export function saveObagiHomeContent(newContent: ObagiHomeContent): ObagiHomeContent {
+export async function getObagiHomeContent(): Promise<ObagiHomeContent> {
+  const now = Date.now();
+  // Fetch from blob every 10 seconds or if no memory cache
+  if (!memoryCache || now - lastBlobFetchTime > 10000) {
+    const blobData = await fetchFromBlob();
+    if (blobData) return blobData;
+  }
+
+  return getObagiHomeContentSync();
+}
+
+export async function saveObagiHomeContent(newContent: ObagiHomeContent): Promise<ObagiHomeContent> {
+  const merged = mergeWithDefaults(newContent);
+  memoryCache = merged;
+  lastBlobFetchTime = Date.now();
+
+  // 1. Write to local/server filesystem
   try {
     const file = getActiveFilePath();
     const tempFile = `${file}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, JSON.stringify(newContent, null, 2), 'utf8');
+    fs.writeFileSync(tempFile, JSON.stringify(merged, null, 2), 'utf8');
     fs.renameSync(tempFile, file);
   } catch (err) {
     console.warn('Filesystem write failed, saved to memory cache:', err);
   }
 
-  memoryCache = newContent;
-  return newContent;
+  // 2. Write to Vercel Blob permanent cloud storage
+  try {
+    const token = process.env.BLOB_READ_WRITE_TOKEN || DEFAULT_TOKEN;
+    await put(BLOB_FILENAME, JSON.stringify(merged, null, 2), {
+      access: 'public',
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      token,
+    });
+  } catch (blobErr) {
+    console.warn('Vercel Blob write error, retained in local/memory cache:', blobErr);
+  }
+
+  return merged;
 }

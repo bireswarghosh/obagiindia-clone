@@ -1,22 +1,101 @@
 /**
- * Obagi India Dynamic CMS Synchronizer (Updated)
- * Synchronizes CMS edits across Header/Navbar, Hero (4 images), History, About,
- * Pillars, R&D, Featured Systems, Mobile Banner, Quotes, Numbers, Careers, Press, and Footer.
+ * Obagi India Dynamic CMS Synchronizer
+ * Safe DOM synchronization for Navbar, Hero, History, About, Pillars, R&D,
+ * Products, Video, Quotes, Numbers, Careers, Press, and Footer.
+ * Includes interactive dismiss handler for the Chatbot / Help bubbles.
  */
 (function () {
+  // 1. Interactive Chatbot / "Need Help?" Dismiss Handler
+  function setupChatbotDismissHandler() {
+    function hideChatBubbles(e) {
+      if (e) {
+        try { e.preventDefault(); e.stopPropagation(); } catch (err) {}
+      }
+      var selectors = [
+        '.sT3llID',
+        '.clickOutside854',
+        '[data-hook="popover-content"]',
+        '[data-content-element="popover-content--undefined"]',
+        '.orVleq6--bubbleHasShadow',
+        '.sQ58pJn',
+        '.suyLqA9',
+        'ul.srmuh7I',
+        'button.ssAUHBf',
+        'button.sNQrbXm'
+      ];
+      selectors.forEach(function (sel) {
+        var els = document.querySelectorAll(sel);
+        for (var i = 0; i < els.length; i++) {
+          els[i].style.setProperty('display', 'none', 'important');
+          els[i].style.setProperty('visibility', 'hidden', 'important');
+          els[i].style.setProperty('opacity', '0', 'important');
+        }
+      });
+      try {
+        sessionStorage.setItem('obagi_chat_dismissed', 'true');
+      } catch (err) {}
+    }
+
+    try {
+      if (sessionStorage.getItem('obagi_chat_dismissed') === 'true') {
+        hideChatBubbles();
+      }
+    } catch (e) {}
+
+    ['click', 'pointerdown', 'touchstart'].forEach(function (evtName) {
+      document.addEventListener(
+        evtName,
+        function (e) {
+          var target = e.target;
+          if (!target || !target.closest) return;
+          var closeBtn = target.closest(
+            '.s__0Mgxoe, [aria-label="Close notification"], .ssSBbnc, svg.ssSBbnc'
+          );
+          if (closeBtn) {
+            hideChatBubbles(e);
+          }
+        },
+        true
+      );
+    });
+  }
+
+  setupChatbotDismissHandler();
+
+  // 2. Fetch CMS Data with Multi-source Fallback
   function getCmsData() {
+    // Priority 1: Raw Object injected directly into window
+    if (
+      window.__OBAGI_CMS_RAW_DATA__ &&
+      typeof window.__OBAGI_CMS_RAW_DATA__ === 'object' &&
+      !window.__OBAGI_CMS_RAW_DATA__.nodeType &&
+      (window.__OBAGI_CMS_RAW_DATA__.hero || window.__OBAGI_CMS_RAW_DATA__.header)
+    ) {
+      return window.__OBAGI_CMS_RAW_DATA__;
+    }
+
+    // Priority 2: Injected JSON Script content
+    var scriptEl = document.getElementById('__OBAGI_CMS_DATA__');
+    if (scriptEl && scriptEl.textContent) {
+      try {
+        var parsed = JSON.parse(scriptEl.textContent);
+        if (parsed && (parsed.hero || parsed.header)) {
+          return parsed;
+        }
+      } catch (e) {}
+    }
+
+    // Priority 3: Browser localStorage
     try {
       var local = localStorage.getItem('obagi_home_cms');
       if (local) {
-        var parsed = JSON.parse(local);
-        if (parsed && (parsed.hero || parsed.header)) return parsed;
+        var parsedLocal = JSON.parse(local);
+        if (parsedLocal && (parsedLocal.hero || parsedLocal.header)) {
+          return parsedLocal;
+        }
       }
-    } catch (e) {
-      console.warn('Could not read local CMS data:', e);
-    }
-    if (window.__OBAGI_CMS_DATA__) {
-      return window.__OBAGI_CMS_DATA__;
-    }
+    } catch (e) {}
+
     return null;
   }
 
@@ -50,13 +129,11 @@
   }
 
   function applyCms() {
-    // 0. Remove any frozen vibe-annotations-root
+    // Clean up any stale vibe annotations shadow roots
     var vibe = document.getElementById('vibe-annotations-root');
-    if (vibe) {
-      vibe.remove();
-    }
+    if (vibe) vibe.remove();
 
-    // 1. Mobile Banner Image Visibility Fix for wow-image#comp-mlau0bjm_img > img
+    // Mobile Banner Image Visibility Fix
     var mobilePoster = document.getElementById('comp-mlau0bjm_img');
     if (mobilePoster) {
       mobilePoster.style.setProperty('opacity', '1', 'important');
@@ -80,33 +157,43 @@
 
     // Section 1: Header / Navbar
     if (data.header) {
-      // Custom logo with background remover support
-      if (data.header.logoUrl) {
+      // 1.1 Custom Logo (only replace SVG if a valid logoUrl is provided)
+      if (data.header.logoUrl && data.header.logoUrl.trim() !== '') {
         var logoContainer = document.querySelector('[data-testid="svgRoot-comp-lw3c3n7z_r_comp-lw3c38vb"]');
         if (logoContainer) {
-          logoContainer.innerHTML = '<img src="' + data.header.logoUrl + '" alt="' + (data.header.logoAlt || 'Obagi Logo') + '" style="max-height: 44px; width: auto; object-fit: contain; display: block;" />';
+          logoContainer.innerHTML =
+            '<img src="' +
+            data.header.logoUrl +
+            '" alt="' +
+            (data.header.logoAlt || 'Logo') +
+            '" style="max-height: 44px; width: auto; object-fit: contain; display: block;" />';
         }
       }
 
-      // Brought to you in India by SPECTRA
+      // 1.2 Tagline "Brought to you in India by SPECTRA" - Leaf node only!
       if (data.header.broughtByText) {
-        var allSpans = document.querySelectorAll('header span, header p, header div');
-        for (var i = 0; i < allSpans.length; i++) {
-          if (allSpans[i].innerText && allSpans[i].innerText.includes('Brought to you in India')) {
-            allSpans[i].innerText = data.header.broughtByText;
-            if (data.header.broughtByColor) allSpans[i].style.color = data.header.broughtByColor;
-            break;
+        var broughtBtn = document.getElementById('comp-lw3c3n7z_r_comp-mlethlmo');
+        if (broughtBtn) {
+          var spanEl = broughtBtn.querySelector('span') || broughtBtn;
+          spanEl.innerText = data.header.broughtByText;
+          if (data.header.broughtByColor) {
+            spanEl.style.color = data.header.broughtByColor;
           }
         }
       }
 
-      // Nav menu items
+      // 1.3 Menu Navigation Labels & Colors
       var menuLabels = document.querySelectorAll('.wixui-horizontal-menu__item-label');
       menuLabels.forEach(function (lbl) {
         var txt = lbl.innerText.trim();
+        var linkParent = lbl.closest('a');
+
         if (txt.includes('Why Obagi') && data.header.whyObagiText) {
           lbl.innerText = data.header.whyObagiText;
           if (data.header.whyObagiColor) lbl.style.color = data.header.whyObagiColor;
+          if (linkParent && data.header.whyObagiLink && data.header.whyObagiLink !== '#') {
+            linkParent.href = data.header.whyObagiLink;
+          }
         } else if (txt.includes('Skin Concern') && data.header.skinConcernTitle) {
           lbl.innerText = data.header.skinConcernTitle;
           if (data.header.skinConcernColor) lbl.style.color = data.header.skinConcernColor;
@@ -126,13 +213,21 @@
       setElementText('comp-lxriaddt', data.hero.awardBadge, data.hero.awardBadgeColor);
       setElementText('comp-lwqgbmmr', data.hero.historyIntroText, data.hero.historyIntroTextColor);
 
-      // Hero 4 Images
       if (data.hero.heroImage1) setImageSrc('img[alt="drop"]', data.hero.heroImage1);
       if (data.hero.heroImage2) setImageSrc('img[alt="aesthetics award winner 2025"]', data.hero.heroImage2);
       if (data.hero.heroImage3) setImageSrc('img[alt="obagi-nu-derm-fx-collection"]', data.hero.heroImage3);
       if (data.hero.heroImage4) {
         var topBannerImg = document.querySelector('section:first-of-type img');
         if (topBannerImg) topBannerImg.src = data.hero.heroImage4;
+      }
+    }
+
+    // Section 3: Trust Marquee Ticker
+    if (data.ticker && data.ticker.text) {
+      var tickerEl = document.querySelector('[data-testid="marquee-text"], .marquee p, .wixui-marquee span');
+      if (tickerEl) {
+        tickerEl.innerText = data.ticker.text;
+        if (data.ticker.textColor) tickerEl.style.color = data.ticker.textColor;
       }
     }
 
@@ -321,11 +416,27 @@
     }
   }
 
+  // 3. Execution triggers
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', applyCms);
   } else {
     applyCms();
   }
-  setTimeout(applyCms, 500);
-  setTimeout(applyCms, 1500);
+  setTimeout(applyCms, 300);
+  setTimeout(applyCms, 1200);
+
+  // 4. Background live data synchronization from Vercel Blob
+  try {
+    fetch('/api/obagi-cms')
+      .then(function (r) {
+        return r.json();
+      })
+      .then(function (res) {
+        if (res && res.success && res.data) {
+          window.__OBAGI_CMS_RAW_DATA__ = res.data;
+          applyCms();
+        }
+      })
+      .catch(function () {});
+  } catch (e) {}
 })();

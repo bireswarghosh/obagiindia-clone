@@ -57,13 +57,20 @@ export default function ObagiHomeCms({ onNotify }: ObagiHomeCmsProps) {
   // Load from API or localStorage
   useEffect(() => {
     async function loadData() {
+      let localCached: any = null;
       try {
-        const res = await fetch('/api/obagi-cms');
+        const saved = localStorage.getItem('obagi_home_cms');
+        if (saved) {
+          localCached = JSON.parse(saved);
+        }
+      } catch (e) {}
+
+      try {
+        const res = await fetch('/api/obagi-cms', { cache: 'no-store' });
         if (res.ok) {
           const json = await res.json();
           if (json.success && json.data) {
-            // merge with defaults defensively
-            setContent({
+            const merged = {
               ...defaultObagiHomeContent,
               ...json.data,
               header: { ...defaultObagiHomeContent.header, ...(json.data.header || {}) },
@@ -81,24 +88,19 @@ export default function ObagiHomeCms({ onNotify }: ObagiHomeCmsProps) {
               press: { ...defaultObagiHomeContent.press, ...(json.data.press || {}) },
               newsletter: { ...defaultObagiHomeContent.newsletter, ...(json.data.newsletter || {}) },
               footer: { ...defaultObagiHomeContent.footer, ...(json.data.footer || {}) }
-            });
-            localStorage.setItem('obagi_home_cms', JSON.stringify(json.data));
+            };
+            setContent(merged);
+            localStorage.setItem('obagi_home_cms', JSON.stringify(merged));
             return;
           }
         }
       } catch (e) {
-        console.warn('API load failed, checking localStorage:', e);
+        console.warn('API load failed, checking localStorage fallback:', e);
       }
 
-      try {
-        const saved = localStorage.getItem('obagi_home_cms');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed) {
-            setContent({ ...defaultObagiHomeContent, ...parsed });
-          }
-        }
-      } catch (e) {}
+      if (localCached) {
+        setContent({ ...defaultObagiHomeContent, ...localCached });
+      }
     }
     loadData();
   }, []);
@@ -112,8 +114,10 @@ export default function ObagiHomeCms({ onNotify }: ObagiHomeCmsProps) {
   const handleSave = async () => {
     try {
       setSaving(true);
+      // Immediately cache locally so user never loses their changes
       localStorage.setItem('obagi_home_cms', JSON.stringify(content));
 
+      // Persist permanently to Vercel Blob cloud storage
       const res = await fetch('/api/obagi-cms', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -121,13 +125,17 @@ export default function ObagiHomeCms({ onNotify }: ObagiHomeCmsProps) {
       });
 
       if (res.ok) {
-        triggerToast('Home Page CMS updated & published live!', 'success');
+        const json = await res.json();
+        if (json.data) {
+          localStorage.setItem('obagi_home_cms', JSON.stringify(json.data));
+        }
+        triggerToast('✅ Home Page CMS permanently saved to Cloud & published live!', 'success');
       } else {
-        triggerToast('Saved locally in browser cache', 'success');
+        triggerToast('⚠️ Saved in local browser cache. Server sync pending.', 'success');
       }
     } catch (err: any) {
       console.error('Save failed:', err);
-      triggerToast('Saved locally in browser cache', 'success');
+      triggerToast('⚠️ Saved in local browser cache.', 'success');
     } finally {
       setSaving(false);
     }
@@ -312,45 +320,123 @@ export default function ObagiHomeCms({ onNotify }: ObagiHomeCmsProps) {
 
           {/* Dropdown Items Preview & Editor */}
           <div className="border-t border-slate-800 pt-4 space-y-4">
-            <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
-              Dropdown Sub-Menus
-            </h4>
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
+                Dropdown Sub-Menus & Redirect URLs
+              </h4>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-slate-400">Why Obagi Link:</span>
+                <input
+                  type="text"
+                  placeholder="/# or https://..."
+                  value={content.header.whyObagiLink || ''}
+                  onChange={(e) =>
+                    setContent({
+                      ...content,
+                      header: { ...content.header, whyObagiLink: e.target.value }
+                    })
+                  }
+                  className="text-xs py-1 px-2.5 rounded bg-slate-950 border border-slate-700 text-slate-200 w-48"
+                />
+              </div>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Skin Concern */}
+              <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
                 <span className="text-[11px] font-bold text-slate-300">Skin Concern Dropdowns (10 items):</span>
-                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 text-xs">
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
                   {content.header.skinConcernItems.map((item, idx) => (
-                    <input
-                      key={idx}
-                      type="text"
-                      value={item}
-                      onChange={(e) => {
-                        const updated = [...content.header.skinConcernItems];
-                        updated[idx] = e.target.value;
-                        setContent({ ...content, header: { ...content.header, skinConcernItems: updated } });
-                      }}
-                      className="w-full text-xs py-1.5 px-2.5 rounded bg-slate-950 border border-slate-700 text-slate-200"
-                    />
+                    <div key={idx} className="space-y-1 bg-slate-950/80 p-1.5 rounded border border-slate-800/80">
+                      <input
+                        type="text"
+                        placeholder="Title"
+                        value={item}
+                        onChange={(e) => {
+                          const updated = [...content.header.skinConcernItems];
+                          updated[idx] = e.target.value;
+                          setContent({ ...content, header: { ...content.header, skinConcernItems: updated } });
+                        }}
+                        className="w-full text-[11px] py-1 px-2 rounded bg-slate-900 border border-slate-700 text-slate-200"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Redirect URL (e.g. /products?concern=aging)"
+                        value={(content.header.skinConcernLinks && content.header.skinConcernLinks[idx]) || ''}
+                        onChange={(e) => {
+                          const links = [...(content.header.skinConcernLinks || [])];
+                          links[idx] = e.target.value;
+                          setContent({ ...content, header: { ...content.header, skinConcernLinks: links } });
+                        }}
+                        className="w-full text-[10px] py-0.5 px-2 rounded bg-slate-950 border border-slate-800 text-teal-400 placeholder:text-slate-600 font-mono"
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+              {/* Product Range */}
+              <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
                 <span className="text-[11px] font-bold text-slate-300">Product Range Dropdowns (10 items):</span>
-                <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 text-xs">
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
                   {content.header.productRangeItems.map((item, idx) => (
-                    <input
-                      key={idx}
-                      type="text"
-                      value={item}
-                      onChange={(e) => {
-                        const updated = [...content.header.productRangeItems];
-                        updated[idx] = e.target.value;
-                        setContent({ ...content, header: { ...content.header, productRangeItems: updated } });
-                      }}
-                      className="w-full text-xs py-1.5 px-2.5 rounded bg-slate-950 border border-slate-700 text-slate-200"
-                    />
+                    <div key={idx} className="space-y-1 bg-slate-950/80 p-1.5 rounded border border-slate-800/80">
+                      <input
+                        type="text"
+                        placeholder="Title"
+                        value={item}
+                        onChange={(e) => {
+                          const updated = [...content.header.productRangeItems];
+                          updated[idx] = e.target.value;
+                          setContent({ ...content, header: { ...content.header, productRangeItems: updated } });
+                        }}
+                        className="w-full text-[11px] py-1 px-2 rounded bg-slate-900 border border-slate-700 text-slate-200"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Redirect URL (e.g. /products/nu-derm)"
+                        value={(content.header.productRangeLinks && content.header.productRangeLinks[idx]) || ''}
+                        onChange={(e) => {
+                          const links = [...(content.header.productRangeLinks || [])];
+                          links[idx] = e.target.value;
+                          setContent({ ...content, header: { ...content.header, productRangeLinks: links } });
+                        }}
+                        className="w-full text-[10px] py-0.5 px-2 rounded bg-slate-950 border border-slate-800 text-teal-400 placeholder:text-slate-600 font-mono"
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Find Obagi */}
+              <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-2">
+                <span className="text-[11px] font-bold text-slate-300">Find Obagi Dropdowns (2 items):</span>
+                <div className="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
+                  {content.header.findObagiItems.map((item, idx) => (
+                    <div key={idx} className="space-y-1 bg-slate-950/80 p-1.5 rounded border border-slate-800/80">
+                      <input
+                        type="text"
+                        placeholder="Title"
+                        value={item}
+                        onChange={(e) => {
+                          const updated = [...content.header.findObagiItems];
+                          updated[idx] = e.target.value;
+                          setContent({ ...content, header: { ...content.header, findObagiItems: updated } });
+                        }}
+                        className="w-full text-[11px] py-1 px-2 rounded bg-slate-900 border border-slate-700 text-slate-200"
+                      />
+                      <input
+                        type="text"
+                        placeholder="Redirect URL (e.g. /clinic-finder)"
+                        value={(content.header.findObagiLinks && content.header.findObagiLinks[idx]) || ''}
+                        onChange={(e) => {
+                          const links = [...(content.header.findObagiLinks || [])];
+                          links[idx] = e.target.value;
+                          setContent({ ...content, header: { ...content.header, findObagiLinks: links } });
+                        }}
+                        className="w-full text-[10px] py-0.5 px-2 rounded bg-slate-950 border border-slate-800 text-teal-400 placeholder:text-slate-600 font-mono"
+                      />
+                    </div>
                   ))}
                 </div>
               </div>
