@@ -1,0 +1,126 @@
+{
+  "header": {
+    "brandLogo": "/images/logo.png",
+    "partnerBadge": {
+      "tagline": "Brought to you in India by",
+      "company": "SPECTRA",
+      "logo": "/images/partner-logo.png"
+    },
+    "navMenu": [
+      { "label": "Why Obagi ?", "link": "#why-obagi" },
+      { "label": "Skin Concern", "link": "#skin-concern" },
+      { "label": "Product Range", "link": "#product-range" },
+      { "label": "Find Obagi", "link": "#find-obagi" }
+    ],
+    "consultDoctorButton": {
+      "label": "For Doctors",
+      "link": "/for-doctors"
+    }
+  },
+
+  "heroSection": {
+    "badge": "CLINICALLY PROVEN SKINCARE",
+    "headline": "Transforming Skin Health at Cellular Level",
+    "subheadline": "Physician-formulated science backed by decades of clinical research.",
+    "ctaButton": {
+      "label": "Explore Products",
+      "link": "#products"
+    },
+    "bannerImage": "/images/hero-banner.jpg",
+    "morphCircleImage": "/images/hero-morph.jpg"
+  },
+
+  "brandMissionSection": {
+    "tagline": "#1 PHYSICIAN-DISPENSED BRAND IN INDIA",
+    "heading": "Real Science. Visible Transformation.",
+    "description": "Backed by dermatology experts worldwide to target hyperpigmentation, premature aging, and barrier damage.",
+    "stats": [
+      { "number": "30+", "label": "Years of Clinical Heritage" },
+      { "number": "100%", "label": "Physician Backed Formulas" },
+      { "number": "50K+", "label": "Dermatologist Recommendations" }
+    ]
+  },
+
+  "cardStack3D": {
+    "sectionTitle": "Flagship Formulations",
+    "backgroundEffect": "pink-serum-expanding-circle",
+    "backgroundImage": "/images/pink-serum-bg.jpg",
+    "cards": [
+      {
+        "cardNumber": "1",
+        "title": "Obagi Nu-Derm Fx™ Systems",
+        "subtitle": "Complete skin transformation system for hyperpigmentation and photo-damage.",
+        "description": "Formulated with arbutin and antioxidant complexes to clarify, brighten, and restore luminous, even-toned complexion.",
+        "image": "/images/card1-nuderm.png",
+        "productLink": "/products/nu-derm"
+      },
+      {
+        "cardNumber": "2",
+        "title": "Obagi Daily Hydro-Drops®",
+        "subtitle": "Weightless facial serum with innovative microfluidic technology.",
+        "description": "Infused with Vitamin B3, Abyssinian oil, and Hibiscus oil to deeply hydrate and soothe skin without clogging pores.",
+        "image": "/images/card2-hydro-drops.png",
+        "productLink": "/products/hydro-drops"
+      },
+      {
+        "cardNumber": "3",
+        "title": "Obagi Nu-Cil®",
+        "subtitle": "Clinically proven hair growth system to address hair thinning on scalp, brows, and lashes.",
+        "description": "Powered by NouriPlex® Technology and BioStim™ Complex, delivering concentrated peptides, biotin, and nourishing actives at the root.",
+        "image": "/images/card3-nucil.png",
+        "productLink": "/products/nu-cil"
+      }
+    ]
+  },
+
+  "videoAwardSection": {
+    "videoUrl": "https://video.wixstatic.com/video/4833d7_958d8b59c22f449990b3c2a75c660389/720p/mp4/file.mp4",
+    "posterImage": "/images/video-poster.jpg",
+    "overlayTitle": "New Beauty Award 2024 Winner",
+    "controlsEnabled": true,
+    "autoplayMuted": true
+  },
+
+  "clinicalResearchSection": {
+    "badge": "CLINICAL EXCELLENCE",
+    "heading": "Proven Across Diverse Fitzpatrick Skin Types",
+    "description": "Rigorous double-blind clinical trials validate visible reduction in melasma, dark spots, fine lines, and texture roughness within 12 weeks.",
+    "featureImages": [
+      "/images/clinical-study-1.jpg",
+      "/images/clinical-study-2.jpg"
+    ]
+  },
+
+  "footer": {
+    "brandDescription": "Leading physician-formulated medical skincare designed to transform your skin from within.",
+    "columns": [
+      {
+        "title": "About",
+        "links": [
+          { "label": "Our Story", "url": "/about" },
+          { "label": "Scientific Innovation", "url": "/science" },
+          { "label": "Clinical Insights", "url": "/insights" }
+        ]
+      },
+      {
+        "title": "Products",
+        "links": [
+          { "label": "Nu-Derm Fx", "url": "/products/nu-derm" },
+          { "label": "Hydro-Drops", "url": "/products/hydro-drops" },
+          { "label": "Nu-Cil Lash & Brow", "url": "/products/nu-cil" },
+          { "label": "All Products", "url": "/products" }
+        ]
+      },
+      {
+        "title": "For Doctors",
+        "links": [
+          { "label": "Prescribing Information", "url": "/for-doctors" },
+          { "label": "Medical Information", "url": "/medical-information" },
+          { "label": "Partner Portal", "url": "/partner" }
+        ]
+      }
+    ],
+    "copyright": "© 2026 Obagi India / Ryan Dermaceutics. All rights reserved.",
+    "disclaimer": "The products described are cosmetic and dermatological formulations intended for skin health maintenance."
+  }
+}

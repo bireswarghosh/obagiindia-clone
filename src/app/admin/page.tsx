@@ -85,8 +85,8 @@ export default function RyanAdminPortal() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
-  // Security PIN Auth State
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
+  // Security PIN Auth State — locked by default; verified server-side.
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState(false);
 
@@ -434,13 +434,22 @@ export default function RyanAdminPortal() {
           </div>
 
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              if (pinInput === '1234') {
-                setIsAuthenticated(true);
-                sessionStorage.setItem('ryan_admin_authenticated', 'true');
-                setPinError(false);
-              } else {
+              try {
+                const res = await fetch('/api/cms-auth', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ pin: pinInput }),
+                });
+                if (res.ok) {
+                  setIsAuthenticated(true);
+                  sessionStorage.setItem('ryan_admin_authenticated', 'true');
+                  setPinError(false);
+                } else {
+                  setPinError(true);
+                }
+              } catch {
                 setPinError(true);
               }
             }}

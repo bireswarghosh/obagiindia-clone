@@ -1,180 +1,144 @@
 import fs from 'fs';
 import path from 'path';
-import { put } from '@vercel/blob';
 import { ObagiHomeContent, defaultObagiHomeContent } from '@/data/obagi-home-content';
-
-const IS_VERCEL = !!process.env.VERCEL;
-const BLOB_URL = 'https://atlkh9ztzm3kfmnr.public.blob.vercel-storage.com/obagi-cms-data.json';
-const BLOB_FILENAME = 'obagi-cms-data.json';
-const DEFAULT_TOKEN = 'vercel_blob_rw_Atlkh9ZtzM3kfMnr_exDGXwl4vKdyHoPM82UEA8RW7gfjJa';
+import {
+  loadContentJsonFromBlob,
+  saveContentJsonToBlob,
+} from './obagi-blob-store';
 
 const LOCAL_DATA_DIR = path.join(process.cwd(), 'data');
 const LOCAL_DATA_FILE = path.join(LOCAL_DATA_DIR, 'obagi-home-content.json');
 
-const VERCEL_DATA_DIR = '/tmp/data';
-const VERCEL_DATA_FILE = '/tmp/data/obagi-home-content.json';
+import { deepMerge } from './deep-merge';
+export { deepMerge };
 
 let memoryCache: ObagiHomeContent | null = null;
-let lastBlobFetchTime = 0;
+let blobCheckedThisBoot = false;
+let blobAvailable: boolean | null = null;
+// Serializes read-modify-write so two section saves can never interleave.
+let writeQueue: Promise<unknown> = Promise.resolve();
 
-function getActiveFilePath(): string {
-  if (IS_VERCEL) {
-    try {
-      if (!fs.existsSync(VERCEL_DATA_DIR)) {
-        fs.mkdirSync(VERCEL_DATA_DIR, { recursive: true });
-      }
-      if (!fs.existsSync(VERCEL_DATA_FILE)) {
-        let initialData = defaultObagiHomeContent;
-        if (fs.existsSync(LOCAL_DATA_FILE)) {
-          try {
-            initialData = JSON.parse(fs.readFileSync(LOCAL_DATA_FILE, 'utf8'));
-          } catch (e) {}
-        }
-        fs.writeFileSync(VERCEL_DATA_FILE, JSON.stringify(initialData, null, 2), 'utf8');
-      }
-      return VERCEL_DATA_FILE;
-    } catch (e) {
-      console.warn('Failed setting up /tmp on Vercel:', e);
-    }
-  }
-
+function ensureLocalFile(): void {
   try {
     if (!fs.existsSync(LOCAL_DATA_DIR)) {
       fs.mkdirSync(LOCAL_DATA_DIR, { recursive: true });
     }
+    // Seed ONLY when the record truly does not exist — never overwrite.
     if (!fs.existsSync(LOCAL_DATA_FILE)) {
-      fs.writeFileSync(LOCAL_DATA_FILE, JSON.stringify(defaultObagiHomeContent, null, 2), 'utf8');
+      fs.writeFileSync(
+        LOCAL_DATA_FILE,
+        JSON.stringify({ ...defaultObagiHomeContent, meta: freshMeta(1) }, null, 2),
+        'utf8'
+      );
     }
-    return LOCAL_DATA_FILE;
-  } catch (e) {
-    return LOCAL_DATA_FILE;
+  } catch {
+    // Read-only serverless FS — Blob/memory carry the truth.
   }
 }
 
-export function mergeWithDefaults(saved: any): ObagiHomeContent {
-  if (!saved || typeof saved !== 'object') return { ...defaultObagiHomeContent };
+function freshMeta(version: number) {
   return {
-    ...defaultObagiHomeContent,
-    ...saved,
-    header: { ...defaultObagiHomeContent.header, ...(saved.header || {}) },
-    hero: { ...defaultObagiHomeContent.hero, ...(saved.hero || {}) },
-    ticker: { ...defaultObagiHomeContent.ticker, ...(saved.ticker || {}) },
-    history: { ...defaultObagiHomeContent.history, ...(saved.history || {}) },
-    about: { ...defaultObagiHomeContent.about, ...(saved.about || {}) },
-    trustBanner: {
-      ...defaultObagiHomeContent.trustBanner,
-      ...(saved.trustBanner || {}),
-      pillars: saved.trustBanner?.pillars || defaultObagiHomeContent.trustBanner.pillars
-    },
-    research: {
-      ...defaultObagiHomeContent.research,
-      ...(saved.research || {}),
-      tabs: saved.research?.tabs || defaultObagiHomeContent.research.tabs
-    },
-    products: {
-      ...defaultObagiHomeContent.products,
-      ...(saved.products || {}),
-      systems: saved.products?.systems || defaultObagiHomeContent.products.systems
-    },
-    videoBanner: { ...defaultObagiHomeContent.videoBanner, ...(saved.videoBanner || {}) },
-    quote: { ...defaultObagiHomeContent.quote, ...(saved.quote || {}) },
-    numbers: {
-      ...defaultObagiHomeContent.numbers,
-      ...(saved.numbers || {}),
-      stats: saved.numbers?.stats || defaultObagiHomeContent.numbers.stats
-    },
-    careers: {
-      ...defaultObagiHomeContent.careers,
-      ...(saved.careers || {}),
-      jobs: saved.careers?.jobs || defaultObagiHomeContent.careers.jobs
-    },
-    press: {
-      ...defaultObagiHomeContent.press,
-      ...(saved.press || {}),
-      items: saved.press?.items || defaultObagiHomeContent.press.items
-    },
-    newsletter: { ...defaultObagiHomeContent.newsletter, ...(saved.newsletter || {}) },
-    footer: { ...defaultObagiHomeContent.footer, ...(saved.footer || {}) },
+    version,
+    updatedAt: new Date().toISOString(),
   };
 }
 
-export async function fetchFromBlob(): Promise<ObagiHomeContent | null> {
+function parseAndMerge(raw: string): ObagiHomeContent | null {
   try {
-    const res = await fetch(BLOB_URL, { cache: 'no-store' });
-    if (res.ok) {
-      const data = await res.json();
-      if (data && (data.hero || data.header)) {
-        const merged = mergeWithDefaults(data);
-        memoryCache = merged;
-        lastBlobFetchTime = Date.now();
-        return merged;
-      }
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      return deepMerge(defaultObagiHomeContent, parsed);
     }
   } catch (err) {
-    // Blob not yet seeded or network error
+    console.error('[obagi-cms] corrupt content JSON, using defaults:', err);
   }
   return null;
 }
 
-export function getObagiHomeContentSync(): ObagiHomeContent {
+/**
+ * Canonical read. Truth order: memory -> Vercel Blob -> local file -> defaults.
+ * Blob is consulted once per boot (then memory carries it) to keep TTFB <1ms.
+ */
+export async function getObagiHomeContent(): Promise<ObagiHomeContent> {
   if (memoryCache) return memoryCache;
 
+  // 1. Durable cloud copy (survives Vercel deploys / /tmp wipes)
+  if (!blobCheckedThisBoot && process.env.BLOB_READ_WRITE_TOKEN) {
+    blobCheckedThisBoot = true;
+    const blobJson = await loadContentJsonFromBlob();
+    if (blobJson) {
+      const merged = parseAndMerge(blobJson);
+      if (merged) {
+        blobAvailable = true;
+        memoryCache = merged;
+        // Warm the local file cache (best-effort, ignored on serverless)
+        try {
+          ensureLocalFile();
+          fs.writeFileSync(LOCAL_DATA_FILE, JSON.stringify(merged, null, 2), 'utf8');
+        } catch {}
+        return merged;
+      }
+    }
+    blobAvailable = false;
+  }
+
+  // 2. Local file
   try {
-    const file = getActiveFilePath();
-    if (fs.existsSync(file)) {
-      const raw = fs.readFileSync(file, 'utf8');
-      const parsed = JSON.parse(raw);
-      if (parsed) {
-        const merged = mergeWithDefaults(parsed);
+    ensureLocalFile();
+    if (fs.existsSync(LOCAL_DATA_FILE)) {
+      const merged = parseAndMerge(fs.readFileSync(LOCAL_DATA_FILE, 'utf8'));
+      if (merged) {
         memoryCache = merged;
         return merged;
       }
     }
   } catch (err) {
-    console.error('Failed reading obagi-home-content.json:', err);
+    console.error('[obagi-cms] local read failed:', err);
   }
 
-  return defaultObagiHomeContent;
+  if (memoryCache) return memoryCache;
+  return deepMerge(defaultObagiHomeContent, {});
 }
 
-export async function getObagiHomeContent(): Promise<ObagiHomeContent> {
-  const now = Date.now();
-  // Fetch from blob every 10 seconds or if no memory cache
-  if (!memoryCache || now - lastBlobFetchTime > 10000) {
-    const blobData = await fetchFromBlob();
-    if (blobData) return blobData;
-  }
+/**
+ * Section-scoped save. `patch` must contain ONLY the section(s) being saved —
+ * every other section is carried over untouched from the latest canonical read.
+ */
+export function saveObagiHomeContent(
+  newContent: Partial<ObagiHomeContent>
+): Promise<ObagiHomeContent> {
+  const task = writeQueue.then(async () => {
+    const current = await getObagiHomeContent();
+    const merged = deepMerge(current, newContent);
+    const nextVersion = (current.meta?.version || 0) + 1;
+    merged.meta = freshMeta(nextVersion);
 
-  return getObagiHomeContentSync();
+    const json = JSON.stringify(merged, null, 2);
+
+    // Durable write first (Blob), then local cache — both best-effort.
+    if (process.env.BLOB_READ_WRITE_TOKEN && blobAvailable !== false) {
+      const url = await saveContentJsonToBlob(json);
+      if (url) blobAvailable = true;
+    }
+    try {
+      ensureLocalFile();
+      const tmp = `${LOCAL_DATA_FILE}.tmp.${Date.now()}`;
+      fs.writeFileSync(tmp, json, 'utf8');
+      fs.renameSync(tmp, LOCAL_DATA_FILE);
+    } catch (err) {
+      console.warn('[obagi-cms] filesystem write failed, kept in memory:', err);
+    }
+
+    memoryCache = merged;
+    return merged;
+  });
+  // Keep the queue alive even if one save fails.
+  writeQueue = task.catch(() => undefined);
+  return task;
 }
 
-export async function saveObagiHomeContent(newContent: ObagiHomeContent): Promise<ObagiHomeContent> {
-  const merged = mergeWithDefaults(newContent);
-  memoryCache = merged;
-  lastBlobFetchTime = Date.now();
-
-  // 1. Write to local/server filesystem
-  try {
-    const file = getActiveFilePath();
-    const tempFile = `${file}.tmp.${Date.now()}`;
-    fs.writeFileSync(tempFile, JSON.stringify(merged, null, 2), 'utf8');
-    fs.renameSync(tempFile, file);
-  } catch (err) {
-    console.warn('Filesystem write failed, saved to memory cache:', err);
-  }
-
-  // 2. Write to Vercel Blob permanent cloud storage
-  try {
-    const token = process.env.BLOB_READ_WRITE_TOKEN || DEFAULT_TOKEN;
-    await put(BLOB_FILENAME, JSON.stringify(merged, null, 2), {
-      access: 'public',
-      addRandomSuffix: false,
-      allowOverwrite: true,
-      token,
-    });
-  } catch (blobErr) {
-    console.warn('Vercel Blob write error, retained in local/memory cache:', blobErr);
-  }
-
-  return merged;
+/** Test/debug helper — never exposed to the browser. */
+export function _resetMemoryCacheForTests(): void {
+  memoryCache = null;
+  blobCheckedThisBoot = false;
 }

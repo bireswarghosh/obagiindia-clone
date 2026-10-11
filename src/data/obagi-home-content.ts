@@ -53,123 +53,151 @@ export interface ObagiPressItem {
   linkUrl?: string;
 }
 
+export interface ObagiNavChild {
+  label: string;
+  link: string;
+}
+
+export interface ObagiNavItem {
+  label: string;
+  link: string;
+  children?: ObagiNavChild[];
+}
+
+export interface ObagiPartnerFeature {
+  id: string;
+  title: string;
+  description: string;
+  icon?: string;
+}
+
+export interface ObagiPartnerActionCard {
+  id: string;
+  title: string;
+  description: string;
+  link?: string;
+  enquiryType: string;
+}
+
+export interface ObagiPartnerSection {
+  tag: string;
+  title: string;
+  titleHighlight: string;
+  subtitle: string;
+  buttonText: string;
+  secondaryButtonText: string;
+  bgImage?: string;
+  features: ObagiPartnerFeature[];
+  actionCards: ObagiPartnerActionCard[];
+}
+
+export interface ObagiEnquirySection {
+  tag: string;
+  title: string;
+  subtitle: string;
+  phone: string;
+  email: string;
+  address: string;
+  workingHours: string;
+  enquiryTypes: string[];
+}
+
 export interface ObagiHomeContent {
-  // Section 1: Header & Navigation
-  header: {
-    logoUrl: string;
-    logoAlt: string;
-    broughtByText: string;
-    broughtByColor?: string;
-    whyObagiText: string;
-    whyObagiColor?: string;
-    whyObagiLink?: string;
-    skinConcernTitle: string;
-    skinConcernColor?: string;
-    skinConcernItems: string[];
-    skinConcernLinks?: string[];
-    productRangeTitle: string;
-    productRangeColor?: string;
-    productRangeItems: string[];
-    productRangeLinks?: string[];
-    findObagiTitle: string;
-    findObagiColor?: string;
-    findObagiItems: string[];
-    findObagiLinks?: string[];
-    searchText: string;
+  // Save metadata — server-maintained, never edited in CMS UI
+  meta?: {
+    version: number;
+    updatedAt: string;
+  };
+  // Header Nav & Logo
+  header?: {
+    logoUrl?: string;
+    navMenu?: ObagiNavItem[];
+    // Spec 01 — in-place text patches on stable header hooks (labels only).
+    skipToContentLabel?: string; // #SKIP_TO_CONTENT_BTN inner text
+    broughtToIndiaByText?: string; // SPECTRA strip button (aria + visible span)
+    searchLabel?: string; // aria-label="Search" (site search button)
+    menuLabel?: string; // aria-label="Menu" (desktop + mobile hamburger, synced)
   };
 
-  // Section 2: Hero Section & Winner Banner
+  // Part 1: Hero Section
   hero: {
     title: string;
     titleColor?: string;
     awardBadge: string;
     awardBadgeColor?: string;
-    // 4 Hero Images
-    heroImage1: string; // Lifestyle Dropper Image
-    heroImage2: string; // Aesthetic Awards Winner Trophy
-    heroImage3: string; // Hero packshot collection
-    heroImage4: string; // Top wide banner background
+    heroImage: string;
+    heroVideoUrl?: string; // annotation 02 — existing hero bg video (comp-lwxgxhly_video), src-swap only
+    heroVideoPoster?: string;
+    awardBadgeImage: string;
     historyIntroText: string;
     historyIntroTextColor?: string;
   };
 
-  // Section 3: Trust Marquee Ticker
-  ticker: {
-    enabled: boolean;
-    text: string;
-    textColor?: string;
-  };
-
-  // Section 4: Our History
-  history: {
-    title: string;
-    titleColor?: string;
-    body: string;
-    bodyColor?: string;
-    image: string;
-  };
-
-  // Section 5: About Obagi Medical Story
-  about: {
-    title: string;
-    titleColor?: string;
-    quote: string;
-    quoteColor?: string;
-    paragraph: string;
-    paragraphColor?: string;
-    image: string;
-  };
-
-  // Section 6: Trust Banner & Brand Pillars
+  // Part 2: Trust Banner & Brand Pillars
   trustBanner: {
     recommendedHeading: string;
     recommendedHeadingColor?: string;
     concernsText: string;
     concernsTextColor?: string;
+    marqueeBgColor?: string;
+    marqueeBgImage?: string;
+    sliderBgImage?: string;
+    autoCarouselInterval?: number;
+    // Spec 03 — the ticker is ONE text node (4 loop copies share it via
+    // inner span + data-text attrs). Per-segment editing is impossible
+    // without changing DOM structure (design lock), so one shared field.
+    tickerText?: string;
     pillars: ObagiPillar[];
   };
 
-  // Section 7: Research, Development & Science
+  // Part 3: History & About Obagi Story
+  story: {
+    historyTitle: string;
+    historyTitleColor?: string;
+    historyBody: string;
+    historyBodyColor?: string;
+    historyImage: string;       // annotation 6 — image 1
+    historyImage2?: string;     // annotation 6 — image 2
+    historyImage3?: string;     // annotation 6 — image 3
+    historyImage4?: string;     // annotation 6 — image 4
+    aboutTitle: string;
+    aboutTitleColor?: string;
+    aboutQuote: string;
+    aboutQuoteColor?: string;
+    aboutParagraph: string;
+    aboutParagraphColor?: string;
+    aboutImage: string;
+  };
+
+  // Part 4: Research, Development & Science
   research: {
     rdTitle: string;
     rdTitleColor?: string;
     rdDescription: string;
     rdDescriptionColor?: string;
-    tabs: ObagiRdTab[];
+    rdBackgroundImage?: string;  // annotation 9 — R&D section bg image with blur
+    tabs: ObagiRdTab[];          // annotation 10 — supports 4 tabs
   };
 
-  // Section 8: Featured Collections / Systems
+  // Part 5: Featured Collections / Systems
   products: {
     sectionTitle: string;
     sectionTitleColor?: string;
     systems: ObagiProductSystem[];
   };
 
-  // Section 9: New Beauty Award Video / Banner
-  videoBanner: {
-    title: string;
-    titleColor?: string;
-    bannerImage: string;
-    videoUrl: string;
-  };
+  // Part 6: Ryan Partner Section (Replaces obsolete bottom Wix sections)
+  partner?: ObagiPartnerSection;
 
-  // Section 10: Testimonial Quote & Executive
-  quote: {
-    author: string;
-    role: string;
-    authorColor?: string;
-    roleColor?: string;
-    image: string;
-  };
+  // Part 7: Ryan Connect & Enquiry Form (Replaces obsolete bottom Wix sections)
+  enquiry?: ObagiEnquirySection;
 
-  // Section 11: Key Numbers & Statistics
+  // Obsolete/Optional Wix Legacy Sections
   numbers: {
     title: string;
     titleColor?: string;
     stats: ObagiStatItem[];
   };
-
-  // Section 12: Careers & Join Our Team
   careers: {
     title: string;
     titleColor?: string;
@@ -177,123 +205,100 @@ export interface ObagiHomeContent {
     subtitleColor?: string;
     jobs: ObagiJobItem[];
   };
-
-  // Section 13: Press & Publications
   press: {
     title: string;
     titleColor?: string;
     items: ObagiPressItem[];
   };
-
-  // Section 14: Join The OBAGI Newsletter
+  quote: {
+    author: string;
+    role: string;
+    authorColor?: string;
+    roleColor?: string;
+    image: string;
+  };
   newsletter: {
     title: string;
     titleColor?: string;
     subtitle: string;
     subtitleColor?: string;
+    emailLabel?: string; // newsletter email <label> text — text only, never restyled
+    consentText?: string; // "Yes, subscribe me to your newsletter." — text only
+    subscribeLabel?: string; // SUBSCRIBE button label — text only, action untouched
+    backgroundImage?: string;
   };
-
-  // Section 15: Footer & Legal
   footer: {
     copyright: string;
     copyrightColor?: string;
+    backgroundImage?: string;
+    // Spec 15 — social icon files (src-swap only, links/destinations frozen).
+    socialIcons?: {
+      instagram?: string;
+      youtube?: string;
+      facebook?: string;
+      x?: string;
+    };
+  };
+  awardVideo?: {
+    videoUrl?: string;
+    posterImage?: string;
+    overlayTitle?: string;
+  };
+  collectionsBg?: {
+    backgroundImage?: string;
+  };
+  // Annotation 14 — standalone background slot (bgLayers_comp-lx8nvywg, newsletter section bg)
+  mediaSlots?: {
+    slot14BackgroundImage?: string;
+  };
+  // SEO text metadata — <title> + meta description only (never canonical/href)
+  seo?: {
+    pageTitle?: string;
+    metaDescription?: string;
+  };
+  // Floating/sticky chat labels — visible text only, behavior/destination untouched
+  floating?: {
+    chatLabel?: string; // "Chat with AI" (minimized chat button aria-label)
+    needHelpText?: string; // "Need Help?" popover
+    exploreText?: string; // "Explore Obagi" quick reply
+    agingText?: string; // "Address the Signs of Aging Skin" quick reply
   };
 }
 
 export const defaultObagiHomeContent: ObagiHomeContent = {
-  // Section 1: Header & Navigation
+  // Header Nav & Logo
   header: {
     logoUrl: '',
-    logoAlt: 'Obagi Medical India',
-    broughtByText: 'Brought to you in India by SPECTRA',
-    broughtByColor: '#ffffff',
-    whyObagiText: 'Why Obagi ?',
-    whyObagiColor: '#ffffff',
-    skinConcernTitle: 'Skin Concern',
-    skinConcernColor: '#ffffff',
-    skinConcernItems: [
-      'Uneven Skin Tone & Discolouration',
-      'Sun Damage',
-      'Signs of Aging',
-      'Acne Blemishes',
-      'Oily Skin or Greasy Skin',
-      'Eye Area',
-      'Dry Skin',
-      'Sensitive Skin',
-      'Young Skin',
-      'Post-Treatment'
-    ],
-    productRangeTitle: 'Product Range',
-    productRangeColor: '#ffffff',
-    productRangeItems: [
-      'Obagi Nu-Derm Fx™ Systems',
-      'Obagi-C® Fx Systems',
-      'Professional-C Portfolio',
-      'ELASTIderm®',
-      'Obagi Nu-Cil®',
-      'Hydrators',
-      'CLENZIderm M.D.™',
-      'Sun Protectors',
-      'Obagi Blue Peel RADIANCE®',
-      'Obagi Retinol®'
-    ],
-    findObagiTitle: 'Find Obagi',
-    findObagiColor: '#ffffff',
-    findObagiItems: [
-      'Clinic Finder',
-      'Contact us'
-    ],
-    searchText: 'Search'
+    navMenu: [
+      { label: 'Company', link: '/about' },
+      { label: 'Products', link: '/products' },
+      { label: 'For Doctors', link: '/for-doctors' },
+      { label: 'Contact', link: '#contact' }
+    ]
   },
 
-  // Section 2: Hero Section & Winner Banner
+  // Part 1: Hero Section
   hero: {
     title: 'Obagi® Medical India',
     titleColor: '#000000',
     awardBadge: 'WINNER 2025\nSkin Product / Range of the Year\n-Aesthetic Awards',
     awardBadgeColor: '#000000',
-    // All 4 Hero images
-    heroImage1: 'https://static.wixstatic.com/media/4833d7_43702b8008e5402c8c805580c51dbcd8~mv2.jpg', // Drop texture
-    heroImage2: 'https://static.wixstatic.com/media/4833d7_3a4748500da24047881d90f975d42006~mv2.jpg', // Award winner badge
-    heroImage3: 'https://static.wixstatic.com/media/4833d7_b81f1121c3eb4ed6807efe18902fb0a1~mv2.jpg', // Nu-Derm packshot
-    heroImage4: 'https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg', // Top wide banner
+    heroImage: 'https://static.wixstatic.com/media/4833d7_43702b8008e5402c8c805580c51dbcd8~mv2.jpg',
+    heroVideoUrl: '',
+    heroVideoPoster: '',
+    awardBadgeImage: 'https://static.wixstatic.com/media/4833d7_3a4748500da24047881d90f975d42006~mv2.jpg',
     historyIntroText: 'With over 35 years of clinically proven results, Obagi Medical Products are the Number 1 physician dispensed skin care range in the world. Obagi Medical products have grown from humble beginnings to having hundreds of thousands of devotees, our vision however hasn’t changed – to transform the skin industry and create a more confident and fearless future. We never take our eyes off tomorrow. That’s the secret to creating a skin care future that is intelligent, accessible and healthier than ever.',
     historyIntroTextColor: '#000000'
   },
 
-  // Section 3: Trust Marquee Ticker
-  ticker: {
-    enabled: true,
-    text: 'CLINICALLY-TESTED          |          TRANSFORMATIONAL SKINCARE          |          PHYSICIAN RECOMMENDED          |          WHO-GMP CERTIFIED',
-    textColor: '#ffffff'
-  },
-
-  // Section 4: Our History
-  history: {
-    title: 'Our History',
-    titleColor: '#000000',
-    body: 'With over 35 years of clinically proven results, Obagi Medical Products are the Number 1 physician dispensed skin care range in the world. Obagi Medical products have grown from humble beginnings to having hundreds of thousands of devotees, our vision however hasn’t changed – to transform the skin industry and create a more confident and fearless future. We never take our eyes off tomorrow. That’s the secret to creating a skin care future that is intelligent, accessible and healthier than ever.',
-    bodyColor: '#000000',
-    image: 'https://static.wixstatic.com/media/4833d7_b81f1121c3eb4ed6807efe18902fb0a1~mv2.jpg'
-  },
-
-  // Section 5: About Obagi Medical Story
-  about: {
-    title: 'About Obagi Medical',
-    titleColor: '#000000',
-    quote: '“We are a complete skin care company, designing transformational products that promote skin health — not just today but for many more tomorrows, too”',
-    quoteColor: '#000000',
-    paragraph: 'Obagi Medical® Products have been specifically formulated to transform the skin from within to result in younger, healthier-looking skin. The Obagi Medical® Product range helps reduce the visible signs of ageing such as fine-lines, wrinkles, melasma (dark sports), hyper-pigmentation, laxity and uneven texture with additional targeted treatments for acne. With over 35 years under our belts, we continue to design transformational products that promote skin health and build on our legacy of science and innovation. Obagi is a complete skin care company designed and tested for every skin type – there really is a solution for everyone.',
-    paragraphColor: '#000000',
-    image: 'https://static.wixstatic.com/media/4833d7_d3685f4b98c2433cb940f7111041fb92~mv2.jpg'
-  },
-
-  // Section 6: Trust Banner & Brand Pillars
+  // Part 2: Trust Banner & Brand Pillars
   trustBanner: {
     recommendedHeading: '#1 Leading U.S. Physician Recommended Brand*',
     recommendedHeadingColor: '#000000',
     concernsText: 'FOR TOP 3 SKIN CONCERNS:     Pigmentation  |  Fine Lines & Wrinkles  |  Sagging Skin & Loss of Elasticity',
     concernsTextColor: '#000000',
+    marqueeBgImage: '',
+    sliderBgImage: '',
     pillars: [
       {
         id: 'pillar-1',
@@ -326,12 +331,35 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
     ]
   },
 
-  // Section 7: Research, Development & Science
+  // Part 3: History & About Obagi Story
+  story: {
+    historyTitle: 'Our History',
+    historyTitleColor: '#000000',
+    historyBody: 'With over 35 years of clinically proven results, Obagi Medical Products are the Number 1 physician dispensed skin care range in the world. Obagi Medical products have grown from humble beginnings to having hundreds of thousands of devotees, our vision however hasn’t changed – to transform the skin industry and create a more confident and fearless future. We never take our eyes off tomorrow. That’s the secret to creating a skin care future that is intelligent, accessible and healthier than ever.',
+    historyBodyColor: '#000000',
+    historyImage: 'https://static.wixstatic.com/media/4833d7_b81f1121c3eb4ed6807efe18902fb0a1~mv2.jpg',
+    historyImage2: 'https://static.wixstatic.com/media/4833d7_43702b8008e5402c8c805580c51dbcd8~mv2.jpg',
+    historyImage3: 'https://static.wixstatic.com/media/4833d7_d3685f4b98c2433cb940f7111041fb92~mv2.jpg',
+    historyImage4: 'https://static.wixstatic.com/media/4833d7_3a4748500da24047881d90f975d42006~mv2.jpg',
+    aboutTitle: 'About Obagi Medical',
+    aboutTitleColor: '#000000',
+    aboutQuote: '“We are a complete skin care company, designing transformational products that promote skin health — not just today but for many more tomorrows, too”',
+    aboutQuoteColor: '#000000',
+    aboutParagraph: 'Obagi Medical® Products have been specifically formulated to transform the skin from within to result in younger, healthier-looking skin. The Obagi Medical® Product range helps reduce the visible signs of ageing such as fine-lines, wrinkles, melasma (dark sports), hyper-pigmentation, laxity and uneven texture with additional targeted treatments for acne. With over 35 years under our belts, we continue to design transformational products that promote skin health and build on our legacy of science and innovation. Obagi is a complete skin care company designed and tested for every skin type – there really is a solution for everyone.',
+    aboutParagraphColor: '#000000',
+    // DOM truth (audit9/11): the `obagi product` slot renders this Pexels file.
+    // A previous default wrongly pointed at the Hydration file, so the served
+    // page NEVER showed the original photo. Fixed to the true original.
+    aboutImage: 'https://static.wixstatic.com/media/c837a6_297eb5ebbb894e709a4ae04906201fa2~mv2.jpg/v1/fill/w_1898,h_353,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/pexels-luu-thanh-truc-335871-9085814.jpg'
+  },
+
+  // Part 4: Research, Development & Science
   research: {
     rdTitle: 'Obagi Research & Development',
     rdTitleColor: '#000000',
     rdDescription: 'At Obagi, we believe skin care is about more than “correcting” or even “preventing;” it’s about unleashing your skin’s full potential. We are dedicated to developing scientifically backed, clinical-quality formulations to promote healthy, future-facing skin so you can greet the future with confidence. Innovation is everywhere, the key is to look in the right places. Our philosophy is to meticulously develop transformational products and rigorously test them to ensure every face is cared for, everywhere.',
     rdDescriptionColor: '#000000',
+    rdBackgroundImage: 'https://static.wixstatic.com/media/4833d7_638d2b9c993f41aeb733907173f188bc~mv2.webp',
     tabs: [
       {
         id: 'tab-approach',
@@ -356,11 +384,19 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
         description: 'Genuine Obagi - Obagi is committed to set and uphold the highest product testing standards at every stage of product development. Every Obagi Medical product undergoes comprehensive safety testing for skin sensitization, allergenicity, non-comedogenicity and photo-toxicity to prove its transformative effectiveness on all Fitzpatrick skin types.',
         textColor: '#000000',
         imageUrl: 'https://static.wixstatic.com/media/4833d7_89f2940aeb7f44dd80b03fba406941b4~mv2.webp'
+      },
+      {
+        id: 'tab-innovation',
+        title: 'Our Innovation Pipeline',
+        titleColor: '#000000',
+        description: 'Obagi continuously invests in next-generation delivery systems and active ingredient research to stay at the forefront of medical-grade skincare science.',
+        textColor: '#000000',
+        imageUrl: 'https://static.wixstatic.com/media/4833d7_638d2b9c993f41aeb733907173f188bc~mv2.webp'
       }
     ]
   },
 
-  // Section 8: Featured Collections / Systems
+  // Part 5: Featured Collections / Systems
   products: {
     sectionTitle: 'Featured Systems & Ranges',
     sectionTitleColor: '#000000',
@@ -401,24 +437,88 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
     ]
   },
 
-  // Section 9: New Beauty Award Video / Banner
-  videoBanner: {
-    title: 'New Beauty Award 2024',
-    titleColor: '#ffffff',
-    bannerImage: 'https://static.wixstatic.com/media/4833d7_958d8b59c22f449990b3c2a75c660389f001.jpg',
-    videoUrl: 'https://video.wixstatic.com/video/4833d7_958d8b59c22f449990b3c2a75c660389/720p/mp4/file.mp4'
+  // Part 6: Partner with Ryan Dermaceutics (Matches Screenshot 2026-10-10 002225.jpg)
+  partner: {
+    tag: 'PARTNER WITH RYAN DERMACEUTICS',
+    title: 'BUILD THE FUTURE OF',
+    titleHighlight: 'DERMATOLOGY TOGETHER',
+    subtitle: 'Ryan Dermaceutics works with healthcare professionals, distribution partners and business associates to expand access to a focused and growing dermatology portfolio.',
+    buttonText: 'BECOME A DISTRIBUTOR',
+    secondaryButtonText: '',
+    bgImage: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?auto=format&fit=crop&w=1600&q=80',
+    features: [
+      {
+        id: 'feat-1',
+        title: 'ATTRACTIVE BUSINESS OPPORTUNITY',
+        description: 'Be part of a growing dermatology division with a comprehensive portfolio.',
+        icon: 'TrendingUp'
+      },
+      {
+        id: 'feat-2',
+        title: 'QUALITY PRODUCTS',
+        description: 'A focused range of topical, oral and hair care products.',
+        icon: 'Award'
+      },
+      {
+        id: 'feat-3',
+        title: 'MARKETING SUPPORT',
+        description: 'Promotional support, visual aids and market development initiatives.',
+        icon: 'Briefcase'
+      },
+      {
+        id: 'feat-4',
+        title: 'LONG-TERM PARTNERSHIP',
+        description: 'Working together for sustainable growth and mutual success.',
+        icon: 'Handshake'
+      }
+    ],
+    actionCards: [
+      {
+        id: 'card-distributor',
+        title: 'DISTRIBUTOR PARTNERSHIP',
+        description: 'Expand your business with our dermatology portfolio.',
+        enquiryType: 'Distributor Partnership'
+      },
+      {
+        id: 'card-business',
+        title: 'BUSINESS ENQUIRY',
+        description: 'Explore business collaboration opportunities.',
+        enquiryType: 'Business Enquiry'
+      },
+      {
+        id: 'card-product',
+        title: 'PRODUCT ENQUIRY',
+        description: 'Get product details, availability and support.',
+        enquiryType: 'Product Enquiry'
+      },
+      {
+        id: 'card-medical',
+        title: 'MEDICAL INFORMATION',
+        description: 'Connect for product-related medical queries.',
+        enquiryType: 'Medical Information'
+      }
+    ]
   },
 
-  // Section 10: Testimonial Quote & Executive
-  quote: {
-    author: 'Megan Brown',
-    role: 'CEO and Co-Founder of BGS',
-    authorColor: '#000000',
-    roleColor: '#000000',
-    image: './Obagi India _ obagi products_files/CEO.jpg'
+  // Part 7: Connect with Ryan / Send Us An Enquiry (Matches Screenshot 2026-10-10 002514.jpg)
+  enquiry: {
+    tag: 'GET IN TOUCH',
+    title: 'CONNECT WITH RYAN DERMACEUTICS',
+    subtitle: 'We are here to support healthcare professionals, distribution partners and business associates. Get in touch for product information, business enquiries or medical support.',
+    phone: '+91 12345 67890',
+    email: 'info@ryandermaceutics.com',
+    address: 'Ahmedabad, Gujarat, India',
+    workingHours: 'Mon – Sat 9:00 AM – 6:00 PM',
+    enquiryTypes: [
+      'Distributor Partnership',
+      'Business Enquiry',
+      'Product Enquiry',
+      'Medical Information',
+      'Other Support'
+    ]
   },
 
-  // Section 11: Key Numbers & Statistics
+  // Part 8: Key Numbers & Statistics (Legacy Wix)
   numbers: {
     title: 'BGS in Numbers',
     titleColor: '#000000',
@@ -430,7 +530,7 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
     ]
   },
 
-  // Section 12: Careers & Join Our Team
+  // Part 9: Careers & Press Releases (Legacy Wix)
   careers: {
     title: 'Join Our Team',
     titleColor: '#000000',
@@ -442,8 +542,6 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
       { id: 'job-3', title: 'Data Scientist, IT', titleColor: '#000000', location: 'San Francisco, CA', locationColor: '#000000' }
     ]
   },
-
-  // Section 13: Press & Publications
   press: {
     title: 'Press',
     titleColor: '#000000',
@@ -472,17 +570,47 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
     ]
   },
 
-  // Section 14: Join The OBAGI Newsletter
+  // Part 10: Quote, Newsletter & Legal
+  quote: {
+    author: 'Megan Brown',
+    role: 'CEO and Co-Founder of BGS',
+    authorColor: '#000000',
+    roleColor: '#000000',
+    image: './Obagi India _ obagi products_files/CEO.jpg'
+  },
   newsletter: {
     title: 'Join The OBAGI Newsletter',
     titleColor: '#000000',
     subtitle: 'Be the first to receive the latest news and updates.',
-    subtitleColor: '#000000'
+    subtitleColor: '#000000',
+    emailLabel: 'Email',
+    consentText: '',
+    backgroundImage: ''
   },
-
-  // Section 15: Footer & Legal
   footer: {
     copyright: '©2026 Obagi. All rights reserved. Obagi® Systems and Products are physician dispensed and should be used under the guidance of a skin care professional.',
-    copyrightColor: '#000000'
+    copyrightColor: '#000000',
+    backgroundImage: ''
+  },
+  awardVideo: {
+    videoUrl: 'https://video.wixstatic.com/video/4833d7_958d8b59c22f449990b3c2a75c660389/720p/mp4/file.mp4',
+    posterImage: 'https://static.wixstatic.com/media/4833d7_43702b8008e5402c8c805580c51dbcd8~mv2.jpg',
+    overlayTitle: 'New Beauty Award 2024 Winner'
+  },
+  collectionsBg: {
+    backgroundImage: ''
+  },
+  mediaSlots: {
+    slot14BackgroundImage: ''
+  },
+  seo: {
+    pageTitle: 'Obagi India | obagi products',
+    metaDescription: 'Explore Obagi Medical India\'s official site for transformative skincare solutions that target fine lines, wrinkles, dark spots, hyperpigmentation, and more.'
+  },
+  floating: {
+    chatLabel: 'Chat with AI',
+    needHelpText: 'Need Help?',
+    exploreText: 'Explore Obagi',
+    agingText: 'Address the Signs of Aging Skin'
   }
 };

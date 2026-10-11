@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { getObagiHomeContent } from '@/lib/obagi-cms';
+import { patchHtmlWithCms } from '@/lib/obagi-html-patcher';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,29 +13,33 @@ export async function GET() {
     }
     let html = fs.readFileSync(htmlPath, 'utf8');
 
-    // Fetch active CMS content
+    // Canonical CMS content is painted on the SERVER before first byte —
+    // the browser receives final text/image/video attributes in the initial
+    // HTML, so saved values can never flash from hard-coded defaults.
     const cmsData = await getObagiHomeContent();
+    html = patchHtmlWithCms(html, cmsData);
 
-    // Inject CMS data and synchronizer script before </body>
-    const injection = `
-      <script>
-        window.__OBAGI_CMS_RAW_DATA__ = ${JSON.stringify(cmsData)};
-      </script>
-      <script id="__OBAGI_CMS_DATA__" type="application/json">${JSON.stringify(cmsData)}</script>
-      <script src="/obagi-cms-sync.js"></script>
-    `;
+    // Preload the hero poster for a sub-second first viewport (non-visual).
+    const heroPreload = cmsData.hero?.heroImage
+      ? `<link rel="preload" as="image" href="${cmsData.hero.heroImage}" fetchpriority="high">`
+      : '';
+    // Interactivity only (carousel + enquiry flow). Contains ZERO CMS-apply
+    // logic by design — it can never overwrite server-painted content.
+    const tail = `${heroPreload}<script src="/obagi-cms-sync.js" defer></script>`;
 
-    if (html.includes('</body>')) {
-      html = html.replace('</body>', `${injection}</body>`);
+    if (html.includes('</head>')) {
+      html = html.replace('</head>', `${tail}</head>`);
+    } else if (html.includes('</body>')) {
+      html = html.replace('</body>', `${tail}</body>`);
     } else {
-      html += injection;
+      html += tail;
     }
 
     return new Response(html, {
       status: 200,
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Cache-Control': 'no-store, max-age=0',
+        'Cache-Control': 'no-store, no-cache, max-age=0, must-revalidate',
       },
     });
   } catch (error: any) {

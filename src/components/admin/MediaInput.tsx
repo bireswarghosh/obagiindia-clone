@@ -33,21 +33,10 @@ export default function MediaInput({
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('provider', activeProvider);
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const json = await res.json();
-      if (json.success && json.url) {
-        onChange(json.url);
-      } else {
-        alert(json.error || 'Upload failed');
-      }
+      // Draft preview only — published only after the section Save succeeds.
+      const { uploadCmsFile } = await import('@/lib/cms-client');
+      const { url } = await uploadCmsFile(file, activeProvider);
+      onChange(url);
     } catch (err: any) {
       alert(err.message || 'Error uploading file');
     } finally {

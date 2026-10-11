@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, Link as LinkIcon, Check, Loader2 } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Link as LinkIcon, Loader2, AlertCircle } from 'lucide-react';
+import { uploadCmsFile } from '@/lib/cms-client';
 
 interface ImageUploaderProps {
   label: string;
@@ -14,56 +15,30 @@ export default function ImageUploader({ label, value, onChange, description }: I
   const [uploading, setUploading] = useState(false);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [dragActive, setDragActive] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     await processFile(file);
+    e.target.value = '';
   };
 
   const processFile = async (file: File) => {
+    setError(null);
+    // Draft preview only — the published page changes ONLY after section Save.
+    const previewUrl = URL.createObjectURL(file);
     try {
       setUploading(true);
-
-      // Attempt server upload
-      const formData = new FormData();
-      formData.append('file', file);
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        if (data.url) {
-          onChange(data.url);
-          setUploading(false);
-          return;
-        }
-      }
-
-      // Client-side fallback to DataURL for immediate persistent preview
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onChange(event.target.result as string);
-        }
-        setUploading(false);
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      console.error('File upload error:', err);
-      // Fallback
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          onChange(event.target.result as string);
-        }
-        setUploading(false);
-      };
-      reader.readAsDataURL(file);
+      const { url } = await uploadCmsFile(file);
+      onChange(url);
+    } catch (err: any) {
+      // Never silently persist a base64 data-URL as published truth.
+      setError(err?.message || 'Upload failed. Paste a direct URL instead.');
+    } finally {
+      URL.revokeObjectURL(previewUrl);
+      setUploading(false);
     }
   };
 
@@ -90,6 +65,12 @@ export default function ImageUploader({ label, value, onChange, description }: I
       </div>
 
       {description && <p className="text-[11px] text-slate-400">{description}</p>}
+      {error && (
+        <p className="text-[11px] text-rose-300 bg-rose-950/50 border border-rose-800 rounded-lg px-3 py-2 flex items-center gap-1.5">
+          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+          <span>{error}</span>
+        </p>
+      )}
 
       {/* Upload Zone & Preview */}
       <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
@@ -97,6 +78,7 @@ export default function ImageUploader({ label, value, onChange, description }: I
         <div className="sm:col-span-4 h-28 rounded-xl bg-slate-900 border border-slate-700 overflow-hidden relative flex items-center justify-center group">
           {value ? (
             <>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={value} alt="Preview" className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                 <button
@@ -163,7 +145,7 @@ export default function ImageUploader({ label, value, onChange, description }: I
                 type="text"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                placeholder="https://... or /ryan/... or data:image/..."
+                placeholder="https://... or /uploads/..."
                 className="w-full text-xs py-2 px-3 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 focus:outline-none focus:border-teal-400 font-mono"
               />
             </div>
