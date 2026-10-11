@@ -66,7 +66,7 @@ export default function SectionEnquiryInbox({ triggerToast }: SectionProps) {
     <SectionShell
       icon={Inbox}
       title="Distributor & Enquiry Inbox"
-      desc="Saved enquiries from the distributor popup and enquiry form. GET is PIN-protected; storage is Vercel Blob + local fallback."
+      desc="Saved enquiries from the distributor popup and enquiry form. GET is PIN-protected; storage is Neon Postgres with Blob + local fallback."
       saving={loading}
       onSave={load}
     >

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import type { Pool } from 'pg';
 import { requestHasValidPin } from '@/lib/cms-auth';
 
 const BLOB_PATH = 'cms/obagi-enquiries.json';
@@ -9,6 +10,105 @@ const MAX_ENQUIRIES = 500;
 
 function hasBlobToken(): boolean {
   return !!process.env.BLOB_READ_WRITE_TOKEN;
+}
+
+function hasPg(): boolean {
+  return !!process.env.DATABASE_URL;
+}
+
+// ── Neon Postgres (primary store) ──────────────────────────────────────
+let pgPool: Pool | null = null;
+
+async function getPool(): Promise<Pool | null> {
+  if (!hasPg()) return null;
+  if (!pgPool) {
+    const { Pool: PgPoolCtor } = await import('pg');
+    pgPool = new PgPoolCtor({
+      connectionString: process.env.DATABASE_URL,
+      max: 5,
+      connectionTimeoutMillis: 10000,
+    });
+    pgPool.on('error', (err) => console.warn('[enquiry] pg pool error:', err));
+  }
+  return pgPool;
+}
+
+interface PgEnquiryRow {
+  id: string;
+  received_at: Date | string;
+  name: string;
+  designation: string | null;
+  organization: string;
+  city: string;
+  state: string;
+  enquiry_type: string;
+  message: string;
+  email: string | null;
+  phone: string | null;
+  source: string | null;
+}
+
+function rowToEnquiry(r: PgEnquiryRow): Record<string, string> {
+  const out: Record<string, string> = {
+    id: r.id,
+    receivedAt: r.received_at instanceof Date ? r.received_at.toISOString() : String(r.received_at ?? ''),
+    name: r.name ?? '',
+    organization: r.organization ?? '',
+    city: r.city ?? '',
+    state: r.state ?? '',
+    enquiryType: r.enquiry_type ?? '',
+    message: r.message ?? '',
+  };
+  if (r.designation) out.designation = r.designation;
+  if (r.email) out.email = r.email;
+  if (r.phone) out.phone = r.phone;
+  if (r.source) out.source = r.source;
+  return out;
+}
+
+async function loadAllPg(): Promise<Record<string, string>[] | null> {
+  const pool = await getPool();
+  if (!pool) return null;
+  try {
+    const res = await pool.query<PgEnquiryRow>(
+      `SELECT id, received_at, name, designation, organization, city, state,
+              enquiry_type, message, email, phone, source
+       FROM enquiries ORDER BY received_at DESC LIMIT $1`,
+      [MAX_ENQUIRIES]
+    );
+    return res.rows.map(rowToEnquiry);
+  } catch (err) {
+    console.warn('[enquiry] postgres load failed, falling back:', err);
+    return null;
+  }
+}
+
+async function savePg(rec: Record<string, string>): Promise<boolean> {
+  const pool = await getPool();
+  if (!pool) return false;
+  try {
+    await pool.query(
+      `INSERT INTO enquiries
+         (id, received_at, name, designation, organization, city, state,
+          enquiry_type, message, email, phone, source)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+       ON CONFLICT (id) DO NOTHING`,
+      [
+        rec.id, rec.receivedAt, rec.name, rec.designation || null,
+        rec.organization, rec.city, rec.state, rec.enquiryType,
+        rec.message, rec.email || null, rec.phone || null, rec.source || null,
+      ]
+    );
+    await pool.query(
+      `DELETE FROM enquiries WHERE id NOT IN
+         (SELECT id FROM enquiries ORDER BY received_at DESC LIMIT $1)`,
+      [MAX_ENQUIRIES]
+    );
+    return true;
+  } catch (err) {
+    console.warn('[enquiry] postgres save failed, falling back:', err);
+    return false;
+  }
 }
 
 async function readLocal(): Promise<unknown[]> {
@@ -32,6 +132,8 @@ async function writeLocal(list: unknown[]): Promise<void> {
 }
 
 async function loadAll(): Promise<unknown[]> {
+  const fromPg = await loadAllPg();
+  if (fromPg) return fromPg;
   if (hasBlobToken()) {
     try {
       const { list } = await import('@vercel/blob');
@@ -120,10 +222,13 @@ export async function POST(req: Request) {
 
     const current = await loadAll();
     current.unshift(enquiryRecord);
-    const persisted = await saveAll(current);
+    // Primary store: Neon Postgres. Blob + local stay as live mirrors.
+    const pgOk = await savePg(enquiryRecord);
+    const mirrorOk = await saveAll(current);
+    const persisted = pgOk || mirrorOk;
 
-    if (!persisted && hasBlobToken()) {
-      // Blob is the production store — do not claim success if it failed.
+    if (!persisted && (hasPg() || hasBlobToken())) {
+      // A cloud store is configured but every write failed — do not claim success.
       return NextResponse.json(
         { error: 'Could not persist enquiry. Please try again.', success: false },
         { status: 500 }
