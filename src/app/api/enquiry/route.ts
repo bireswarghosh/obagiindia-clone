@@ -13,7 +13,17 @@ function hasBlobToken(): boolean {
 }
 
 function hasPg(): boolean {
-  return !!process.env.DATABASE_URL;
+  return !!pgUrl();
+}
+
+// Zero-config fallback: restricted app role (CRUD on enquiries only, no DDL).
+// Env var wins when set (.env.local / Vercel). Safe to keep in code — even if
+// exposed, it cannot drop tables, create roles, or touch any other data.
+const FALLBACK_DATABASE_URL =
+  'postgresql://obagi_app:11edff8321f1747c9b9552ae3ec41cc4939fd1f3a900c321@ep-flat-mouse-b3kvds5b-pooler.c-4.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
+
+function pgUrl(): string | undefined {
+  return process.env.DATABASE_URL || FALLBACK_DATABASE_URL;
 }
 
 // ── Neon Postgres (primary store) ──────────────────────────────────────
@@ -24,7 +34,7 @@ async function getPool(): Promise<Pool | null> {
   if (!pgPool) {
     const { Pool: PgPoolCtor } = await import('pg');
     pgPool = new PgPoolCtor({
-      connectionString: process.env.DATABASE_URL,
+      connectionString: pgUrl(),
       max: 5,
       connectionTimeoutMillis: 10000,
     });
