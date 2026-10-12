@@ -128,6 +128,8 @@ export interface ObagiHomeContent {
     heroImage: string;
     heroVideoUrl?: string; // annotation 02 — existing hero bg video (comp-lwxgxhly_video), src-swap only
     heroVideoPoster?: string;
+    // Hero band background photo (bgLayers_comp-lwxgxhly inner img, no alt).
+    backgroundImage?: string;
     awardBadgeImage: string;
     historyIntroText: string;
     historyIntroTextColor?: string;
@@ -236,6 +238,9 @@ export interface ObagiHomeContent {
     logoImage?: string;
     // Logo link target.
     logoHref?: string;
+    // Footer-left brand text (same footer text style). Wins over logoImage
+    // when both are set; empty = logoImage/original logic applies.
+    leftText?: string;
     // Footer nav links — 4 fixed slots mapped to the 4 Wix anchors.
     // Empty label = keep that original slot untouched.
     links?: { label: string; href: string }[];
@@ -294,6 +299,7 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
     heroImage: 'https://static.wixstatic.com/media/4833d7_43702b8008e5402c8c805580c51dbcd8~mv2.jpg',
     heroVideoUrl: '',
     heroVideoPoster: '',
+    backgroundImage: '',
     awardBadgeImage: 'https://static.wixstatic.com/media/4833d7_3a4748500da24047881d90f975d42006~mv2.jpg',
     historyIntroText: 'With over 35 years of clinically proven results, Obagi Medical Products are the Number 1 physician dispensed skin care range in the world. Obagi Medical products have grown from humble beginnings to having hundreds of thousands of devotees, our vision however hasn’t changed – to transform the skin industry and create a more confident and fearless future. We never take our eyes off tomorrow. That’s the secret to creating a skin care future that is intelligent, accessible and healthier than ever.',
     historyIntroTextColor: '#000000'
@@ -601,6 +607,7 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
     backgroundImage: '',
     logoImage: '',
     logoHref: 'https://www.obagiindia.com/',
+    leftText: '',
     links: [
       { label: 'TERMS & CONDITIONS', href: 'https://www.obagiindia.com/terms-and-coniditions' },
       { label: 'PRIVACY POLICY', href: 'https://www.obagiindia.com/privacy-policy' },

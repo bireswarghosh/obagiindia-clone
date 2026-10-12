@@ -27,12 +27,89 @@ function patchDiv(html: string, id: string, innerHtml: string): string {
   });
 }
 
+/**
+ * Image swap by alt keyword — fragment-synced. The original Wix URI fragment
+ * is replaced EVERYWHERE it occurs (img src/srcset, data-image-info JSON,
+ * viewerModel embeds), so client-side Wix code can no longer restore the
+ * original after paint ("shows mine on load, flips back on scroll" bug).
+ * srcset is stripped (Blob URLs + Wix /v1 params would 404). Falls back to
+ * src-only swap when no Wix fragment is found (local files).
+ * NOTE: one source file = one image everywhere (shared duplicates swap
+ * together — matches CMS "replace this image" semantics).
+ */
 function patchImgByAlt(html: string, altKeyword: string, newSrc?: string): string {
   if (!newSrc) return html;
-  const re = new RegExp(`(<img\\b[^>]*alt="[^"]*${altKeyword}[^"]*"[^>]*>)`, 'i');
-  return html.replace(re, (tag) => {
-    return tag.replace(/src="[^"]*"/i, `src="${newSrc}"`).replace(/srcset="[^"]*"/i, '');
+  const tagRe = new RegExp(`(<img\\b[^>]*alt="[^"]*${altKeyword}[^"]*"[^>]*>)`, 'i');
+  const tagMatch = tagRe.exec(html);
+  if (!tagMatch) return html;
+  const oldSrc = (tagMatch[1].match(/\ssrc="([^"]*)"/i) || [])[1] || '';
+  html = syncOldUri(html, oldSrc, newSrc);
+  html = html.replace(tagRe, (tag) => {
+    return tag.replace(/\ssrc="[^"]*"/i, ` src="${newSrc}"`).replace(/\ssrcset="[^"]*"/i, '');
   });
+  return normalizeSwappedImgs(html, newSrc);
+}
+
+/**
+ * Normalizes every <img> whose src merely CONTAINS newSrc (sync remnants
+ * with wixstatic prefixes or /v1 suffixes) to exactly newSrc, minus srcset.
+ * Belt-and-braces after any image swap — a remnant src 403s on Vercel Blob.
+ */
+function normalizeSwappedImgs(html: string, newSrc: string): string {
+  return html.replace(/<img\b[^>]*>/gi, (tag) => {
+    const m = tag.match(/\ssrc="([^"]*)"/i);
+    if (!m || m[1] === newSrc || m[1].indexOf(newSrc) === -1) return tag;
+    return tag.replace(/\ssrc="[^"]*"/i, ` src="${newSrc}"`).replace(/\ssrcset="[^"]*"/i, '');
+  });
+}
+
+/**
+ * Swaps the first <img> inside a container div (bg-layer photos carry no
+ * alt text). Fragment-synced like patchImgByAlt, then normalized.
+ * No-op when the layer holds no image nearby (never touches other images).
+ */
+function patchImgInLayer(html: string, layerId: string, newSrc?: string): string {
+  if (!newSrc) return html;
+  const probe = new RegExp(`id="${layerId}"[\\s\\S]{0,4000}?<img\\b[^>]*?\\ssrc="([^"]*)"`, 'i').exec(html);
+  if (!probe) return html;
+  html = syncOldUri(html, probe[1] || '', newSrc);
+  return normalizeSwappedImgs(html, newSrc);
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Extracts the bare Wix media URI stem (no ~mv2 suffix) from any URL. */
+function wixFragOf(url: string): string {
+  const m = (url || '').match(/([a-f0-9]{6,}_[a-f0-9]{20,}|11062b_[A-Za-z0-9~]+)/);
+  return m ? (m[1] || '').replace(/~.*$/, '') : '';
+}
+
+/**
+ * Fragment-syncs a replaced media URL across the whole document (see
+ * replaceUriFragment). Returns html unchanged when there is nothing to sync.
+ */
+function syncOldUri(html: string, oldUrl: string, newSrc: string): string {
+  const frag = wixFragOf(oldUrl);
+  if (!frag || newSrc.indexOf(frag) !== -1) return html;
+  return replaceUriFragment(html, frag, newSrc);
+}
+
+/**
+ * Replaces a Wix media URI fragment EVERYWHERE it occurs — bare, with an
+ * extension (`.jpg`), with `~mv2` suffixes, and with `/v1/...` crop params
+ * (which repeat the URI at the end). Without full-suffix consumption,
+ * remnants like `blob-url + .jpg/v1/...` survive in srcset/data-info/JSON,
+ * and client-side Wix code picks them up (Vercel Blob 403s the suffixed
+ * path → image never paints).
+ */
+function replaceUriFragment(html: string, frag: string, newSrc: string): string {
+  const re = new RegExp(
+    escapeRegExp(frag) + '(\\.[a-z0-9]+)?(~mv2(\\.[a-z0-9]+)?)?(\\/v1\\/[^"\'\\s<>]*)?',
+    'g'
+  );
+  return html.replace(re, () => newSrc);
 }
 
 /**
@@ -43,7 +120,8 @@ function patchImgByAlt(html: string, altKeyword: string, newSrc?: string): strin
  */
 function patchUriFragmentAll(html: string, fragment: string, newSrc?: string): string {
   if (!newSrc || !fragment) return html;
-  return html.split(fragment).join(newSrc);
+  html = replaceUriFragment(html, fragment, newSrc);
+  return normalizeSwappedImgs(html, newSrc);
 }
 
 /**
@@ -76,14 +154,18 @@ const FOOTER_LINK_DIVS = [
 
 /**
  * Footer logo — the Wix original is an inline vector SVG inside an anchor.
+ * Priority: leftText (explicit wording) > logoImage > original SVG.
  * An uploaded image replaces the SVG (anchor + sizing container untouched);
- * empty = keep original. Href updates when logoHref is set.
+ * empty everything = keep original. Href updates when logoHref is set.
  */
-function patchFooterLogo(html: string, logoImage?: string, logoHref?: string): string {
-  if (!logoImage && !logoHref) return html;
+function patchFooterLogo(html: string, logoImage?: string, logoHref?: string, leftText?: string): string {
+  if (!logoImage && !logoHref && !leftText) return html;
   const re = new RegExp(`(<div\\s+id="${FOOTER_LOGO_DIV}"[^>]*>\\s*<a\\b[^>]*>)([\\s\\S]*?)(<\\/a>)`, 'i');
   return html.replace(re, (_m, open, old, close) => {
     const newOpen = logoHref ? open.replace(/href="[^"]*"/i, `href="${escapeHtml(logoHref)}"`) : open;
+    if (leftText) {
+      return `${newOpen}<span class="font_9 wixui-rich-text__text">${escapeHtml(leftText)}</span>${close}`;
+    }
     if (!logoImage) return newOpen + old + close;
     const img = `<img src="${logoImage}" alt="Footer logo" style="width:100%;height:auto;display:block;" />`;
     return newOpen + img + close;
@@ -137,6 +219,10 @@ function patchBg(html: string, id: string, newBgUrl?: string): string {
  */
 function patchVideoSrc(html: string, videoId: string, newSrc?: string): string {
   if (!newSrc) return html;
+  // Fragment-sync first: the old video URI may live in data attrs/JSON that
+  // client players re-resolve (same flip class as images).
+  const tagSrc = (html.match(new RegExp(`<video\\b[^>]*id="${videoId}"[^>]*?\\ssrc="([^"]*)"`, 'i')) || [])[1] || '';
+  html = syncOldUri(html, tagSrc, newSrc);
   const re = new RegExp(`(<video\\b[^>]*id="${videoId}"[^>]*)(>)`, 'i');
   let out = html.replace(re, (_m, open, close) => {
     let tag = open.replace(/\ssrc="[^"]*"/i, '');
@@ -157,6 +243,8 @@ function patchVideoSrc(html: string, videoId: string, newSrc?: string): string {
  */
 function patchVideoPoster(html: string, videoId: string, newPoster?: string): string {
   if (!newPoster) return html;
+  const oldPoster = (html.match(new RegExp(`<video\\b[^>]*id="${videoId}"[^>]*?\\sposter="([^"]*)"`, 'i')) || [])[1] || '';
+  html = syncOldUri(html, oldPoster, newPoster);
   const re = new RegExp(`(<video\\b[^>]*id="${videoId}"[^>]*?)(\\s*>)`, 'i');
   return html.replace(re, (_m, open, close) => {
     const without = open.replace(/\sposter="[^"]*"/i, '');
@@ -685,6 +773,10 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     if (data.hero.heroVideoPoster) {
       result = patchVideoPoster(result, 'comp-lwxgxhly_video', data.hero.heroVideoPoster);
     }
+    if (data.hero.backgroundImage) {
+      // Hero band background photo (bg-layer inner img, no alt text).
+      result = patchImgInLayer(result, 'bgLayers_comp-lwxgxhly', data.hero.backgroundImage);
+    }
     if (data.hero.awardBadgeImage) {
       result = patchImgByAlt(result, 'aesthetics award winner', data.hero.awardBadgeImage);
     }
@@ -904,8 +996,9 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
       if (si.x) result = patchUriFragmentAll(result, '11062b_e82f42804b3546dfa8e426e752b24542', si.x);
     }
     // Full footer branding — logo image swap + 4 nav links (label + href).
-    if (data.footer.logoImage || data.footer.logoHref) {
-      result = patchFooterLogo(result, data.footer.logoImage, data.footer.logoHref);
+    if (data.footer.logoImage || data.footer.logoHref || data.footer.leftText) {
+      result = patchFooterLogo(result, data.footer.logoImage, data.footer.logoHref, data.footer.leftText);
+      if (data.footer.logoImage) result = normalizeSwappedImgs(result, data.footer.logoImage);
     }
     const footerLinks = data.footer.links;
     if (footerLinks) {
@@ -964,10 +1057,13 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
       result = patchVideoSrc(result, 'comp-mlau0bjm_video', data.awardVideo.videoUrl);
     }
     if (data.awardVideo.posterImage) {
+      const oldPoster = (result.match(/<wow-image\b[^>]*id="comp-mlau0bjm_img"[^>]*>[\s\S]*?<img\b[^>]*?\ssrc="([^"]*)"/i) || [])[1] || '';
+      result = syncOldUri(result, oldPoster, data.awardVideo.posterImage);
       result = result.replace(
         /(<wow-image\b[^>]*id="comp-mlau0bjm_img"[^>]*>[\s\S]*?<img\b[^>]*?)(\ssrc="[^"]*")/i,
         (_m, head) => `${head} src="${data.awardVideo!.posterImage}"`
       );
+      result = normalizeSwappedImgs(result, data.awardVideo.posterImage);
     }
     if (data.awardVideo.overlayTitle) {
       result = result.replace(

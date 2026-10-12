@@ -24,6 +24,7 @@ export default function SectionHero({ loaded, triggerToast, onSaved, patchSectio
     awardBadge: loaded.hero.awardBadge,
     heroVideoUrl: loaded.hero.heroVideoUrl || '',
     heroVideoPoster: loaded.hero.heroVideoPoster || '',
+    backgroundImage: loaded.hero.backgroundImage || '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -33,6 +34,7 @@ export default function SectionHero({ loaded, triggerToast, onSaved, patchSectio
       awardBadge: loaded.hero.awardBadge,
       heroVideoUrl: loaded.hero.heroVideoUrl || '',
       heroVideoPoster: loaded.hero.heroVideoPoster || '',
+      backgroundImage: loaded.hero.backgroundImage || '',
     });
   }, [loaded.hero]);
 
@@ -41,6 +43,7 @@ export default function SectionHero({ loaded, triggerToast, onSaved, patchSectio
     awardBadge: loaded.hero.awardBadge,
     heroVideoUrl: loaded.hero.heroVideoUrl || '',
     heroVideoPoster: loaded.hero.heroVideoPoster || '',
+    backgroundImage: loaded.hero.backgroundImage || '',
   };
   const dirty = JSON.stringify(local) !== JSON.stringify(base);
 
@@ -99,6 +102,12 @@ export default function SectionHero({ loaded, triggerToast, onSaved, patchSectio
           value={local.heroVideoPoster}
           onChange={(url) => setLocal({ ...local, heroVideoPoster: url })}
           description="Poster shown before hero video loads. Empty = keep original."
+        />
+        <ImageUploader
+          label="Hero Background Photo (optional)"
+          value={local.backgroundImage}
+          onChange={(url) => setLocal({ ...local, backgroundImage: url })}
+          description="Background photo behind the hero band. Empty = keep original."
         />
       </div>
     </SectionShell>
