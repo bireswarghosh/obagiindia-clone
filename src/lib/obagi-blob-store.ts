@@ -26,16 +26,14 @@ async function readBlobText(url: string): Promise<string | null> {
 
 export async function loadContentJsonFromBlob(): Promise<string | null> {
   if (!hasBlobToken()) return null;
-  try {
-    const { list } = await import('@vercel/blob');
-    const { blobs } = await list({ prefix: CONTENT_BLOB_PATH, limit: 1 });
-    const hit = blobs.find((b) => b.pathname === CONTENT_BLOB_PATH) || blobs[0];
-    if (!hit?.url) return null;
-    return await readBlobText(hit.url);
-  } catch (err) {
-    console.warn('[obagi-blob] content load failed:', err);
-    return null;
-  }
+  // NOTE: list() failures propagate so the caller can mark blob unavailable
+  // for the boot; a missing blob returns null (empty store — first save
+  // creates it) and must NOT poison future saves.
+  const { list } = await import('@vercel/blob');
+  const { blobs } = await list({ prefix: CONTENT_BLOB_PATH, limit: 1 });
+  const hit = blobs.find((b) => b.pathname === CONTENT_BLOB_PATH) || blobs[0];
+  if (!hit?.url) return null;
+  return await readBlobText(hit.url);
 }
 
 export async function saveContentJsonToBlob(json: string): Promise<string | null> {

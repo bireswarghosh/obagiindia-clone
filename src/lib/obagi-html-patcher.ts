@@ -66,6 +66,43 @@ function patchButtonText(html: string, id: string, newText?: string): string {
   return html.replace(re, (_m, open, _old, lt) => `${open}${escapeHtml(newText)}${lt}`);
 }
 
+const FOOTER_LOGO_DIV = 'comp-ml6nay6u_r_comp-lx02zbs6';
+const FOOTER_LINK_DIVS = [
+  'comp-ml6nay6u_r_comp-lx03t9a4',
+  'comp-ml6nay6u_r_comp-lx03ty71',
+  'comp-ml6nay6u_r_comp-lx03uzo5',
+  'comp-ml6nay6u_r_comp-mmiuuv9f',
+];
+
+/**
+ * Footer logo — the Wix original is an inline vector SVG inside an anchor.
+ * An uploaded image replaces the SVG (anchor + sizing container untouched);
+ * empty = keep original. Href updates when logoHref is set.
+ */
+function patchFooterLogo(html: string, logoImage?: string, logoHref?: string): string {
+  if (!logoImage && !logoHref) return html;
+  const re = new RegExp(`(<div\\s+id="${FOOTER_LOGO_DIV}"[^>]*>\\s*<a\\b[^>]*>)([\\s\\S]*?)(<\\/a>)`, 'i');
+  return html.replace(re, (_m, open, old, close) => {
+    const newOpen = logoHref ? open.replace(/href="[^"]*"/i, `href="${escapeHtml(logoHref)}"`) : open;
+    if (!logoImage) return newOpen + old + close;
+    const img = `<img src="${logoImage}" alt="Footer logo" style="width:100%;height:auto;display:block;" />`;
+    return newOpen + img + close;
+  });
+}
+
+/**
+ * Footer nav links — 4 fixed Wix anchors, label + href. Empty label keeps
+ * the original slot; empty href keeps the original destination.
+ */
+function patchFooterLink(html: string, divId: string, label?: string, href?: string): string {
+  if (!label && !href) return html;
+  const re = new RegExp(`(<div\\s+id="${divId}"[^>]*>[\\s\\S]*?<a\\b[^>]*>)([\\s\\S]*?)(<\\/a>)`, 'i');
+  return html.replace(re, (_m, open, old, close) => {
+    const newOpen = href ? open.replace(/href="[^"]*"/i, `href="${escapeHtml(href)}"`) : open;
+    return newOpen + (label ? escapeHtml(label) : old) + close;
+  });
+}
+
 /**
  * Replaces the text of the newsletter email <label id="…comp-lx8nyczl10…">.
  * Precise (label id), so enquiry-form "Email" text elsewhere is untouched.
@@ -865,6 +902,17 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
       if (si.youtube) result = patchUriFragmentAll(result, '11062b_30de4e7217e64dfdadc3ea03beea7b94', si.youtube);
       if (si.facebook) result = patchUriFragmentAll(result, '11062b_362ef89dec51403eb0ee59a21bde967c', si.facebook);
       if (si.x) result = patchUriFragmentAll(result, '11062b_e82f42804b3546dfa8e426e752b24542', si.x);
+    }
+    // Full footer branding — logo image swap + 4 nav links (label + href).
+    if (data.footer.logoImage || data.footer.logoHref) {
+      result = patchFooterLogo(result, data.footer.logoImage, data.footer.logoHref);
+    }
+    const footerLinks = data.footer.links;
+    if (footerLinks) {
+      for (let i = 0; i < FOOTER_LINK_DIVS.length; i += 1) {
+        const slot = footerLinks[i];
+        if (slot) result = patchFooterLink(result, FOOTER_LINK_DIVS[i], slot.label, slot.href);
+      }
     }
   }
 

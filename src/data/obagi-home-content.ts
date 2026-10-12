@@ -231,6 +231,14 @@ export interface ObagiHomeContent {
     copyright: string;
     copyrightColor?: string;
     backgroundImage?: string;
+    // Footer brand logo — the Wix original is an inline vector SVG.
+    // An uploaded image replaces it (empty = keep original SVG).
+    logoImage?: string;
+    // Logo link target.
+    logoHref?: string;
+    // Footer nav links — 4 fixed slots mapped to the 4 Wix anchors.
+    // Empty label = keep that original slot untouched.
+    links?: { label: string; href: string }[];
     // Spec 15 — social icon files (src-swap only, links/destinations frozen).
     socialIcons?: {
       instagram?: string;
@@ -590,7 +598,15 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
   footer: {
     copyright: '©2026 Obagi. All rights reserved. Obagi® Systems and Products are physician dispensed and should be used under the guidance of a skin care professional.',
     copyrightColor: '#000000',
-    backgroundImage: ''
+    backgroundImage: '',
+    logoImage: '',
+    logoHref: 'https://www.obagiindia.com/',
+    links: [
+      { label: 'TERMS & CONDITIONS', href: 'https://www.obagiindia.com/terms-and-coniditions' },
+      { label: 'PRIVACY POLICY', href: 'https://www.obagiindia.com/privacy-policy' },
+      { label: 'ACCESSIBILITY STATEMENT', href: 'https://www.obagiindia.com/accessibility-statement' },
+      { label: 'CONTACT US', href: 'https://www.obagiindia.com/contact-us' },
+    ],
   },
   awardVideo: {
     videoUrl: 'https://video.wixstatic.com/video/4833d7_958d8b59c22f449990b3c2a75c660389/720p/mp4/file.mp4',

@@ -15,6 +15,9 @@ export { deepMerge };
 let memoryCache: ObagiHomeContent | null = null;
 let blobCheckedThisBoot = false;
 let blobAvailable: boolean | null = null;
+// Timestamp of last failed Blob write — saves pause Blob attempts for 60s
+// after a failure so a downed Blob never slows every save.
+let lastBlobErrorAt = 0;
 // Serializes read-modify-write so two section saves can never interleave.
 let writeQueue: Promise<unknown> = Promise.resolve();
 
@@ -62,24 +65,30 @@ function parseAndMerge(raw: string): ObagiHomeContent | null {
 export async function getObagiHomeContent(): Promise<ObagiHomeContent> {
   if (memoryCache) return memoryCache;
 
-  // 1. Durable cloud copy (survives Vercel deploys / /tmp wipes)
+  // 1. Durable cloud copy (survives Vercel deploys / /tmp wipes).
+  // Absent blob = empty store (the first save creates it) — only a real
+  // transport failure marks blob unavailable for this boot.
   if (!blobCheckedThisBoot && process.env.BLOB_READ_WRITE_TOKEN) {
     blobCheckedThisBoot = true;
-    const blobJson = await loadContentJsonFromBlob();
-    if (blobJson) {
-      const merged = parseAndMerge(blobJson);
-      if (merged) {
-        blobAvailable = true;
-        memoryCache = merged;
-        // Warm the local file cache (best-effort, ignored on serverless)
-        try {
-          ensureLocalFile();
-          fs.writeFileSync(LOCAL_DATA_FILE, JSON.stringify(merged, null, 2), 'utf8');
-        } catch {}
-        return merged;
+    try {
+      const blobJson = await loadContentJsonFromBlob();
+      if (blobJson) {
+        const merged = parseAndMerge(blobJson);
+        if (merged) {
+          blobAvailable = true;
+          memoryCache = merged;
+          // Warm the local file cache (best-effort, ignored on serverless)
+          try {
+            ensureLocalFile();
+            fs.writeFileSync(LOCAL_DATA_FILE, JSON.stringify(merged, null, 2), 'utf8');
+          } catch {}
+          return merged;
+        }
       }
+    } catch (err) {
+      console.warn('[obagi-cms] blob unavailable this boot:', err);
+      blobAvailable = false;
     }
-    blobAvailable = false;
   }
 
   // 2. Local file
@@ -116,9 +125,17 @@ export function saveObagiHomeContent(
     const json = JSON.stringify(merged, null, 2);
 
     // Durable write first (Blob), then local cache — both best-effort.
-    if (process.env.BLOB_READ_WRITE_TOKEN && blobAvailable !== false) {
-      const url = await saveContentJsonToBlob(json);
-      if (url) blobAvailable = true;
+    // Always attempted when a token exists: an absent blob is CREATED here
+    // (this is what breaks the empty-store deadlock). Paused 60s after a
+    // failure so a downed Blob doesn't slow every save.
+    if (process.env.BLOB_READ_WRITE_TOKEN && Date.now() - lastBlobErrorAt > 60_000) {
+      const url = await saveContentJsonToBlob(json).catch(() => null);
+      if (url) {
+        blobAvailable = true;
+        lastBlobErrorAt = 0;
+      } else {
+        lastBlobErrorAt = Date.now();
+      }
     }
     try {
       ensureLocalFile();

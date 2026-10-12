@@ -5,7 +5,8 @@ import { Mail } from 'lucide-react';
 import SectionShell from './SectionShell';
 import RichColorTextEditor from '../RichColorTextEditor';
 import ImageUploader from '../ImageUploader';
-import { ObagiHomeContent } from '@/data/obagi-home-content';
+import MediaInput from '../MediaInput';
+import { ObagiHomeContent, defaultObagiHomeContent } from '@/data/obagi-home-content';
 
 interface SectionProps {
   loaded: ObagiHomeContent;
@@ -25,6 +26,13 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
     subscribeLabel: loaded.newsletter.subscribeLabel || '',
   });
   const [copyright, setCopyright] = useState(loaded.footer.copyright);
+  const [logoImage, setLogoImage] = useState(loaded.footer.logoImage || '');
+  const [logoHref, setLogoHref] = useState(loaded.footer.logoHref || '');
+  const [links, setLinks] = useState<{ label: string; href: string }[]>(
+    loaded.footer.links && loaded.footer.links.length > 0
+      ? loaded.footer.links.map((l) => ({ label: l.label || '', href: l.href || '' }))
+      : (defaultObagiHomeContent.footer.links || []).map((l) => ({ ...l }))
+  );
   const [socials, setSocials] = useState(
     loaded.footer.socialIcons || { instagram: '', youtube: '', facebook: '', x: '' }
   );
@@ -42,6 +50,13 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
       subscribeLabel: loaded.newsletter.subscribeLabel || '',
     });
     setCopyright(loaded.footer.copyright);
+    setLogoImage(loaded.footer.logoImage || '');
+    setLogoHref(loaded.footer.logoHref || '');
+    setLinks(
+      loaded.footer.links && loaded.footer.links.length > 0
+        ? loaded.footer.links.map((l) => ({ label: l.label || '', href: l.href || '' }))
+        : (defaultObagiHomeContent.footer.links || []).map((l) => ({ ...l }))
+    );
     setSocials(loaded.footer.socialIcons || { instagram: '', youtube: '', facebook: '', x: '' });
     setFloating(loaded.floating || { chatLabel: '', needHelpText: '', exploreText: '', agingText: '' });
   }, [loaded.newsletter, loaded.footer, loaded.floating]);
@@ -56,16 +71,28 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
         subscribeLabel: loaded.newsletter.subscribeLabel || '',
       }) ||
     copyright !== loaded.footer.copyright ||
+    logoImage !== (loaded.footer.logoImage || '') ||
+    logoHref !== (loaded.footer.logoHref || '') ||
+    JSON.stringify(links) !==
+      JSON.stringify(
+        loaded.footer.links && loaded.footer.links.length > 0
+          ? loaded.footer.links
+          : defaultObagiHomeContent.footer.links || []
+      ) ||
     JSON.stringify(socials) !==
       JSON.stringify(loaded.footer.socialIcons || { instagram: '', youtube: '', facebook: '', x: '' }) ||
     JSON.stringify(floating) !==
       JSON.stringify(loaded.floating || { chatLabel: '', needHelpText: '', exploreText: '', agingText: '' });
 
+  const setLink = (i: number, field: 'label' | 'href', val: string) => {
+    setLinks((prev) => prev.map((lnk, j) => (j === i ? { ...lnk, [field]: val } : lnk)));
+  };
+
   const save = async () => {
     setSaving(true);
     const updated = await patchSection({
       newsletter: nl,
-      footer: { copyright, socialIcons: socials },
+      footer: { copyright, socialIcons: socials, logoImage, logoHref, links },
       floating,
     } as any);
     setSaving(false);
@@ -81,7 +108,7 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
     <SectionShell
       icon={Mail}
       title="Part 15: Footer, Newsletter & Floating Labels"
-      desc="Newsletter copy, consent + button labels, legal line, social icons and chat labels. Backgrounds: tabs 13/14. SEO: Settings."
+      desc="Newsletter copy, consent + button labels, legal line, footer logo & links, social icons and chat labels. Backgrounds: tabs 13/14. SEO: Settings."
       saving={saving}
       onSave={save}
       dirty={dirty}
@@ -133,6 +160,69 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
           onChange={setCopyright}
           description="Physician-dispensed warning and copyright line."
         />
+      </div>
+
+      <div className="border-t border-slate-800 pt-6 space-y-4">
+        <h4 className="text-xs font-black uppercase text-teal-400 tracking-wider">
+          Footer Logo & Nav Links (full footer branding)
+        </h4>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <MediaInput
+            label="Footer Logo Image"
+            value={logoImage}
+            onChange={setLogoImage}
+            mediaType="image"
+            placeholder="Upload logo or paste https://..."
+            helperText="Empty = keep original vector logo. Uploads go to durable Blob storage."
+          />
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-slate-300 block">Logo Link Target</label>
+            <input
+              type="text"
+              value={logoHref}
+              onChange={(e) => setLogoHref(e.target.value)}
+              placeholder="https://..."
+              className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 font-mono focus:border-indigo-500 focus:outline-none transition-colors"
+            />
+            <p className="text-[10px] text-slate-500">Where the logo click goes. Default: homepage.</p>
+          </div>
+        </div>
+        <div className="space-y-3">
+          {links.map((lnk, i) => (
+            <div
+              key={i}
+              className="grid grid-cols-1 md:grid-cols-2 gap-3 p-3 rounded-xl bg-slate-900/60 border border-slate-800"
+            >
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300 block">
+                  Link {i + 1} Label
+                </label>
+                <input
+                  type="text"
+                  value={lnk.label}
+                  onChange={(e) => setLink(i, 'label', e.target.value)}
+                  placeholder="TERMS & CONDITIONS"
+                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-colors"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-slate-300 block">
+                  Link {i + 1} URL
+                </label>
+                <input
+                  type="text"
+                  value={lnk.href}
+                  onChange={(e) => setLink(i, 'href', e.target.value)}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 font-mono focus:border-indigo-500 focus:outline-none transition-colors"
+                />
+              </div>
+            </div>
+          ))}
+          <p className="text-[10px] text-slate-500">
+            Empty label = keep that original footer link untouched. Saved to Blob — survives deploys.
+          </p>
+        </div>
       </div>
 
       <div className="border-t border-slate-800 pt-6 space-y-4">
