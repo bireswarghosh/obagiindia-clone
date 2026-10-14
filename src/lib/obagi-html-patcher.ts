@@ -2271,14 +2271,34 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
   }
 
   /* Prevent image blanking / flickering / disappearing on scroll */
-  img, wow-image, picture, wow-image img, picture img {
+  img:not(#comp-lwxgxhly_img img):not(#comp-mlau0bjm_img img),
+  wow-image:not(#comp-lwxgxhly_img):not(#comp-mlau0bjm_img):not(.bgVideoposter),
+  picture,
+  picture img {
     opacity: 1 !important;
     visibility: visible !important;
     content-visibility: visible !important;
   }
+  #comp-lwxgxhly.video-playing #comp-lwxgxhly_img,
+  #comp-lwxgxhly.video-playing #comp-lwxgxhly_img img,
+  body.hero-video-playing #comp-lwxgxhly_img,
+  body.hero-video-playing #comp-lwxgxhly_img img,
+  #comp-mlau0bjm.video-playing #comp-mlau0bjm_img,
+  #comp-mlau0bjm.video-playing #comp-mlau0bjm_img img,
   .bgVideoposter[style*="opacity: 0"],
-  .bgVideoposter.is-hidden {
+  .bgVideoposter.is-hidden,
+  .video-playing .bgVideoposter {
     opacity: 0 !important;
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+  }
+  #comp-lwxgxhly_video,
+  #comp-mlau0bjm_video,
+  video {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   [data-motion-enter]:not(#comp-lwrlbohf):not(#comp-lwz2pnus):not(#comp-lwxgxhly),
   [style*="--motion-clip-start"]:not(#comp-lwrlbohf):not(#comp-lwz2pnus):not(#comp-lwxgxhly) {
