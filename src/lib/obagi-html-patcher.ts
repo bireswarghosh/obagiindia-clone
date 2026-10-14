@@ -2224,7 +2224,13 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
 
   /* 1i. Section 6 Product Cards - 3D Perspective Flip Cards on Desktop & Mobile */
   #comp-lwsw0td95__item1 {
-    opacity: 1 !important;
+    z-index: 10;
+  }
+  #comp-lwsw0td95__item-j9ples3e {
+    z-index: 11;
+  }
+  #comp-lwsw0td95__item-j9plerjk {
+    z-index: 12;
   }
   @media (max-width: 768px) {
     #comp-lwsw0td7 {
@@ -2259,7 +2265,29 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
       transform-style: preserve-3d !important;
       transform-origin: top center !important;
       backface-visibility: hidden !important;
+      -webkit-backface-visibility: hidden !important;
+      will-change: transform, opacity !important;
     }
+  }
+
+  /* Prevent image blanking / flickering / disappearing on scroll */
+  img, wow-image, picture, wow-image img, picture img {
+    opacity: 1 !important;
+    visibility: visible !important;
+    content-visibility: visible !important;
+  }
+  .bgVideoposter[style*="opacity: 0"],
+  .bgVideoposter.is-hidden {
+    opacity: 0 !important;
+  }
+  [data-motion-enter]:not(#comp-lwrlbohf):not(#comp-lwz2pnus):not(#comp-lwxgxhly),
+  [style*="--motion-clip-start"]:not(#comp-lwrlbohf):not(#comp-lwz2pnus):not(#comp-lwxgxhly) {
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+    animation: none !important;
+  }
+  html, body {
+    -webkit-overflow-scrolling: touch;
   }
 
   /* 2. R&D Science Cards — Clean column layout matching official site (no double card, no box-shadows) */
@@ -2807,6 +2835,9 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     /<script\b[^>]*data-url="[^"]*(?:initCustomElements|custom-element-utils)[^"]*"[^>]*>[\s\S]*?<\/script>/gi,
     ''
   );
+
+  // E. Eager-load and asynchronously decode all images to prevent mobile scroll-flicker / blank frames
+  result = result.replace(/\sloading=["']lazy["']/gi, ' loading="eager" decoding="async"');
 
   return result;
 }
