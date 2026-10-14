@@ -3462,8 +3462,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   }
 
   #comp-lwsw0td95__item1 { z-index: 10; }
-  #comp-lwsw0td95__item-j9ples3e { z-index: 11; }
-  #comp-lwsw0td95__item-j9plerjk { z-index: 12; }
+  #comp-lwsw0td95__item-j9ples3e { z-index: 11; opacity: 0; visibility: hidden; }
+  #comp-lwsw0td95__item-j9plerjk { z-index: 12; opacity: 0; visibility: hidden; }
 
   /* Completely remove / hide Chat with AI floating elements per Vibe Annotation 1 */
   [data-hook="minimizedChat"],
@@ -3600,9 +3600,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     if (pinkImg && cardSec) {
       var isMobile = window.innerWidth <= 768;
       var startClip = isMobile ? 'circle(18% at 50% 68%)' : 'circle(20% at 50% 55%)';
-      var endClip = isMobile ? 'circle(42% at 50% 40%)' : 'circle(42% at 50% 45%)';
+      var endClip = 'circle(130% at 50% 50%)';
 
-      // Pink circle expands upwards as cardSec enters the viewport, touching the header exactly at 'top top'
+      // Pink circle expands upwards as cardSec enters the viewport, expanding to full bleed (100% width and height)
       gsap.fromTo(pinkImg,
         { clipPath: startClip },
         {
@@ -3657,14 +3657,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
 
       // Card 1 starts peeking from bottom (top ~30% visible on mobile, half on desktop matching Screenshot 1)
-      // Cards 2 & 3 wait off-screen below
+      // Cards 2 & 3 wait off-screen below and are COMPLETELY HIDDEN (autoAlpha: 0) to prevent any peeking!
       var peekYPercent = isMobile ? 68 : 55;
       cardItems.forEach(function(card, idx) {
         gsap.set(card, {
-          yPercent: idx === 0 ? peekYPercent : 115,
+          yPercent: idx === 0 ? peekYPercent : 140,
           y: 0,
           rotateX: 0,
-          opacity: 1,
+          autoAlpha: idx === 0 ? 1 : 0,
           scale: 1,
           transformPerspective: 1200,
           transformOrigin: 'top center'
@@ -3689,6 +3689,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       if (cardItems.length > 0) {
         tl.to(cardItems[0], {
           yPercent: 0,
+          autoAlpha: 1,
           ease: 'power2.out',
           duration: riseDuration
         }, 0);
@@ -3701,11 +3702,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         var currentCard = cardItems[i];
         var isLast = (i === cardItems.length - 1);
 
+        // Current card flips backward into 3D shelf and fades out cleanly
         tl.to(currentCard, {
           rotateX: 78,
           scale: 0.94,
           y: flipY,
-          opacity: 0,
+          autoAlpha: 0,
           ease: 'power2.inOut',
           duration: flipDuration
         }, currentTime);
@@ -3713,12 +3715,13 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         if (!isLast) {
           var nextCard = cardItems[i + 1];
           if (nextCard) {
+            // Next card ONLY becomes visible (autoAlpha: 1) as it enters!
             tl.to(nextCard, {
+              autoAlpha: 1,
               yPercent: 0,
               y: 0,
               rotateX: 0,
               scale: 1,
-              opacity: 1,
               ease: 'power2.out',
               duration: flipDuration
             }, currentTime + 0.25);
