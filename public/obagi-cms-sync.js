@@ -823,18 +823,44 @@
       v.muted = true;
       v.setAttribute('muted', '');
       v.setAttribute('playsinline', '');
+      v.setAttribute('webkit-playsinline', '');
       v.setAttribute('autoplay', '');
       v.setAttribute('loop', '');
+
+      function handleVideoPlaying() {
+        var box = v.closest('[id^="comp-"]') || v.parentElement;
+        if (box) box.classList.add('video-playing');
+        if (v.id === 'comp-lwxgxhly_video') {
+          document.body.classList.add('hero-video-playing');
+        }
+        var poster = (box && box.querySelector('wow-image, [id*="_img"]')) || document.getElementById(v.id.replace('_video', '_img'));
+        if (poster) {
+          poster.style.opacity = '0';
+          poster.style.pointerEvents = 'none';
+        }
+      }
+
+      if (!v.paused && v.currentTime > 0) {
+        handleVideoPlaying();
+      }
+      v.addEventListener('playing', handleVideoPlaying);
+      v.addEventListener('timeupdate', function onTime() {
+        if (v.currentTime > 0.1) {
+          handleVideoPlaying();
+          v.removeEventListener('timeupdate', onTime);
+        }
+      });
+
       var playPromise = v.play();
       if (playPromise !== undefined) {
-        playPromise.catch(function() {
+        playPromise.then(handleVideoPlaying).catch(function() {
           var onInteraction = function() {
-            v.play().catch(function() {});
+            v.play().then(handleVideoPlaying).catch(function() {});
             document.removeEventListener('click', onInteraction);
             document.removeEventListener('touchstart', onInteraction);
           };
-          document.addEventListener('click', onInteraction, { once: true });
-          document.addEventListener('touchstart', onInteraction, { once: true });
+          document.addEventListener('click', onInteraction, { once: true, passive: true });
+          document.addEventListener('touchstart', onInteraction, { once: true, passive: true });
         });
       }
     });

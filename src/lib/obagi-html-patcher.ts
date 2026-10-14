@@ -2107,11 +2107,16 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
   #comp-lwxgxhly {
     background-color: #002530 !important;
   }
-  #comp-lwxgxhly_img,
-  #comp-lwxgxhly_img img {
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: block !important;
+  #comp-lwxgxhly_img {
+    transition: opacity 0.6s ease-in-out !important;
+  }
+  #comp-lwxgxhly.video-playing #comp-lwxgxhly_img,
+  #comp-lwxgxhly.video-playing #comp-lwxgxhly_img img,
+  body.hero-video-playing #comp-lwxgxhly_img,
+  body.hero-video-playing #comp-lwxgxhly_img img {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 
   /* 1g. Completely remove / hide Chat with AI floating elements per Vibe Annotation 1 */
@@ -2130,41 +2135,130 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     opacity: 0 !important;
   }
 
-  /* 1h. Section 6 Product Cards - Visible on First View & Clean Mobile Flow */
+  /* 1h. Section 3 (4 Pillars Carousel) & Section 4 (Beyond Visible Symptoms) Mobile Flow & Contrast */
+  @media (max-width: 768px) {
+    #comp-mlqmnjor {
+      padding-bottom: 24px !important;
+      margin-bottom: 0 !important;
+      position: relative !important;
+      z-index: 2 !important;
+    }
+  }
+
+  #comp-mlqlr0fm {
+    position: relative !important;
+    background-color: #002530 !important;
+    overflow: hidden !important;
+    padding: 50px 20px !important;
+    box-sizing: border-box !important;
+  }
+  #comp-mlqlr0fm #bgLayers_comp-mlqlr0fm,
+  #comp-mlqlr0fm #bgMedia_comp-mlqlr0fm,
+  #comp-mlqlr0fm #img_comp-mlqlr0fm {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+  }
+  #comp-mlqlr0fm #img_comp-mlqlr0fm img {
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 100% !important;
+    object-fit: cover !important;
+    object-position: center center !important;
+  }
+  #comp-mlqlr0fm [data-testid="colorUnderlay"] {
+    background: linear-gradient(180deg, rgba(0, 32, 43, 0.75) 0%, rgba(0, 32, 43, 0.88) 100%) !important;
+    display: block !important;
+    position: absolute !important;
+    inset: 0 !important;
+    z-index: 1 !important;
+  }
+  #comp-mlqlr0fm .comp-mlqlr0fm-container {
+    position: relative !important;
+    z-index: 2 !important;
+    max-width: 900px !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  #comp-mlqlr0fp {
+    width: 100% !important;
+    max-width: 800px !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+  #comp-mlqlr0fr2 {
+    width: 100% !important;
+    margin-bottom: 16px !important;
+  }
+  #comp-mlqlr0fr2 :is(p,h1,h2,h3,span) {
+    color: #ffffff !important;
+    font-size: clamp(22px, 4vw, 36px) !important;
+    line-height: 1.3 !important;
+    font-weight: 700 !important;
+    text-align: center !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
+  }
+  #comp-mlqlr0fq4 {
+    width: 100% !important;
+  }
+  #comp-mlqlr0fq4 :is(p,span) {
+    color: rgba(255, 255, 255, 0.94) !important;
+    font-size: clamp(13px, 2.5vw, 16px) !important;
+    line-height: 1.65 !important;
+    font-weight: 400 !important;
+    text-align: center !important;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5) !important;
+  }
+
+  /* 1i. Section 6 Product Cards - 3D Perspective Flip Cards on Desktop & Mobile */
   #comp-lwsw0td95__item1 {
     opacity: 1 !important;
   }
   @media (max-width: 768px) {
-    #comp-lwrl9iel {
-      height: auto !important;
-      min-height: auto !important;
-      padding-top: 30px !important;
-      padding-bottom: 30px !important;
-    }
     #comp-lwsw0td7 {
-      height: auto !important;
-      position: relative !important;
-      display: flex !important;
-      flex-direction: column !important;
-      gap: 20px !important;
+      width: min(340px, 92vw) !important;
+      max-width: 340px !important;
+      height: min(520px, 75vh) !important;
+      margin: 0 auto !important;
+      transform-style: preserve-3d !important;
+    }
+    #comp-lwsw0td7 [data-testid="imageX"] img,
+    #comp-lwsw0td7 wow-image img,
+    #comp-lwsw0td7 .comp-lwtcg9jk img {
+      max-width: 260px !important;
+      max-height: 160px !important;
+      object-fit: contain !important;
+      margin: 0 auto !important;
     }
     #comp-lwsw0td95__item1,
     #comp-lwsw0td95__item-j9ples3e,
     #comp-lwsw0td95__item-j9plerjk {
-      position: relative !important;
-      top: auto !important;
-      left: auto !important;
-      right: auto !important;
-      bottom: auto !important;
+      position: absolute !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
       width: 100% !important;
-      height: auto !important;
-      min-height: 280px !important;
-      border-radius: 12px !important;
-      box-shadow: 0 10px 25px -6px rgba(0, 0, 0, 0.12) !important;
-      opacity: 1 !important;
-      transform: none !important;
-      margin-bottom: 24px !important;
-      display: block !important;
+      height: 100% !important;
+      border-radius: 16px !important;
+      box-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.18) !important;
+      background: #ffffff !important;
+      overflow: hidden !important;
+      transform-style: preserve-3d !important;
+      transform-origin: top center !important;
+      backface-visibility: hidden !important;
     }
   }
 
