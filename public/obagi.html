@@ -3461,9 +3461,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
   }
 
-  #comp-lwsw0td95__item1 { z-index: 10; }
-  #comp-lwsw0td95__item-j9ples3e { z-index: 11; opacity: 0; visibility: hidden; }
-  #comp-lwsw0td95__item-j9plerjk { z-index: 12; opacity: 0; visibility: hidden; }
+  #comp-lwsw0td95__item1 { z-index: 10; opacity: 1 !important; }
+  #comp-lwsw0td95__item-j9ples3e { z-index: 11; opacity: 1 !important; visibility: hidden; }
+  #comp-lwsw0td95__item-j9plerjk { z-index: 12; opacity: 1 !important; visibility: hidden; }
 
   /* Completely remove / hide Chat with AI floating elements per Vibe Annotation 1 */
   [data-hook="minimizedChat"],
@@ -3657,14 +3657,16 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
 
       // Card 1 starts peeking from bottom (top ~30% visible on mobile, half on desktop matching Screenshot 1)
-      // Cards 2 & 3 wait off-screen below and are COMPLETELY HIDDEN (autoAlpha: 0) to prevent any peeking!
+      // Cards 2 & 3 wait off-screen below (visibility: hidden) so they NEVER peek before their turn!
+      // Opacity stays 100% solid (1) always per user request (no fading/decreasing opacity)
       var peekYPercent = isMobile ? 68 : 55;
       cardItems.forEach(function(card, idx) {
         gsap.set(card, {
           yPercent: idx === 0 ? peekYPercent : 140,
           y: 0,
           rotateX: 0,
-          autoAlpha: idx === 0 ? 1 : 0,
+          opacity: 1,
+          visibility: idx === 0 ? 'visible' : 'hidden',
           scale: 1,
           transformPerspective: 1200,
           transformOrigin: 'top center'
@@ -3685,11 +3687,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       var flipDuration = 0.9;
       var flipY = isMobile ? -360 : -320;
 
-      // Step 1: When section pins, Card 1 glides up from peeking position to center
+      // Step 1: When section pins, Card 1 glides up from peeking position to center (100% solid opacity)
       if (cardItems.length > 0) {
         tl.to(cardItems[0], {
           yPercent: 0,
-          autoAlpha: 1,
+          opacity: 1,
+          visibility: 'visible',
           ease: 'power2.out',
           duration: riseDuration
         }, 0);
@@ -3697,17 +3700,17 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
       var currentTime = riseDuration + restDuration;
 
-      // Step 2..N: Each card flips 3D backwards into shelf, next card enters smoothly
+      // Step 2..N: Each card flips 3D backwards into shelf with FULL OPACITY 1 (NO opacity decreasing)
       for (var i = 0; i < cardItems.length; i++) {
         var currentCard = cardItems[i];
         var isLast = (i === cardItems.length - 1);
 
-        // Current card flips backward into 3D shelf and fades out cleanly
+        // Current card flips backward into 3D shelf with 100% solid opacity
         tl.to(currentCard, {
           rotateX: 78,
           scale: 0.94,
           y: flipY,
-          autoAlpha: 0,
+          opacity: 1,
           ease: 'power2.inOut',
           duration: flipDuration
         }, currentTime);
@@ -3715,13 +3718,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         if (!isLast) {
           var nextCard = cardItems[i + 1];
           if (nextCard) {
-            // Next card ONLY becomes visible (autoAlpha: 1) as it enters!
+            // Next card becomes visible and enters with 100% solid opacity
+            tl.set(nextCard, { visibility: 'visible', opacity: 1 }, currentTime + 0.25);
             tl.to(nextCard, {
-              autoAlpha: 1,
               yPercent: 0,
               y: 0,
               rotateX: 0,
               scale: 1,
+              opacity: 1,
               ease: 'power2.out',
               duration: flipDuration
             }, currentTime + 0.25);
