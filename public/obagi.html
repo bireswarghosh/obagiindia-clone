@@ -3305,13 +3305,13 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 1 !important;
     transform: none !important;
     will-change: clip-path !important;
-    clip-path: circle(22% at 50% 55%);
+    clip-path: circle(20% at 50% 55%);
   }
 
   @media (max-width: 768px) {
     #comp-lwrlbohf {
       height: 100% !important;
-      clip-path: circle(18% at 50% 70%);
+      clip-path: circle(18% at 50% 68%);
     }
   }
 
@@ -3599,22 +3599,19 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     var cardSec = document.querySelector('#comp-lwrl9iel');
     if (pinkImg && cardSec) {
       var isMobile = window.innerWidth <= 768;
-      var startClip = isMobile ? 'circle(18% at 50% 70%)' : 'circle(22% at 50% 55%)';
-      var endClip = isMobile ? 'circle(125% at 50% 50%)' : 'circle(115% at 50% 50%)';
+      var startClip = isMobile ? 'circle(18% at 50% 68%)' : 'circle(20% at 50% 55%)';
+      var endClip = isMobile ? 'circle(42% at 50% 40%)' : 'circle(42% at 50% 45%)';
 
-      // Pink circle starts expanding as cardSec enters viewport (while #1 Leading... scrolls up)
-      // and continues expanding while Card 1 enters, finishing when Card 1 settles in place
+      // Pink circle expands upwards as cardSec enters the viewport, touching the header exactly at 'top top'
       gsap.fromTo(pinkImg,
         { clipPath: startClip },
         {
           clipPath: endClip,
-          ease: isMobile ? 'none' : 'power1.out',
+          ease: 'power1.out',
           scrollTrigger: {
             trigger: cardSec,
-            start: isMobile ? 'top 95%' : 'top 65%',
-            end: function() {
-              return '+=' + (window.innerHeight * (isMobile ? 1.45 : 1.4));
-            },
+            start: isMobile ? 'top 85%' : 'top 75%',
+            end: 'top top',
             scrub: 1.0
           }
         }
@@ -3640,7 +3637,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
     if (cardSec && cardItems.length > 0) {
       var isMobile = window.innerWidth <= 768;
-      var totalTrackVh = 100 + (cardItems.length + 1) * (isMobile ? 75 : 70);
+      // Snappy, responsive track height matching official site (eliminates multi-spin dead distance)
+      var totalTrackVh = isMobile ? 260 : 240;
       cardSec.style.setProperty('height', totalTrackVh + 'vh', 'important');
       cardSec.style.setProperty('min-height', totalTrackVh + 'vh', 'important');
 
@@ -3658,10 +3656,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         window.addEventListener('resize', doFit);
       }
 
-      // Card 1 starts at yPercent: 0 (visible right away!), other cards wait below
+      // Card 1 starts peeking from bottom (top ~30% visible on mobile, half on desktop matching Screenshot 1)
+      // Cards 2 & 3 wait off-screen below
+      var peekYPercent = isMobile ? 68 : 55;
       cardItems.forEach(function(card, idx) {
         gsap.set(card, {
-          yPercent: idx === 0 ? 0 : 115,
+          yPercent: idx === 0 ? peekYPercent : 115,
           y: 0,
           rotateX: 0,
           opacity: 1,
@@ -3676,31 +3676,41 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           trigger: cardSec,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: isMobile ? 1.0 : 1.2
+          scrub: isMobile ? 0.8 : 1.0
         }
       });
 
-      var stepDuration = 1.0;
-      var stepGap = 1.8;
+      var riseDuration = 0.8;
+      var restDuration = 0.45;
+      var flipDuration = 0.9;
+      var flipY = isMobile ? -360 : -320;
 
-      // Card 1 flips back and Card 2 enters
-      // Then Card 2 flips back and Card 3 enters
-      // Then Card 3 flips back and exits cleanly into the next section!
+      // Step 1: When section pins, Card 1 glides up from peeking position to center
+      if (cardItems.length > 0) {
+        tl.to(cardItems[0], {
+          yPercent: 0,
+          ease: 'power2.out',
+          duration: riseDuration
+        }, 0);
+      }
+
+      var currentTime = riseDuration + restDuration;
+
+      // Step 2..N: Each card flips 3D backwards into shelf, next card enters smoothly
       for (var i = 0; i < cardItems.length; i++) {
         var currentCard = cardItems[i];
         var isLast = (i === cardItems.length - 1);
-        var flipStartTime = (i + 1) * stepGap;
+
+        tl.to(currentCard, {
+          rotateX: 78,
+          scale: 0.94,
+          y: flipY,
+          opacity: 0,
+          ease: 'power2.inOut',
+          duration: flipDuration
+        }, currentTime);
 
         if (!isLast) {
-          // Card flips backward in 3D shelf perspective matching Desktop
-          tl.to(currentCard, {
-            rotateX: 78,
-            scale: 0.94,
-            y: isMobile ? -360 : -320,
-            ease: 'power2.inOut',
-            duration: stepDuration
-          }, flipStartTime);
-
           var nextCard = cardItems[i + 1];
           if (nextCard) {
             tl.to(nextCard, {
@@ -3708,20 +3718,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
               y: 0,
               rotateX: 0,
               scale: 1,
+              opacity: 1,
               ease: 'power2.out',
-              duration: stepDuration
-            }, flipStartTime + 0.35);
+              duration: flipDuration
+            }, currentTime + 0.25);
           }
+          currentTime += flipDuration + restDuration;
         } else {
-          // LAST CARD: Third card also flips away per user request!
-          // "থার্ড কার্ডও ফ্লিপ হবে থার্ড কার্ড ফ্লিপ হয়ে চলে যাবে তারপরে তোমার ইয়ে হবে তারপর এই জায়গাটা দেখা যাবে"
-          tl.to(currentCard, {
-            rotateX: 78,
-            scale: 0.94,
-            y: isMobile ? -360 : -320,
-            ease: 'power2.inOut',
-            duration: stepDuration
-          }, flipStartTime);
+          currentTime += flipDuration + 0.2;
         }
       }
 
