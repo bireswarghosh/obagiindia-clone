@@ -936,26 +936,27 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
       // Existing hero bg video only — playback attrs untouched.
       result = patchVideoSrc(result, 'comp-lwxgxhly_video', heroVid);
     }
-    const heroPoster = data.hero.heroVideoPoster || data.hero.backgroundImage;
-    if (heroPoster) {
-      result = patchVideoPoster(result, 'comp-lwxgxhly_video', heroPoster);
-      const oldPoster = (result.match(/<wow-image\b[^>]*id="comp-lwxgxhly_img"[^>]*>[\s\S]*?<img\b[^>]*?\ssrc="([^"]*)"/i) || [])[1] || '';
+    const heroPoster = data.hero.heroVideoPoster || data.hero.backgroundImage || 'https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg/v1/fill/w_1265,h_585,al_c,q_85,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg';
+    result = patchVideoPoster(result, 'comp-lwxgxhly_video', heroPoster);
+    const oldPoster = (result.match(/<wow-image\b[^>]*id="comp-lwxgxhly_img"[^>]*>[\s\S]*?<img\b[^>]*?\ssrc="([^"]*)"/i) || [])[1] || '';
+    if (oldPoster && oldPoster !== heroPoster) {
       result = syncOldUri(result, oldPoster, heroPoster);
-      result = result.replace(
-        /(<wow-image\b[^>]*id="comp-lwxgxhly_img"[^>]*>[\s\S]*?<img\b[^>]*?)(\ssrc="[^"]*")/i,
-        (_m, head) => `${head} src="${heroPoster}"`
-      );
-      result = normalizeSwappedImgs(result, heroPoster);
     }
+    result = result.replace(
+      /(<wow-image\b[^>]*id="comp-lwxgxhly_img"[^>]*>[\s\S]*?<img\b[^>]*?)(\ssrc="[^"]*")/i,
+      (_m, head) => `${head} src="${heroPoster}"`
+    );
+    result = normalizeSwappedImgs(result, heroPoster);
+    // Unconditionally make poster image visible on initial load (prevents black screen flash)
+    result = result.replace(
+      /(<wow-image\b[^>]*id="comp-lwxgxhly_img"[^>]*style=")[^"]*(")/i,
+      (_m, head, tail) => `${head}opacity: 1; display: block;${tail}`
+    );
     if (data.hero.backgroundImage) {
       // Hero band background photo (bg-layer inner img, no alt text).
       result = patchBg(result, 'comp-lwxgxhly', data.hero.backgroundImage);
       result = patchBg(result, 'bgLayers_comp-lwxgxhly', data.hero.backgroundImage);
       result = patchImgInLayer(result, 'bgLayers_comp-lwxgxhly', data.hero.backgroundImage);
-      result = result.replace(
-        /(<wow-image\b[^>]*id="comp-lwxgxhly_img"[^>]*style=")[^"]*(")/i,
-        (_m, head, tail) => `${head}opacity: 1; display: block;${tail}`
-      );
       if (!data.hero.heroVideoUrl) {
         result = result.replace(
           /(<video\b[^>]*id="comp-lwxgxhly_video"[^>]*style=")[^"]*(")/i,
@@ -2103,10 +2104,68 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     object-fit: cover !important;
   }
   /* 1f. Hero Section Background Image & Video Poster Visibility */
+  #comp-lwxgxhly {
+    background-color: #002530 !important;
+  }
   #comp-lwxgxhly_img,
   #comp-lwxgxhly_img img {
     opacity: 1 !important;
     visibility: visible !important;
+    display: block !important;
+  }
+
+  /* 1g. Completely remove / hide Chat with AI floating elements per Vibe Annotation 1 */
+  [data-hook="minimizedChat"],
+  [data-hook="minimizedChatButton"],
+  [data-hook="tpa-components-provider"],
+  #popover_62ytzm0ch,
+  [data-hook="popover-content"],
+  #ryan-chat-root,
+  #ryan-chat-trigger,
+  #ryan-chat-panel,
+  button[aria-label*="Chat with AI"] {
+    display: none !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    opacity: 0 !important;
+  }
+
+  /* 1h. Section 6 Product Cards - Visible on First View & Clean Mobile Flow */
+  #comp-lwsw0td95__item1 {
+    opacity: 1 !important;
+  }
+  @media (max-width: 768px) {
+    #comp-lwrl9iel {
+      height: auto !important;
+      min-height: auto !important;
+      padding-top: 30px !important;
+      padding-bottom: 30px !important;
+    }
+    #comp-lwsw0td7 {
+      height: auto !important;
+      position: relative !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 20px !important;
+    }
+    #comp-lwsw0td95__item1,
+    #comp-lwsw0td95__item-j9ples3e,
+    #comp-lwsw0td95__item-j9plerjk {
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      bottom: auto !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 280px !important;
+      border-radius: 12px !important;
+      box-shadow: 0 10px 25px -6px rgba(0, 0, 0, 0.12) !important;
+      opacity: 1 !important;
+      transform: none !important;
+      margin-bottom: 24px !important;
+      display: block !important;
+    }
   }
 
   /* 2. R&D Science Cards — Clean column layout matching official site (no double card, no box-shadows) */

@@ -20,9 +20,8 @@ export async function GET() {
     html = patchHtmlWithCms(html, cmsData);
 
     // Preload the hero poster for a sub-second first viewport (non-visual).
-    const heroPreload = cmsData.hero?.heroImage
-      ? `<link rel="preload" as="image" href="${cmsData.hero.heroImage}" fetchpriority="high">`
-      : '';
+    const heroPosterUrl = cmsData.hero?.heroVideoPoster || cmsData.hero?.backgroundImage || 'https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg/v1/fill/w_1265,h_585,al_c,q_85,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg';
+    const heroPreload = `<link rel="preload" as="image" href="${heroPosterUrl}" fetchpriority="high">`;
     // Interactivity only (carousel + enquiry flow). Contains ZERO CMS-apply
     // logic by design — it can never overwrite server-painted content.
     const tail = `${heroPreload}<script src="/obagi-cms-sync.js" defer></script>`;

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -10,6 +11,11 @@ export default function RyanHeader() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [doctorsDropdown, setDoctorsDropdown] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
@@ -257,116 +263,119 @@ export default function RyanHeader() {
         </div>
       </div>
 
-      {/* Mobile Drawer — floats in from the LEFT */}
-      <div
-        className={`lg:hidden fixed inset-0 z-[60] ${mobileMenuOpen ? '' : 'pointer-events-none'}`}
-        aria-hidden={!mobileMenuOpen}
-      >
-        {/* Backdrop */}
+      {/* Mobile Drawer mounted via Portal directly to body so backdrop-blur on header never traps it */}
+      {mounted && createPortal(
         <div
-          onClick={() => setMobileMenuOpen(false)}
-          className={`absolute inset-0 bg-[#002530]/55 transition-opacity duration-300 ${
-            mobileMenuOpen ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
-        {/* Panel */}
-        <div
-          className={`absolute left-0 top-0 bottom-0 w-[86%] max-w-sm bg-white shadow-2xl flex flex-col transition-transform duration-[380ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
-            mobileMenuOpen ? 'translate-x-0' : '-translate-x-[110%]'
-          }`}
-          role="dialog"
-          aria-label="Site navigation"
+          className={`lg:hidden fixed inset-0 z-[99999] ${mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}
+          aria-hidden={!mobileMenuOpen}
         >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-teal-100 shrink-0">
-            <span className="text-xs font-black tracking-widest text-[#004f5e] uppercase">
-              Ryan Dermaceutics
-            </span>
-            <button
-              onClick={() => setMobileMenuOpen(false)}
-              className="p-2 text-slate-500 hover:text-[#00768a] hover:bg-slate-100 rounded-lg transition"
-              aria-label="Close navigation"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          {/* Backdrop */}
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            className={`fixed inset-0 bg-[#002530]/60 backdrop-blur-xs transition-opacity duration-300 ${
+              mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+            }`}
+          />
+          {/* Panel */}
+          <div
+            className={`fixed left-0 top-0 bottom-0 w-[84vw] max-w-[320px] sm:max-w-sm h-full max-h-screen bg-white shadow-2xl flex flex-col z-[100000] transition-transform duration-[350ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              mobileMenuOpen ? 'translate-x-0' : '-translate-x-[110%]'
+            }`}
+            role="dialog"
+            aria-label="Site navigation"
+          >
+            <div className="flex items-center justify-between px-4 py-3.5 border-b border-teal-100 shrink-0 bg-white">
+              <span className="text-xs font-black tracking-widest text-[#004f5e] uppercase truncate mr-2">
+                Ryan Dermaceutics
+              </span>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1.5 text-slate-500 hover:text-[#00768a] hover:bg-slate-100 rounded-lg transition shrink-0"
+                aria-label="Close navigation"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-          <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 space-y-4">
-          <div className="p-3 bg-teal-50/80 rounded-xl space-y-2 border border-teal-100">
-            <div className="text-xs font-bold text-[#006070] uppercase tracking-wider">For Doctors Portal</div>
-            <Link
-              href="/for-doctors"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block p-2 rounded-lg bg-white text-xs font-bold text-[#00768a] shadow-2xs border border-teal-100"
-            >
-              Doctor Portal Overview & Directory
-            </Link>
-            <Link
-              href="/for-doctors/therapeutic-resources"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
-            >
-              Therapeutic Resources Hub
-            </Link>
-            <Link
-              href="/products"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
-            >
-              Product Monographs (53 Products)
-            </Link>
-            <Link
-              href="/for-doctors/prescribing-information"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
-            >
-              Prescribing Information
-            </Link>
-            <Link
-              href="/for-doctors/reference-library"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
-            >
-              Dermatology Reference Library
-            </Link>
-            <Link
-              href="/for-doctors/medical-information"
-              onClick={() => setMobileMenuOpen(false)}
-              className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
-            >
-              Medical Information Service
-            </Link>
-          </div>
+            <div className="flex-1 overflow-y-auto overscroll-contain px-4 pt-3 pb-8 space-y-4">
+              <div className="p-3 bg-teal-50/80 rounded-xl space-y-2 border border-teal-100">
+                <div className="text-xs font-bold text-[#006070] uppercase tracking-wider">For Doctors Portal</div>
+                <Link
+                  href="/for-doctors"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block p-2 rounded-lg bg-white text-xs font-bold text-[#00768a] shadow-2xs border border-teal-100"
+                >
+                  Doctor Portal Overview & Directory
+                </Link>
+                <Link
+                  href="/for-doctors/therapeutic-resources"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
+                >
+                  Therapeutic Resources Hub
+                </Link>
+                <Link
+                  href="/products"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
+                >
+                  Product Monographs (53 Products)
+                </Link>
+                <Link
+                  href="/for-doctors/prescribing-information"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
+                >
+                  Prescribing Information
+                </Link>
+                <Link
+                  href="/for-doctors/reference-library"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
+                >
+                  Dermatology Reference Library
+                </Link>
+                <Link
+                  href="/for-doctors/medical-information"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
+                >
+                  Medical Information Service
+                </Link>
+              </div>
 
-          <div className="space-y-1 text-sm font-medium text-slate-700 divide-y divide-slate-100">
-            <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
-              Home
-            </Link>
-            <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
-              About Ryan
-            </Link>
-            <Link href="/products" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
-              Products
-            </Link>
-            <Link href="/#therapeutic-areas" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
-              Therapeutic Areas
-            </Link>
-            <Link href="/#contact" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
-              Contact
-            </Link>
-          </div>
+              <div className="space-y-1 text-sm font-medium text-slate-700 divide-y divide-slate-100">
+                <Link href="/" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
+                  Home
+                </Link>
+                <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
+                  About Ryan
+                </Link>
+                <Link href="/products" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
+                  Products
+                </Link>
+                <Link href="/#therapeutic-areas" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
+                  Therapeutic Areas
+                </Link>
+                <Link href="/#contact" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
+                  Contact
+                </Link>
+              </div>
 
-          <div className="pt-2">
-            <Link
-              href="/products"
-              onClick={() => setMobileMenuOpen(false)}
-              className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white bg-[#00768a] rounded-xl shadow-md"
-            >
-              Explore Products →
-            </Link>
+              <div className="pt-2">
+                <Link
+                  href="/products"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full inline-flex justify-center items-center gap-2 px-4 py-3 text-xs font-bold uppercase tracking-wider text-white bg-[#00768a] rounded-xl shadow-md"
+                >
+                  Explore Products →
+                </Link>
+              </div>
+            </div>
           </div>
-          </div>
-        </div>
-      </div>
+        </div>,
+        document.body
+      )}
     </header>
   );
 }
