@@ -1165,7 +1165,11 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
   // 9. Footer Section (annotation 15)
   if (data.footer) {
     if (data.footer.copyright) {
-      const fHtml = `<p class="font_8 wixui-rich-text__text">${escapeHtml(data.footer.copyright)}</p>`;
+      let cleanCopyright = data.footer.copyright;
+      if (cleanCopyright.includes('Obagi')) {
+        cleanCopyright = cleanCopyright.replace(/Obagi®?\s*Systems\s*and\s*Products/gi, 'Ryan Dermaceutics and Products').replace(/Obagi®?/gi, 'Ryan Dermaceutics');
+      }
+      const fHtml = `<p class="font_8 wixui-rich-text__text">${escapeHtml(cleanCopyright)}</p>`;
       result = patchDiv(result, 'comp-ml6nay6u_r_comp-lx0hp721', fHtml);
     }
     if (data.footer.backgroundImage) {
@@ -2047,7 +2051,7 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     }
   }
 
-  /* 1e. Section 5 — 4-Image Mosaic Gallery Panel: ensure fully visible, clear motion clips */
+  /* 1e. Section 5 — 4-Image Mosaic Gallery Panel: ensure fully visible, remove dark blue box, clear motion clips */
   #comp-lwz20kzt,
   #comp-lwz20kzt *,
   #comp-lwz20l0d11,
@@ -2074,6 +2078,29 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     opacity: 1 !important;
     visibility: visible !important;
     display: block !important;
+  }
+  /* Remove any solid dark blue box under the Section 5 image (Annotation 2) */
+  #comp-lwz20l0d11,
+  #comp-lwz20l0d11 .inner-box,
+  #comp-lwz20l0d11 [class*="inner-box"],
+  #comp-lwz20l0d11-container,
+  .comp-lwz20l0d11-container,
+  #comp-lwz20kzt .inner-box,
+  #comp-lwz20kzt [class*="inner-box"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    --bg: transparent !important;
+    --alpha-bg: 0 !important;
+  }
+  #comp-lwz20l0e14,
+  #comp-lwz20l0e14 .YX2qkL,
+  #comp-lwz20l0e14 [data-motion-part^="BG_MEDIA"],
+  #comp-lwz20l0e14 wow-image,
+  #comp-lwz20l0e14 picture,
+  #comp-lwz20l0e14 img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
   }
   /* 1f. Hero Section Background Image & Video Poster Visibility */
   #comp-lwxgxhly_img,
@@ -2542,31 +2569,41 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
   }
 
   /* Footer Logo Pop-up / Scale Effect on Hover & Click (User Requested) */
-  #comp-ml6nay6u_r_comp-lx02zbs6 {
+  #comp-ml6nay6u_r_comp-lx02zbs6,
+  #comp-ml6nay6u_r_comp-ljckoxjc,
+  .comp-ml6nay6u_r_comp-ljckoxjc-container {
     display: inline-block !important;
+    overflow: visible !important;
   }
   #comp-ml6nay6u_r_comp-lx02zbs6 a {
     display: inline-block !important;
     text-decoration: none !important;
+    overflow: visible !important;
   }
   #comp-ml6nay6u_r_comp-lx02zbs6 img,
   #comp-ml6nay6u_r_comp-lx02zbs6 .ryan-footer-logo-img {
     transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease !important;
-    transform-origin: center center !important;
+    transform-origin: left center !important;
     cursor: pointer !important;
     will-change: transform !important;
-    transform: scale(1) !important;
+    transform: scale(1) translateY(0) !important;
   }
   #comp-ml6nay6u_r_comp-lx02zbs6:hover img,
   #comp-ml6nay6u_r_comp-lx02zbs6 a:hover img,
   #comp-ml6nay6u_r_comp-lx02zbs6:focus-within img {
-    transform: scale(1.14) !important;
-    filter: drop-shadow(0 8px 20px rgba(0, 118, 138, 0.32)) !important;
+    transform: scale(1.12) translateY(-2px) !important;
+    filter: drop-shadow(0 10px 24px rgba(0, 118, 138, 0.35)) !important;
   }
   #comp-ml6nay6u_r_comp-lx02zbs6:active img,
   #comp-ml6nay6u_r_comp-lx02zbs6 a:active img {
-    transform: scale(0.96) !important;
+    transform: scale(0.96) translateY(0) !important;
     transition-duration: 0.12s !important;
+  }
+  @media (max-width: 750px) {
+    #comp-ml6nay6u_r_comp-lx02zbs6 img,
+    #comp-ml6nay6u_r_comp-lx02zbs6 .ryan-footer-logo-img {
+      transform-origin: center center !important;
+    }
   }
 </style>
 `;
