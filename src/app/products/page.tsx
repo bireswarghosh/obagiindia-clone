@@ -5,19 +5,18 @@ import Image from 'next/image';
 import Link from 'next/link';
 import RyanHeader from '@/components/ryan/RyanHeader';
 import RyanFooter from '@/components/ryan/RyanFooter';
+import { ProductPackshot } from '@/components/ryan/ProductPackshot';
 import { 
   RYAN_PRODUCTS, 
   THERAPEUTIC_AREAS, 
   DOSAGE_FORMS, 
-  ROUTES, 
-  RyanProduct 
+  ROUTES
 } from '@/data/ryan-products';
 import { 
   Search, 
   X, 
   Filter, 
   ChevronDown, 
-  ChevronUp, 
   Download, 
   ArrowRight, 
   FileText, 
@@ -38,6 +37,40 @@ export default function ProductsPage() {
   const [selectedRoutes, setSelectedRoutes] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<'featured' | 'name-asc' | 'name-desc'>('featured');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [productsList, setProductsList] = useState(RYAN_PRODUCTS);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  React.useEffect(() => {
+    fetch('/api/db/products')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && Array.isArray(data.products) && data.products.length > 0) {
+          const mapped = data.products.map((p: any) => ({
+            ...p.data,
+            id: p.id,
+            slug: p.slug,
+            brandName: p.brand_name,
+            genericName: p.generic_name,
+            strength: p.strength || p.data?.strength || '',
+            dosageForm: p.dosage_form || p.data?.dosageForm || 'Cream',
+            route: p.route || p.data?.route || 'Topical',
+            therapeuticArea: p.therapeutic_area || p.data?.therapeuticArea || 'Acne',
+            tagline: p.tagline || p.data?.tagline || '',
+            hasFullMonograph: p.has_full_monograph ?? p.data?.hasFullMonograph ?? true,
+            isFeatured: p.is_featured ?? p.data?.isFeatured ?? false,
+            images: {
+              ...(p.data?.images || {}),
+              primaryPackshot: p.packshot_image || p.data?.images?.primaryPackshot || ''
+            }
+          }));
+          setProductsList(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const PAGE_SIZE = 16;
 
   // Accordion open states
   const [openSections, setOpenSections] = useState({
@@ -49,6 +82,10 @@ export default function ProductsPage() {
   React.useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
+      const qParam = params.get('q');
+      if (qParam) {
+        setSearchQuery(qParam);
+      }
       const areaParam = params.get('area') || params.get('category');
       if (areaParam) {
         const matched = THERAPEUTIC_AREAS.find(
@@ -90,6 +127,9 @@ export default function ProductsPage() {
     setSelectedTherapeuticAreas([]);
     setSelectedDosageForms([]);
     setSelectedRoutes([]);
+    setMonographFilter('all');
+    setSortBy('featured');
+    setCurrentPage(1);
   };
 
   const hasActiveFilters = 
@@ -100,9 +140,14 @@ export default function ProductsPage() {
 
   const [monographFilter, setMonographFilter] = useState<'all' | 'full' | 'summary'>('all');
 
+  // Reset to first page whenever the result set criteria change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedTherapeuticAreas, selectedDosageForms, selectedRoutes, sortBy, monographFilter]);
+
   // Filtered & Sorted Products
   const filteredProducts = useMemo(() => {
-    let result = RYAN_PRODUCTS.filter(product => {
+    let result = productsList.filter(product => {
       // Monograph status filter
       if (monographFilter === 'full' && !product.hasFullMonograph) return false;
       if (monographFilter === 'summary' && product.hasFullMonograph) return false;
@@ -151,7 +196,7 @@ export default function ProductsPage() {
     }
 
     return result;
-  }, [searchQuery, selectedTherapeuticAreas, selectedDosageForms, selectedRoutes, sortBy, monographFilter]);
+  }, [productsList, searchQuery, selectedTherapeuticAreas, selectedDosageForms, selectedRoutes, sortBy, monographFilter]);
 
   // Dynamic counts for checkboxes
   const counts = useMemo(() => {
@@ -159,17 +204,53 @@ export default function ProductsPage() {
     const dosageCounts: Record<string, number> = {};
     const routeCounts: Record<string, number> = {};
 
-    RYAN_PRODUCTS.forEach(p => {
+    productsList.forEach(p => {
       therapeuticCounts[p.therapeuticArea] = (therapeuticCounts[p.therapeuticArea] || 0) + 1;
       dosageCounts[p.dosageForm] = (dosageCounts[p.dosageForm] || 0) + 1;
       routeCounts[p.route] = (routeCounts[p.route] || 0) + 1;
     });
 
     return { therapeuticCounts, dosageCounts, routeCounts };
-  }, []);
+  }, [productsList]);
+
+  // Pagination (16 per page, like the reference catalog)
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const pagedProducts = filteredProducts.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const rangeStart = filteredProducts.length === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1;
+  const rangeEnd = Math.min(safePage * PAGE_SIZE, filteredProducts.length);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">
+      <style>{`
+        .ryan-filter-title{font-size:18px;font-weight:800;color:#003d4d;margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid #e2e8f0}
+        .ryan-filter-head{width:100%;display:flex;align-items:center;justify-content:space-between;font-size:14px;font-weight:700;color:#003d4d;margin-bottom:12px;cursor:pointer;padding:0;text-align:left;background:none;border:0}
+        .ryan-filter-head .chev{color:#64748b;font-size:12px;transition:transform .2s ease;display:inline-flex}
+        .ryan-filter-head[aria-expanded="true"] .chev{transform:rotate(180deg)}
+        .ryan-check{display:flex;align-items:center;gap:12px;font-size:13px;font-weight:600;color:#334155;cursor:pointer;-webkit-user-select:none;user-select:none;position:relative;padding:8px 8px 8px 40px;margin:0;min-height:28px;line-height:1.45;border-radius:8px}
+        .ryan-check input{position:absolute;left:0;top:50%;transform:translateY(-50%);width:20px;height:20px;margin:0;opacity:0;cursor:pointer;z-index:1}
+        .ryan-check .ryan-box{display:inline-flex;width:20px;height:20px;border-radius:6px;border:1.5px solid #B9CFE8;background:#fff;position:absolute;left:0;top:50%;transform:translateY(-50%);transition:all .15s ease;align-items:center;justify-content:center;flex:none}
+        .ryan-check .ryan-box::after{content:"";width:9px;height:5px;border-left:2.5px solid #fff;border-bottom:2.5px solid #fff;transform:rotate(-45deg) translateY(-.5px);opacity:0;transition:opacity .12s}
+        .ryan-check:hover{background:#f0f9fa}
+        .ryan-check:hover .ryan-box{border-color:#00768a;box-shadow:0 0 0 3px rgba(0,118,138,.08)}
+        .ryan-check input:checked + .ryan-box{background:linear-gradient(135deg,#00768a,#00a8cc);border-color:#00768a;box-shadow:0 2px 8px rgba(0,118,138,.4)}
+        .ryan-check input:checked + .ryan-box::after{opacity:1}
+        .ryan-check input:focus-visible + .ryan-box{box-shadow:0 0 0 3px rgba(0,118,138,.25)}
+        .ryan-check input:checked ~ .ryan-label{color:#003d4d;font-weight:800}
+        .ryan-check .ryan-count{margin-left:auto;font-size:11px;color:#94a3b8;font-weight:500}
+        .ryan-clear-btn{width:100%;padding:10px;border:1px solid #bfe3ea;border-radius:10px;font-size:13px;font-weight:700;color:#00768a;background:#f0f9fa;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}
+        .ryan-clear-btn:hover{background:#00768a;color:#fff;border-color:#00768a}
+        .ryan-search-box{position:relative;margin-bottom:4px;display:block}
+        .ryan-search-box input{width:100%;padding:10px 36px 10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;outline:none;transition:all .2s;color:#0f172a;background:#fff}
+        .ryan-search-box input:focus{border-color:#00768a;box-shadow:0 0 0 3px rgba(0,118,138,.1)}
+        .ryan-card{position:relative;overflow:hidden}
+        .ryan-card::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,#00768a,#00a8cc,#00768a);background-size:200% 100%;opacity:.9;z-index:1}
+        .ryan-card-img{height:150px;background:linear-gradient(160deg,#F0F7FF 0%,#E4F0FE 55%,#D9E9FD 100%);border:1px solid #E3EEFB;border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;padding:10px;overflow:hidden}
+        @media(max-width:640px){.ryan-card-img{height:110px;padding:6px;margin-bottom:10px}}
+        .ryan-grid-card{animation:ryanCardIn .45s ease both}
+        @media(prefers-reduced-motion:reduce){.ryan-grid-card{animation:none}.packshot{transition:none}}
+        @keyframes ryanCardIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+      `}</style>
       <RyanHeader />
 
       {/* ========================================================= */}
@@ -182,8 +263,20 @@ export default function ProductsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
             <div className="max-w-2xl space-y-3">
-              <span className="text-[11px] sm:text-xs font-black tracking-widest text-[#00768a] uppercase">
-                THERAPEUTIC RESOURCES
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] sm:text-xs">
+                <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#00768a] text-white font-bold tracking-wider uppercase text-[10px]">
+                  Healthcare Professional Area
+                </span>
+                <nav className="flex items-center gap-1.5 text-slate-500 font-medium" aria-label="Breadcrumb">
+                  <Link href="/" className="hover:text-[#00768a] transition">Home</Link>
+                  <span>/</span>
+                  <Link href="/for-doctors/therapeutic-resources" className="hover:text-[#00768a] transition">Therapeutic Resources</Link>
+                  <span>/</span>
+                  <span className="text-[#00768a] font-semibold">Product Monographs</span>
+                </nav>
+              </div>
+              <span className="text-[11px] sm:text-xs font-black tracking-widest text-[#00768a] uppercase block">
+                Therapeutic Resources
               </span>
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-[#003d4d] tracking-tight uppercase">
                 Product Monographs
@@ -242,40 +335,34 @@ export default function ProductsPage() {
       </section>
 
       {/* ========================================================= */}
-      {/* 2. BREADCRUMBS & TOP BAR                                  */}
-      {/* ========================================================= */}
-      <div className="bg-white border-b border-slate-200/80 py-3">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between text-xs text-slate-500">
-          <div className="flex items-center gap-2">
-            <Link href="/home" className="hover:text-[#00768a] transition">Home</Link>
-            <span>/</span>
-            <Link href="/for-doctors/therapeutic-resources" className="hover:text-[#00768a] transition">Therapeutic Resources</Link>
-            <span>/</span>
-            <span className="text-[#00768a] font-semibold">Product Monographs</span>
-          </div>
-
-          <div className="hidden sm:flex items-center gap-4 text-xs font-semibold text-slate-600">
-            <span>Showing <strong className="text-slate-900">{filteredProducts.length}</strong> of {RYAN_PRODUCTS.length} Products</span>
-          </div>
-        </div>
-      </div>
-
-      {/* ========================================================= */}
       {/* 3. MAIN CATALOG LAYOUT (Sidebar + Products Grid)          */}
       {/* ========================================================= */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[330px_minmax(0,1fr)] xl:grid-cols-[380px_minmax(0,1fr)] gap-8">
           
+          {/* Mobile Filters toggle */}
+          <div className="lg:hidden mb-4">            <button
+              onClick={() => setFiltersOpen(!filtersOpen)}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-800 shadow-xs"
+              aria-expanded={filtersOpen}
+            >
+              {filtersOpen ? <X className="w-4 h-4" /> : <Filter className="w-4 h-4 text-[#00768a]" />}
+              {filtersOpen ? 'Hide Filters' : 'Show Filters'}
+              {hasActiveFilters && (
+                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-[#00768a] text-white text-[10px] font-black">
+                  On
+                </span>
+              )}
+            </button>
+          </div>
+
           {/* ======================================================= */}
           {/* LEFT SIDEBAR: FILTERS (Matching First page.png)         */}
           {/* ======================================================= */}
-          <aside className="lg:col-span-1 space-y-6">
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs sticky top-24">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4 text-[#00768a]" />
-                  <h2 className="text-sm font-black text-slate-900 uppercase tracking-wider">Filter by</h2>
-                </div>
+          <aside className={`space-y-6 min-w-0 ${filtersOpen ? 'block' : 'hidden'} lg:block`}>
+            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-xs lg:sticky lg:top-24">
+              <div className="flex items-center justify-between">
+                <h2 className="ryan-filter-title !mb-0 !pb-0 !border-0">Filter by</h2>
                 {hasActiveFilters && (
                   <button
                     onClick={clearAllFilters}
@@ -285,27 +372,29 @@ export default function ProductsPage() {
                   </button>
                 )}
               </div>
+              <div className="border-b border-slate-200 mt-3 mb-5" />
 
               {/* Search Bar in Sidebar */}
-              <div className="pt-4">
-                <div className="relative">
+              <div className="pb-5">
+                <label className="ryan-search-box">
                   <input
-                    type="text"
+                    type="search"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by brand, generic..."
-                    className="w-full pl-9 pr-8 py-2 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#00768a] focus:bg-white transition"
+                    aria-label="Search products"
                   />
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-[15px] h-[15px] text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      className="absolute right-8 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                      aria-label="Clear search"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
                   )}
-                </div>
+                </label>
               </div>
 
               {/* Monograph Readiness Status Filter */}
@@ -346,41 +435,33 @@ export default function ProductsPage() {
               </div>
 
               {/* Filter 1: Therapeutic Category */}
-              <div className="pt-5 border-t border-slate-100 mt-5">
+              <div className="pt-1">
                 <button
+                  type="button"
                   onClick={() => toggleSection('therapeutic')}
-                  className="w-full flex items-center justify-between text-xs font-bold text-slate-900 uppercase tracking-wider mb-3"
+                  className="ryan-filter-head"
+                  aria-expanded={openSections.therapeutic}
                 >
                   <span>Therapeutic Category</span>
-                  {openSections.therapeutic ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                  )}
+                  <span className="chev" aria-hidden="true">
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </span>
                 </button>
 
                 {openSections.therapeutic && (
-                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
+                  <div className="flex flex-col gap-1 max-h-64 overflow-y-auto pr-1">
                     {THERAPEUTIC_AREAS.map(area => {
                       const count = counts.therapeuticCounts[area] || 0;
-                      const isChecked = selectedTherapeuticAreas.includes(area);
                       return (
-                        <label
-                          key={area}
-                          className="flex items-center justify-between text-slate-600 hover:text-slate-900 cursor-pointer select-none group py-0.5"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => toggleTherapeutic(area)}
-                              className="rounded border-slate-300 text-[#00768a] focus:ring-[#00768a] w-3.5 h-3.5 cursor-pointer"
-                            />
-                            <span className={`text-xs ${isChecked ? 'font-bold text-[#00768a]' : ''}`}>
-                              {area}
-                            </span>
-                          </div>
-                          <span className="text-[11px] text-slate-400 font-medium">({count})</span>
+                        <label key={area} className="ryan-check">
+                          <input
+                            type="checkbox"
+                            checked={selectedTherapeuticAreas.includes(area)}
+                            onChange={() => toggleTherapeutic(area)}
+                          />
+                          <span className="ryan-box" aria-hidden="true" />
+                          <span className="ryan-label">{area}</span>
+                          <span className="ryan-count">({count})</span>
                         </label>
                       );
                     })}
@@ -389,42 +470,34 @@ export default function ProductsPage() {
               </div>
 
               {/* Filter 2: Dosage Form */}
-              <div className="pt-5 border-t border-slate-100 mt-5">
+              <div className="pt-5 mt-5 border-t border-slate-100">
                 <button
+                  type="button"
                   onClick={() => toggleSection('dosage')}
-                  className="w-full flex items-center justify-between text-xs font-bold text-slate-900 uppercase tracking-wider mb-3"
+                  className="ryan-filter-head"
+                  aria-expanded={openSections.dosage}
                 >
                   <span>Dosage Form</span>
-                  {openSections.dosage ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                  )}
+                  <span className="chev" aria-hidden="true">
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </span>
                 </button>
 
                 {openSections.dosage && (
-                  <div className="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
+                  <div className="flex flex-col gap-1 max-h-64 overflow-y-auto pr-1">
                     {DOSAGE_FORMS.map(form => {
                       const count = counts.dosageCounts[form] || 0;
                       if (count === 0) return null;
-                      const isChecked = selectedDosageForms.includes(form);
                       return (
-                        <label
-                          key={form}
-                          className="flex items-center justify-between text-slate-600 hover:text-slate-900 cursor-pointer select-none group py-0.5"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => toggleDosageForm(form)}
-                              className="rounded border-slate-300 text-[#00768a] focus:ring-[#00768a] w-3.5 h-3.5 cursor-pointer"
-                            />
-                            <span className={`text-xs ${isChecked ? 'font-bold text-[#00768a]' : ''}`}>
-                              {form}
-                            </span>
-                          </div>
-                          <span className="text-[11px] text-slate-400 font-medium">({count})</span>
+                        <label key={form} className="ryan-check">
+                          <input
+                            type="checkbox"
+                            checked={selectedDosageForms.includes(form)}
+                            onChange={() => toggleDosageForm(form)}
+                          />
+                          <span className="ryan-box" aria-hidden="true" />
+                          <span className="ryan-label">{form}</span>
+                          <span className="ryan-count">({count})</span>
                         </label>
                       );
                     })}
@@ -433,41 +506,33 @@ export default function ProductsPage() {
               </div>
 
               {/* Filter 3: Route */}
-              <div className="pt-5 border-t border-slate-100 mt-5">
+              <div className="pt-5 mt-5 border-t border-slate-100">
                 <button
+                  type="button"
                   onClick={() => toggleSection('route')}
-                  className="w-full flex items-center justify-between text-xs font-bold text-slate-900 uppercase tracking-wider mb-3"
+                  className="ryan-filter-head"
+                  aria-expanded={openSections.route}
                 >
                   <span>Route</span>
-                  {openSections.route ? (
-                    <ChevronUp className="w-4 h-4 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
-                  )}
+                  <span className="chev" aria-hidden="true">
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </span>
                 </button>
 
                 {openSections.route && (
-                  <div className="space-y-2 text-xs">
+                  <div className="flex flex-col gap-1">
                     {ROUTES.map(routeObj => {
                       const count = counts.routeCounts[routeObj.name] || 0;
-                      const isChecked = selectedRoutes.includes(routeObj.name);
                       return (
-                        <label
-                          key={routeObj.name}
-                          className="flex items-center justify-between text-slate-600 hover:text-slate-900 cursor-pointer select-none py-0.5"
-                        >
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={() => toggleRoute(routeObj.name)}
-                              className="rounded border-slate-300 text-[#00768a] focus:ring-[#00768a] w-3.5 h-3.5 cursor-pointer"
-                            />
-                            <span className={`text-xs ${isChecked ? 'font-bold text-[#00768a]' : ''}`}>
-                              {routeObj.name}
-                            </span>
-                          </div>
-                          <span className="text-[11px] text-slate-400 font-medium">({count})</span>
+                        <label key={routeObj.name} className="ryan-check">
+                          <input
+                            type="checkbox"
+                            checked={selectedRoutes.includes(routeObj.name)}
+                            onChange={() => toggleRoute(routeObj.name)}
+                          />
+                          <span className="ryan-box" aria-hidden="true" />
+                          <span className="ryan-label">{routeObj.name}</span>
+                          <span className="ryan-count">({count})</span>
                         </label>
                       );
                     })}
@@ -477,11 +542,8 @@ export default function ProductsPage() {
 
               {/* Clear All Filters Button */}
               {hasActiveFilters && (
-                <div className="pt-5 border-t border-slate-100 mt-5">
-                  <button
-                    onClick={clearAllFilters}
-                    className="w-full py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition flex items-center justify-center gap-1.5"
-                  >
+                <div className="pt-5 mt-5 border-t border-slate-100">
+                  <button onClick={clearAllFilters} className="ryan-clear-btn">
                     <X className="w-3.5 h-3.5" />
                     Clear all filters
                   </button>
@@ -493,15 +555,17 @@ export default function ProductsPage() {
           {/* ======================================================= */}
           {/* MAIN COLUMN: PRODUCT CATALOG GRID                      */}
           {/* ======================================================= */}
-          <main className="lg:col-span-3 space-y-6">
+          <main className="space-y-6 min-w-0">
             
             {/* Top Toolbar */}
             <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-black text-slate-900">
-                  {filteredProducts.length}
-                </span>
-                <span className="text-xs text-slate-500 font-medium">Products found</span>
+              <div>
+                <h2 className="text-xl font-black text-slate-900 tracking-tight">
+                  {filteredProducts.length} Products
+                </h2>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  Showing {rangeStart}–{rangeEnd} of {filteredProducts.length}
+                </p>
               </div>
 
               <div className="flex items-center gap-4">
@@ -558,85 +622,50 @@ export default function ProductsPage() {
               </div>
             )}
 
-            {/* Products Grid (Matching First page.png) */}
+            {/* Products Grid (reference catalog style) */}
             {viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                {filteredProducts.map(product => (
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                {pagedProducts.map(product => (
                   <div
                     key={product.id}
-                    className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-xl hover:border-teal-300 transition-all duration-300 flex flex-col justify-between group overflow-hidden"
+                    className="ryan-card ryan-grid-card bg-white rounded-2xl border border-slate-200/90 shadow-2xs hover:shadow-[0_16px_38px_rgba(0,118,138,0.18)] hover:border-teal-300 hover:-translate-y-1 transition-all duration-300 flex flex-col p-3 sm:p-5 group"
                   >
-                    {/* Visual Card Header */}
-                    <div className="p-5 pb-2">
-                      {/* Product Visual Box */}
-                      <div className="relative h-44 w-full rounded-xl bg-gradient-to-b from-slate-50 to-teal-50/30 border border-slate-100 flex items-center justify-center p-4 group-hover:bg-teal-50/50 transition-colors">
-                        {/* Packaging Rendering */}
-                        <div className="w-full h-full flex flex-col items-center justify-center text-center p-2">
-                          <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[#00768a] to-[#004f5e] flex items-center justify-center text-white text-2xl font-black shadow-md shadow-teal-900/10 mb-2 group-hover:scale-110 transition-transform">
-                            {product.brandName.replace(/[^a-zA-Z0-9]/g, '').charAt(0) || product.brandName.charAt(0)}
-                          </div>
-                          <span className="text-[11px] font-black uppercase text-[#004f5e] tracking-wider line-clamp-1">
-                            {product.brandName}
-                          </span>
-                          <span className="text-[9.5px] text-slate-500 line-clamp-1 mt-0.5">
-                            {product.dosageForm} • {product.packSize}
-                          </span>
-                        </div>
+                    <div className="ryan-card-img">
+                      <ProductPackshot product={product} />
+                    </div>
+                    <h3 className="text-[13px] sm:text-[15px] font-black text-slate-900 group-hover:text-[#00768a] transition-colors tracking-tight leading-snug">
+                      {product.brandName}
+                      <span className="align-super text-[9px] font-bold">®</span>
+                    </h3>
+                    <p className="text-[11px] sm:text-xs text-slate-500 font-medium line-clamp-2 mt-1 leading-snug min-h-[2rem]">
+                      {product.genericName}
+                    </p>
 
-                        {/* Top Badges */}
-                        <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
-                          {product.hasFullMonograph && (
-                            <span className="text-[9px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100/95 border border-emerald-300 px-2 py-0.5 rounded-full shadow-2xs flex items-center gap-1">
-                              <Sparkles className="w-2.5 h-2.5 text-emerald-600" />
-                              Full Monograph
-                            </span>
-                          )}
-                          <span className="text-[9.5px] font-bold tracking-wider text-[#006070] bg-white/90 border border-teal-100 px-2 py-0.5 rounded-full shadow-2xs">
-                            {product.route}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Brand & Composition */}
-                      <div className="mt-4">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="text-base font-black text-slate-900 group-hover:text-[#00768a] transition-colors tracking-tight">
-                            {product.brandName}
-                          </h3>
-                        </div>
-                        <p className="text-xs text-slate-500 font-medium line-clamp-2 mt-1 leading-snug">
-                          {product.genericName}
-                        </p>
-
-                        {/* Category Badges */}
-                        <div className="flex flex-wrap items-center gap-1.5 mt-3">
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-teal-50 text-[#00768a] border border-teal-100/80">
-                            {product.therapeuticArea}
-                          </span>
-                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
-                            {product.dosageForm}
-                          </span>
-                          <span className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
-                            {product.packSize}
-                          </span>
-                        </div>
-                      </div>
+                    <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-teal-50 text-[#00768a] border border-teal-100/80">
+                        {product.therapeuticArea}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">
+                        {product.route === 'Oral / Systematic' ? 'Oral' : product.route}
+                      </span>
                     </div>
 
-                    {/* Card Actions */}
-                    <div className="p-4 pt-3 bg-slate-50/60 border-t border-slate-100 flex items-center gap-2">
+                    <p className="text-xs text-slate-500 font-medium mt-2.5">
+                      {product.dosageForm} <span className="text-slate-300 mx-1">|</span> {product.packSize}
+                    </p>
+
+                    <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
                       <Link
                         href={`/products/${product.slug}`}
                         className="flex-1 py-2 px-3 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-xs"
                       >
                         View Monograph
-                        <ArrowRight className="w-3.5 h-3.5" />
                       </Link>
-
                       <Link
                         href={`/products/${product.slug}#monograph-pdf`}
-                        className="p-2 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 hover:text-slate-900 transition"
-                        title="Download Monograph PDF"
+                        className="p-2 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 hover:text-[#00768a] transition shrink-0"
+                        title="Download PDF"
+                        aria-label={`Download ${product.brandName} monograph PDF`}
                       >
                         <Download className="w-4 h-4" />
                       </Link>
@@ -647,7 +676,7 @@ export default function ProductsPage() {
             ) : (
               /* List View */
               <div className="space-y-3">
-                {filteredProducts.map(product => (
+                {pagedProducts.map(product => (
                   <div
                     key={product.id}
                     className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs hover:shadow-md hover:border-teal-300 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 group"
@@ -701,6 +730,46 @@ export default function ProductsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="flex flex-col items-center gap-2 pt-2">
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => { setCurrentPage(safePage - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    disabled={safePage === 1}
+                    className="w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-bold transition disabled:opacity-40 disabled:cursor-not-allowed hover:border-teal-300 hover:text-[#00768a]"
+                    aria-label="Previous page"
+                  >
+                    ‹
+                  </button>
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                    <button
+                      key={page}
+                      onClick={() => { setCurrentPage(page); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                      className={`w-9 h-9 rounded-lg border text-xs font-bold transition ${
+                        page === safePage
+                          ? 'bg-[#00768a] border-[#00768a] text-white'
+                          : 'bg-white border-slate-200 text-slate-600 hover:border-teal-300 hover:text-[#00768a]'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => { setCurrentPage(safePage + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                    disabled={safePage === totalPages}
+                    className="w-9 h-9 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-bold transition disabled:opacity-40 disabled:cursor-not-allowed hover:border-teal-300 hover:text-[#00768a]"
+                    aria-label="Next page"
+                  >
+                    ›
+                  </button>
+                </div>
+                <p className="text-xs text-slate-500 font-medium">
+                  Showing {rangeStart}–{rangeEnd} of {filteredProducts.length} products
+                </p>
               </div>
             )}
 

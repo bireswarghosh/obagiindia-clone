@@ -146,6 +146,28 @@ export function saveObagiHomeContent(
       console.warn('[obagi-cms] filesystem write failed, kept in memory:', err);
     }
 
+    // Persist to PostgreSQL
+    try {
+      const { upsertPageSection } = await import('./postgres');
+      for (const [key, val] of Object.entries(newContent)) {
+        if (key !== 'meta' && val && typeof val === 'object') {
+          await upsertPageSection('home', key, {
+            title: (val as any).title || (val as any).headline || (val as any).rdHeading || null,
+            subtitle: (val as any).subtitle || (val as any).rdSubheading || null,
+            body_text: (val as any).description || (val as any).text || (val as any).historyIntroText || null,
+            cta_text: (val as any).buttonText || null,
+            cta_url: (val as any).buttonLink || null,
+            image_url: (val as any).heroImage || (val as any).imageUrl || (val as any).bgImage || (val as any).logoUrl || null,
+            video_url: (val as any).videoUrl || null,
+            video_poster: (val as any).videoPoster || (val as any).posterUrl || null,
+            extra_data: val,
+          }).catch(() => {});
+        }
+      }
+    } catch (dbErr) {
+      console.warn('[obagi-cms] PostgreSQL write failed:', dbErr);
+    }
+
     memoryCache = merged;
     return merged;
   });

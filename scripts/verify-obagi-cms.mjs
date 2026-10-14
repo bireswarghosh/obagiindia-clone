@@ -191,7 +191,10 @@ if (LIVE) {
         const origHistoryTitle = before?.data?.story?.historyTitle || '';
         const origTicker = before?.data?.trustBanner?.tickerText || '';
         const origNlTitle = before?.data?.newsletter?.title || '';
-        const origVideo = before?.data?.awardVideo?.videoUrl || '';
+        const origVideo =
+          before?.data?.awardVideo?.videoUrl && !before.data.awardVideo.videoUrl.includes('example.com')
+            ? before.data.awardVideo.videoUrl
+            : 'https://video.wixstatic.com/video/4833d7_958d8b59c22f449990b3c2a75c660389/720p/mp4/file.mp4';
         const origChat = before?.data?.floating?.chatLabel || '';
         // Section isolation: save hero, then story — hero must survive.
         const H1 = `FLASH-CHECK-${Date.now()}`;

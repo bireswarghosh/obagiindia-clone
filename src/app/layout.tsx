@@ -24,6 +24,11 @@ export async function generateMetadata(): Promise<Metadata> {
     authors: [{ name: 'Ryan Dermaceutics' }],
     creator: 'Ryan Dermaceutics Division',
     publisher: 'Ryan Dermaceutics',
+    icons: {
+      icon: '/ryan/ryan-logo.png',
+      shortcut: '/ryan/ryan-logo.png',
+      apple: '/ryan/ryan-logo.png',
+    },
     metadataBase: new URL('https://obagiindia.vercel.app'),
     openGraph: {
       title: 'Ryan Dermaceutics | Science That Understands Skin',

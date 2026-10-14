@@ -4,7 +4,10 @@ import { notFound } from 'next/navigation';
 import RyanHeader from '@/components/ryan/RyanHeader';
 import RyanFooter from '@/components/ryan/RyanFooter';
 import { RYAN_PRODUCTS, getProductBySlug } from '@/data/ryan-products';
+import { getProductBySlug as getDbProductBySlug } from '@/lib/postgres';
 import ProductDetailClient from './ProductDetailClient';
+
+export const dynamic = 'force-dynamic';
 
 export function generateStaticParams() {
   return RYAN_PRODUCTS.map((product) => ({
@@ -12,8 +15,24 @@ export function generateStaticParams() {
   }));
 }
 
-export function generateMetadata({ params }: { params: { slug: string } }) {
-  const product = getProductBySlug(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }) {
+  let product = null;
+  try {
+    const dbRow = await getDbProductBySlug(params.slug);
+    if (dbRow) {
+      product = {
+        ...dbRow.data,
+        brandName: dbRow.brand_name,
+        genericName: dbRow.generic_name,
+        tagline: dbRow.tagline || dbRow.data?.tagline || '',
+      };
+    }
+  } catch (e) {}
+
+  if (!product) {
+    product = getProductBySlug(params.slug);
+  }
+
   if (!product) {
     return { title: 'Product Not Found | Ryan Dermaceutics' };
   }
@@ -23,12 +42,41 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
   };
 }
 
-export default function ProductDetailPage({
+export default async function ProductDetailPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const product = getProductBySlug(params.slug);
+  let product = null;
+
+  try {
+    const dbRow = await getDbProductBySlug(params.slug);
+    if (dbRow) {
+      product = {
+        ...dbRow.data,
+        id: dbRow.id,
+        slug: dbRow.slug,
+        brandName: dbRow.brand_name,
+        genericName: dbRow.generic_name,
+        strength: dbRow.strength || dbRow.data?.strength || '',
+        dosageForm: dbRow.dosage_form || dbRow.data?.dosageForm || 'Cream',
+        route: dbRow.route || dbRow.data?.route || 'Topical',
+        therapeuticArea: dbRow.therapeutic_area || dbRow.data?.therapeuticArea || 'Acne',
+        tagline: dbRow.tagline || dbRow.data?.tagline || '',
+        hasFullMonograph: dbRow.has_full_monograph ?? dbRow.data?.hasFullMonograph ?? true,
+        isFeatured: dbRow.is_featured ?? dbRow.data?.isFeatured ?? false,
+        images: {
+          ...(dbRow.data?.images || {}),
+          primaryPackshot: dbRow.packshot_image || dbRow.data?.images?.primaryPackshot || '',
+        },
+        videoUrl: dbRow.product_video_url || '',
+      };
+    }
+  } catch (e) {}
+
+  if (!product) {
+    product = getProductBySlug(params.slug);
+  }
 
   if (!product) {
     notFound();

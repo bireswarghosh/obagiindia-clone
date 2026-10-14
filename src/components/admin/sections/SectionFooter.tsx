@@ -28,6 +28,7 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
   const [copyright, setCopyright] = useState(loaded.footer.copyright);
   const [logoImage, setLogoImage] = useState(loaded.footer.logoImage || '');
   const [logoHref, setLogoHref] = useState(loaded.footer.logoHref || '');
+  const [leftText, setLeftText] = useState(loaded.footer.leftText || '');
   const [links, setLinks] = useState<{ label: string; href: string }[]>(
     loaded.footer.links && loaded.footer.links.length > 0
       ? loaded.footer.links.map((l) => ({ label: l.label || '', href: l.href || '' }))
@@ -52,6 +53,7 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
     setCopyright(loaded.footer.copyright);
     setLogoImage(loaded.footer.logoImage || '');
     setLogoHref(loaded.footer.logoHref || '');
+    setLeftText(loaded.footer.leftText || '');
     setLinks(
       loaded.footer.links && loaded.footer.links.length > 0
         ? loaded.footer.links.map((l) => ({ label: l.label || '', href: l.href || '' }))
@@ -73,6 +75,7 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
     copyright !== loaded.footer.copyright ||
     logoImage !== (loaded.footer.logoImage || '') ||
     logoHref !== (loaded.footer.logoHref || '') ||
+    leftText !== (loaded.footer.leftText || '') ||
     JSON.stringify(links) !==
       JSON.stringify(
         loaded.footer.links && loaded.footer.links.length > 0
@@ -92,7 +95,7 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
     setSaving(true);
     const updated = await patchSection({
       newsletter: nl,
-      footer: { copyright, socialIcons: socials, logoImage, logoHref, links },
+      footer: { copyright, socialIcons: socials, logoImage, logoHref, leftText, links },
       floating,
     } as any);
     setSaving(false);
@@ -186,6 +189,19 @@ export default function SectionFooter({ loaded, triggerToast, onSaved, patchSect
             />
             <p className="text-[10px] text-slate-500">Where the logo click goes. Default: homepage.</p>
           </div>
+        </div>
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-300 block">Footer Left Text (instead of logo)</label>
+          <input
+            type="text"
+            value={leftText}
+            onChange={(e) => setLeftText(e.target.value)}
+            placeholder="e.g. RYAN DERMACEUTICS"
+            className="w-full px-3 py-2 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:border-indigo-500 focus:outline-none transition-colors"
+          />
+          <p className="text-[10px] text-slate-500">
+            Brand text in footer style, shown where the logo sits. Wins over the logo image when both are set. Empty = logo/original logic.
+          </p>
         </div>
         <div className="space-y-3">
           {links.map((lnk, i) => (

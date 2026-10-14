@@ -390,8 +390,46 @@ const CLINICAL_INSIGHTS: InsightArticle[] = [
 ];
 
 export default function TherapeuticResourcesPage() {
+  const [guidesList, setGuidesList] = useState<GuideItem[]>(THERAPEUTIC_GUIDES);
+  const [insightsList, setInsightsList] = useState<InsightArticle[]>(CLINICAL_INSIGHTS);
   const [activeGuideModal, setActiveGuideModal] = useState<GuideItem | null>(null);
   const [activeArticleModal, setActiveArticleModal] = useState<InsightArticle | null>(null);
+
+  React.useEffect(() => {
+    fetch('/api/db/guides')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && Array.isArray(data.guides) && data.guides.length > 0) {
+          const mapped = data.guides.map((g: any) => ({
+            ...g.data,
+            id: g.id,
+            slug: g.slug,
+            title: g.title,
+            subtitle: g.subtitle || g.data?.subtitle || '',
+            image: g.cover_image || g.data?.image || '/ryan/guide-acne.jpg',
+          }));
+          setGuidesList(mapped);
+        }
+      })
+      .catch(() => {});
+
+    fetch('/api/db/insights')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && Array.isArray(data.insights) && data.insights.length > 0) {
+          const mapped = data.insights.map((ins: any) => ({
+            ...ins.data,
+            id: ins.id,
+            slug: ins.slug,
+            title: ins.title,
+            subtitle: ins.subtitle || ins.data?.subtitle || '',
+            image: ins.featured_image || ins.data?.image || '/ryan/insight-acne.jpg',
+          }));
+          setInsightsList(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">
@@ -554,7 +592,7 @@ export default function TherapeuticResourcesPage() {
 
         {/* 6 Grid Cards Matching Mockup */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5">
-          {THERAPEUTIC_GUIDES.map((guide) => (
+          {guidesList.map((guide) => (
             <a
               key={guide.id}
               href={`/for-doctors/therapeutic-resources/guides/${guide.slug}`}
@@ -612,7 +650,7 @@ export default function TherapeuticResourcesPage() {
               </p>
             </div>
             <a 
-              href={`/for-doctors/therapeutic-resources/insights/${CLINICAL_INSIGHTS[0].slug}`}
+              href={`/for-doctors/therapeutic-resources/insights/${insightsList[0]?.slug || 'understanding-acne'}`}
               className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#00768a] hover:text-[#004f5e] group"
             >
               View All Articles
@@ -622,7 +660,7 @@ export default function TherapeuticResourcesPage() {
 
           {/* 6 Article Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {CLINICAL_INSIGHTS.map((article) => (
+            {insightsList.map((article) => (
               <a
                 key={article.id}
                 href={`/for-doctors/therapeutic-resources/insights/${article.slug}`}

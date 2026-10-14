@@ -27,12 +27,29 @@ export default function ReferenceLibraryLandingPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrowseMode, setSelectedBrowseMode] = useState<'condition' | 'therapeutic' | 'ingredient' | 'anatomy'>('condition');
 
-  const categories = Object.values(REFERENCE_LIBRARY_CATEGORIES);
+  const [categories, setCategories] = useState<LibraryCategory[]>(Object.values(REFERENCE_LIBRARY_CATEGORIES));
+
+  React.useEffect(() => {
+    fetch('/api/db/library?type=category')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && Array.isArray(data.items) && data.items.length > 0) {
+          const mapped = data.items.map((it: any) => ({
+            ...it.data,
+            name: it.title,
+            description: it.data?.description || '',
+            conditionReferences: it.data?.conditionReferences || [],
+          }));
+          setCategories(mapped);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const filteredCategories = categories.filter(cat => 
     cat.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     cat.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    cat.conditionReferences.some(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    (cat.conditionReferences || []).some(c => c.title.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   return (

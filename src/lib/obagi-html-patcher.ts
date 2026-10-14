@@ -27,12 +27,98 @@ function patchDiv(html: string, id: string, innerHtml: string): string {
   });
 }
 
+function stripPictureSourcesForAlt(html: string, altKeyword: string): string {
+  const picRe = new RegExp(
+    `(<picture\\b[^>]*>)([\\s\\S]*?<img\\b[^>]*alt="[^"]*${altKeyword}[^"]*"[\\s\\S]*?)(<\\/picture>)`,
+    'i'
+  );
+  return html.replace(picRe, (_m, open, inner, close) => {
+    const cleanedInner = inner.replace(/<source\b[^>]*\/?>/gi, '');
+    return open + cleanedInner + close;
+  });
+}
+
 function patchImgByAlt(html: string, altKeyword: string, newSrc?: string): string {
   if (!newSrc) return html;
-  const re = new RegExp(`(<img\\b[^>]*alt="[^"]*${altKeyword}[^"]*"[^>]*>)`, 'i');
-  return html.replace(re, (tag) => {
-    return tag.replace(/src="[^"]*"/i, `src="${newSrc}"`).replace(/srcset="[^"]*"/i, '');
+  const tagRe = new RegExp(`(<img\\b[^>]*alt="[^"]*${altKeyword}[^"]*"[^>]*>)`, 'i');
+  const tagMatch = tagRe.exec(html);
+  if (!tagMatch) return html;
+  const oldSrc = (tagMatch[1].match(/\ssrc="([^"]*)"/i) || [])[1] || '';
+  html = syncOldUri(html, oldSrc, newSrc);
+  html = html.replace(tagRe, (tag) => {
+    return tag.replace(/\ssrc="[^"]*"/i, ` src="${newSrc}"`).replace(/\ssrcset="[^"]*"/i, '');
   });
+  html = stripPictureSourcesForAlt(html, altKeyword);
+  return normalizeSwappedImgs(html, newSrc);
+}
+
+/**
+ * Swaps the first <img> inside a container div (bg-layer photos carry no
+ * alt text). Fragment-synced like patchImgByAlt, then normalized.
+ * No-op when the layer holds no image nearby (never touches other images).
+ */
+function patchImgInLayer(html: string, layerId: string, newSrc?: string): string {
+  if (!newSrc) return html;
+  const probe = new RegExp(`id="${layerId}"[\\s\\S]{0,4000}?<img\\b[^>]*?\\ssrc="([^"]*)"`, 'i').exec(html);
+  if (!probe) return html;
+  html = syncOldUri(html, probe[1] || '', newSrc);
+  return normalizeSwappedImgs(html, newSrc);
+}
+
+function escapeRegExp(s: string): string {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/** Extracts the bare Wix media URI stem (no ~mv2 suffix) from any URL. */
+function wixFragOf(url: string): string {
+  const m = (url || '').match(/([a-f0-9]{6,}_[a-f0-9]{20,}|11062b_[A-Za-z0-9~]+)/);
+  return m ? (m[1] || '').replace(/~.*$/, '') : '';
+}
+
+/**
+ * Fragment-syncs a replaced media URL across the whole document (see
+ * replaceUriFragment). Returns html unchanged when there is nothing to sync.
+ */
+function syncOldUri(html: string, oldUrl: string, newSrc: string): string {
+  const frag = wixFragOf(oldUrl);
+  if (!frag || newSrc.indexOf(frag) !== -1) return html;
+  return replaceUriFragment(html, frag, newSrc);
+}
+
+/**
+ * Replaces a Wix media URI fragment EVERYWHERE it occurs — bare, with an
+ * extension (`.jpg`), with `~mv2` suffixes, and with `/v1/...` crop params
+ * (which repeat the URI at the end). Without full-suffix consumption,
+ * remnants like `blob-url + .jpg/v1/...` survive in srcset/data-info/JSON,
+ * and client-side Wix code picks them up (Vercel Blob 403s the suffixed
+ * path → image never paints).
+ */
+function replaceUriFragment(html: string, frag: string, newSrc: string): string {
+  const re = new RegExp(
+    escapeRegExp(frag) + '(\\.[a-z0-9]+)?(~mv2(\\.[a-z0-9]+)?)?(\\/v1\\/[^"\'\\s<>]*)?',
+    'g'
+  );
+  return html.replace(re, () => newSrc);
+}
+
+/**
+ * Normalizes every <img> whose src merely CONTAINS newSrc (sync remnants
+ * with wixstatic prefixes or /v1 suffixes) to exactly newSrc, minus srcset.
+ * Also normalizes <source srcset="..."> to clean newSrc.
+ * Belt-and-braces after any image swap — a remnant src 403s on Vercel Blob.
+ */
+function normalizeSwappedImgs(html: string, newSrc: string): string {
+  html = html.replace(/<img\b[^>]*>/gi, (tag) => {
+    const m = tag.match(/\ssrc="([^"]*)"/i);
+    if (!m || m[1] === newSrc || m[1].indexOf(newSrc) === -1) return tag;
+    return tag.replace(/\ssrc="[^"]*"/i, ` src="${newSrc}"`).replace(/\ssrcset="[^"]*"/i, '');
+  });
+  html = html.replace(/<source\b[^>]*>/gi, (tag) => {
+    const m = tag.match(/\ssrcset="([^"]*)"/i);
+    if (!m || m[1] === newSrc || m[1].indexOf(newSrc) === -1) return tag;
+    return tag.replace(/\ssrcset="[^"]*"/i, ` srcset="${newSrc}"`);
+  });
+  return html;
 }
 
 /**
@@ -43,7 +129,8 @@ function patchImgByAlt(html: string, altKeyword: string, newSrc?: string): strin
  */
 function patchUriFragmentAll(html: string, fragment: string, newSrc?: string): string {
   if (!newSrc || !fragment) return html;
-  return html.split(fragment).join(newSrc);
+  html = replaceUriFragment(html, fragment, newSrc);
+  return normalizeSwappedImgs(html, newSrc);
 }
 
 /**
@@ -76,16 +163,20 @@ const FOOTER_LINK_DIVS = [
 
 /**
  * Footer logo — the Wix original is an inline vector SVG inside an anchor.
+ * Priority: leftText (explicit wording) > logoImage > original SVG.
  * An uploaded image replaces the SVG (anchor + sizing container untouched);
- * empty = keep original. Href updates when logoHref is set.
+ * empty everything = keep original. Href updates when logoHref is set.
  */
-function patchFooterLogo(html: string, logoImage?: string, logoHref?: string): string {
-  if (!logoImage && !logoHref) return html;
+function patchFooterLogo(html: string, logoImage?: string, logoHref?: string, leftText?: string): string {
+  const footerLogo = logoImage?.trim() || '/ryan/ryan-logo.png';
+  const targetHref = (!logoHref || logoHref.includes('obagiindia.com')) ? '/' : logoHref.trim();
   const re = new RegExp(`(<div\\s+id="${FOOTER_LOGO_DIV}"[^>]*>\\s*<a\\b[^>]*>)([\\s\\S]*?)(<\\/a>)`, 'i');
-  return html.replace(re, (_m, open, old, close) => {
-    const newOpen = logoHref ? open.replace(/href="[^"]*"/i, `href="${escapeHtml(logoHref)}"`) : open;
-    if (!logoImage) return newOpen + old + close;
-    const img = `<img src="${logoImage}" alt="Footer logo" style="width:100%;height:auto;display:block;" />`;
+  return html.replace(re, (_m, open, _old, close) => {
+    const newOpen = open.replace(/href="[^"]*"/i, `href="${escapeHtml(targetHref)}"`);
+    if (leftText) {
+      return `${newOpen}<span class="font_9 wixui-rich-text__text">${escapeHtml(leftText)}</span>${close}`;
+    }
+    const img = `<img src="${escapeHtml(footerLogo)}" alt="Ryan Dermaceutics" class="ryan-footer-logo-img" style="width:100%;max-width:280px;height:auto;display:block;object-fit:contain;" />`;
     return newOpen + img + close;
   });
 }
@@ -132,11 +223,36 @@ function patchBg(html: string, id: string, newBgUrl?: string): string {
 }
 
 /**
+ * Removes an entire <div> subtree by a data-hook marker, balancing nested
+ * divs (regex alone can't). Returns html unchanged when not found.
+ */
+function removeDivByHook(html: string, hook: string): string {
+  const openRe = new RegExp(`<div\\b[^>]*data-hook="${hook}"[^>]*>`, 'i');
+  const openMatch = openRe.exec(html);
+  if (!openMatch || openMatch.index === undefined) return html;
+  let depth = 0;
+  const tagRe = /<\/?div\b[^>]*>/gi;
+  tagRe.lastIndex = openMatch.index;
+  let m: RegExpExecArray | null;
+  while ((m = tagRe.exec(html)) !== null) {
+    depth += m[0][1] === '/' ? -1 : 1;
+    if (depth === 0 && tagRe.lastIndex > openMatch.index) {
+      return html.slice(0, openMatch.index) + html.slice(tagRe.lastIndex);
+    }
+  }
+  return html;
+}
+
+/**
  * Swaps ONLY the src attribute of a <video> (or its <source>), preserving
  * autoplay/mute/loop/playsinline/preload and all inline sizing.
  */
 function patchVideoSrc(html: string, videoId: string, newSrc?: string): string {
   if (!newSrc) return html;
+  // Fragment-sync first: the old video URI may live in data attrs/JSON that
+  // client players re-resolve (same flip class as images).
+  const tagSrc = (html.match(new RegExp(`<video\\b[^>]*id="${videoId}"[^>]*?\\ssrc="([^"]*)"`, 'i')) || [])[1] || '';
+  html = syncOldUri(html, tagSrc, newSrc);
   const re = new RegExp(`(<video\\b[^>]*id="${videoId}"[^>]*)(>)`, 'i');
   let out = html.replace(re, (_m, open, close) => {
     let tag = open.replace(/\ssrc="[^"]*"/i, '');
@@ -157,6 +273,8 @@ function patchVideoSrc(html: string, videoId: string, newSrc?: string): string {
  */
 function patchVideoPoster(html: string, videoId: string, newPoster?: string): string {
   if (!newPoster) return html;
+  const oldPoster = (html.match(new RegExp(`<video\\b[^>]*id="${videoId}"[^>]*?\\sposter="([^"]*)"`, 'i')) || [])[1] || '';
+  html = syncOldUri(html, oldPoster, newPoster);
   const re = new RegExp(`(<video\\b[^>]*id="${videoId}"[^>]*?)(\\s*>)`, 'i');
   return html.replace(re, (_m, open, close) => {
     const without = open.replace(/\sposter="[^"]*"/i, '');
@@ -542,21 +660,69 @@ function renderEnquirySection(enquiry: ObagiEnquirySection): string {
 export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
   let result = html;
 
-  // 1. Header Logo — src-swap ONLY. The layout box (147x85 desktop) is
-  // untouched; the image fills its container so size/alignment never change.
-  if (data.header?.logoUrl) {
-    const logoImgRe = /(<div\s+data-testid="svgRoot-comp-lw3c3n7z_r_comp-lw3c38vb"[^>]*>[\s\S]*?<img\b[^>]*?)(\ssrc="[^"]*")/i;
+  // Base brand migration on static Wix template HTML (runs first so CMS-edited values are never mutated)
+  {
+    const MIRROR_PH = '__RYAN_MIRROR_PATH__';
+    const INIT_PH = '__RYAN_INIT_FN__';
+    result = result.split('./Obagi India _ obagi products_files/').join(MIRROR_PH);
+    result = result.split('initObagi').join(INIT_PH);
+    result = result.split('Obagi India').join('Ryan');
+    result = result.split('Obagi').join('Ryan');
+    result = result.split('OBAGI® MEDICAL IS THE ORIGINAL').join('RYAN® MEDICAL IS THE ORIGINAL');
+    result = result.split('Join The OBAGI Newsletter').join('Join The RYAN Newsletter');
+    result = result.split('https://www.obagiindia.com').join('https://ryandarma.com');
+    result = result.split('https://obagiindia.com').join('https://ryandarma.com');
+    result = result.split('http://www.obagiindia.com').join('https://ryandarma.com');
+    result = result.split(INIT_PH).join('initObagi');
+    result = result.split(MIRROR_PH).join('./Obagi India _ obagi products_files/');
+  }
+
+  // 1. Header Logo — replaces the Wix vector inside
+  // .comp-lw3c3n7z_r_comp-lwqc45m1-container with /ryan/ryan-logo.png.
+  // Layout box (147x85 desktop) is untouched; the image fills its container
+  // so size/alignment never change. Falls back to the Ryan logo when CMS
+  // logoUrl is empty so the header can never render the old Obagi mark.
+  // NOTE: use site-relative "/ryan/ryan-logo.png" (resolves to
+  // http://localhost:3000/ryan/ryan-logo.png locally) — never hard-code
+  // localhost, which breaks production.
+  // IMPORTANT: the <img>-swap pattern MUST NOT span past the svgRoot
+  // </div> — an unbounded [\s\S]*? previously matched a distant hero
+  // <img> and corrupted it while leaving this SVG untouched.
+  {
+    const logoSrc =
+      data.header?.logoUrl?.trim() ||
+      defaultObagiHomeContent.header?.logoUrl?.trim() ||
+      '/ryan/ryan-logo.png';
+    const logoImgRe = /(<div\s+data-testid="svgRoot-comp-lw3c3n7z_r_comp-lw3c38vb"[^>]*>(?:(?!<\/div>)[\s\S])*?<img\b[^>]*?)(\ssrc="[^"]*")/i;
     if (logoImgRe.test(result)) {
       result = result.replace(
         logoImgRe,
-        (_m, head) => `${head} src="${data.header!.logoUrl}"`
+        (_m, head) => `${head} src="${logoSrc}"`
       );
     } else {
       const logoRe = /(<div\s+data-testid="svgRoot-comp-lw3c3n7z_r_comp-lw3c38vb"[^>]*>)([\s\S]*?)(<\/div>)/;
-      result = result.replace(logoRe, (_m, open, _old, close) => {
-        return `${open}<img src="${data.header!.logoUrl}" alt="Logo" style="width:100%;height:100%;object-fit:contain;" />${close}`;
-      });
+      if (logoRe.test(result)) {
+        // No nested <a>: the vector node already sits inside the header
+        // link anchor — just swap the SVG for the Ryan <img>.
+        result = result.replace(logoRe, (_m, open, _old, close) => {
+          return `${open}<img src="${logoSrc}" alt="Ryan Dermaceutics logo" width="148" height="85" fetchpriority="high" style="width:100%;height:100%;object-fit:contain;display:block;" />${close}`;
+        });
+      } else {
+        // Last resort: swap the whole vector-image node inside
+        // .comp-lw3c3n7z_r_comp-lwqc45m1-container (user-requested slot).
+        const vectorRe = /(<div\s+id="comp-lw3c3n7z_r_comp-lw3c38vb"[^>]*>)[\s\S]*?(<\/div>\s*<\/a>\s*<\/div>)/i;
+        if (vectorRe.test(result)) {
+          result = result.replace(vectorRe, (_m, open, close) => {
+            return `${open}<a data-testid="linkElement" href="/" target="_self" class="IT88M3"><div data-testid="svgRoot-comp-lw3c3n7z_r_comp-lw3c38vb" class="iL7Pq5 gx51wo"><img src="${logoSrc}" alt="Ryan Dermaceutics logo" width="148" height="85" fetchpriority="high" style="width:100%;height:100%;object-fit:contain;display:block;" /></div></a>${close}`;
+          });
+        }
+      }
     }
+    // Point the header logo link at our homepage, not obagiindia.com.
+    result = result.replace(
+      /(<div\s+id="comp-lw3c3n7z_r_comp-lw3c38vb"[^>]*>\s*<a\b[^>]*?)href="[^"]*"/i,
+      (_m, head) => `${head}href="/"`
+    );
   }
 
   // 1b. Header utility labels (Spec 01) — in-place text patches on stable
@@ -584,6 +750,19 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
       `aria-label="${escapeHtml(data.header.menuLabel)}"`
     );
   }
+
+  // 1c. Header CTA — the SPECTRA anchor (#comp-lw3c3n7z_r_comp-mlethlmo)
+  // is removed entirely (was retargeted to Explore Products before).
+  result = result.replace(
+    /<a\b[^>]*id="comp-lw3c3n7z_r_comp-mlethlmo"[^>]*>[\s\S]*?<\/a>/gi,
+    ''
+  );
+
+  // 1d. Header search — retired: the Wix <search> slot is dropped with
+  // nothing in its place (trigger + overlay + index all removed per
+  // request). The <search> element itself is removed so no dead Wix
+  // search UI remains.
+  result = result.replace(/<search\b[^>]*>[\s\S]*?<\/search>/i, '');
 
   // 2. Header Nav Menu with Dropdown Children & Carets (Annotation 1)
   const navItems = (data.header?.navMenu && Array.isArray(data.header.navMenu) && data.header.navMenu.length > 0)
@@ -663,6 +842,80 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     return mobileNavHtml;
   });
 
+  // 2c. Mobile hamburger button (m8oie6mg: "Menu" label + three-bar
+  // icon) becomes a compact horizontal nav bar; the orphan two-bar icon
+  // in the header hamburger (m8mvebw9) is dropped (text button stays and
+  // still opens the drawer).
+  result = result.replace(
+    /<svg\b[^>]*data-bbox="26\.7 74\.6 146\.6 50\.8"[^>]*>[\s\S]*?<\/svg>/i,
+    ''
+  );
+  const ryanMobileBarHtml = `
+<div class="ryan-mobile-wrap">
+  <button type="button" id="ryan-mobile-toggle" aria-expanded="false" aria-label="Open menu">
+    <svg width="22" height="22" viewBox="0 0 200 200" aria-hidden="true"><g fill="currentColor"><path d="M173.3 74.6v14.1H26.7V74.6h146.6z"></path><path d="M173.3 111.3v14.1H26.7v-14.1h146.6z"></path><path d="M173.3 148v14.1H26.7V148h146.6z"></path></g></svg>
+  </button>
+  <div class="ryan-mobile-popup" hidden>
+    <div class="ryan-mobile-backdrop" data-ryan-mobile-close></div>
+    <div class="ryan-mobile-panel" role="dialog" aria-modal="true" aria-label="Menu">
+      <div class="ryan-mobile-panel-head">
+        <span>Menu</span>
+        <button type="button" data-ryan-mobile-close aria-label="Close menu">✕</button>
+      </div>
+      <nav class="ryan-mobile-bar" aria-label="Mobile">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/products">Products</a>
+        <a href="/for-doctors">Doctors</a>
+        <a href="/#contact">Contact</a>
+      </nav>
+    </div>
+  </div>
+</div>`;
+  result = result.replace(
+    /<div\s+id="comp-lw3c3n7z_r_comp-m8oie6mg"[^>]*>[\s\S]*?<\/nav>\s*<!--\/\$-->\s*<\/div>/i,
+    ryanMobileBarHtml
+  );
+  // 2b. Hamburger overlay menu — the Wix panel (m8mvebwi) ships EMPTY
+  // (items render client-side via the neutered runtime) and a second
+  // portal duplicate (m8oie6li) exists. Inject the Ryan drawer menu
+  // (same links as RyanHeader's Toggle Navigation drawer) after the
+  // overlay close button; the duplicate is hidden in §14 CSS. Toggle
+  // lives in obagi-cms-sync.js (initMobileMenu).
+  const ryanDrawerLink = (href: string, label: string, strong = false) => `
+    <a href="${href}" style="display:block; padding:10px 12px; border-radius:10px; font-family:'Montserrat', sans-serif, system-ui; font-size:13px; ${strong ? 'font-weight:700; color:#00768a; background:#ffffff; border:1px solid rgba(0,118,138,0.18);' : 'font-weight:600; color:#004f5e; background:#ffffff;'} text-decoration:none;">${escapeHtml(label)}</a>`;
+  const ryanDrawerHtml = `
+<nav class="ryan-drawer-nav" aria-label="Site navigation" style="display:flex; flex-direction:column; gap:16px; padding:20px;">
+  <div style="padding:12px; background:rgba(0,118,138,0.07); border:1px solid rgba(0,118,138,0.15); border-radius:14px; display:flex; flex-direction:column; gap:8px;">
+    <span style="font-family:'Montserrat', sans-serif, system-ui; font-size:11px; font-weight:800; letter-spacing:0.08em; color:#006070;">FOR DOCTORS PORTAL</span>
+    ${ryanDrawerLink('/for-doctors', 'Doctor Portal Overview & Directory', true)}
+    ${ryanDrawerLink('/for-doctors/therapeutic-resources', 'Therapeutic Resources Hub')}
+    ${ryanDrawerLink('/products', 'Product Monographs (53 Products)')}
+    ${ryanDrawerLink('/for-doctors/prescribing-information', 'Prescribing Information')}
+    ${ryanDrawerLink('/for-doctors/reference-library', 'Dermatology Reference Library')}
+    ${ryanDrawerLink('/for-doctors/medical-information', 'Medical Information Service')}
+  </div>
+  <div style="display:flex; flex-direction:column; font-family:'Montserrat', sans-serif, system-ui; font-size:14px; font-weight:600;">
+    ${[
+      ['/', 'Home'],
+      ['/about', 'About Ryan'],
+      ['/products', 'Products'],
+      ['/#therapeutic-areas', 'Therapeutic Areas'],
+      ['/#contact', 'Contact'],
+    ]
+      .map(
+        ([href, label]) =>
+          `<a href="${href}" style="padding:10px 12px; border-radius:10px; color:#334155; text-decoration:none;">${label}</a>`
+      )
+      .join('')}
+  </div>
+  <a href="/products" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:12px 16px; border-radius:12px; background:#00768a; color:#ffffff; font-family:'Montserrat', sans-serif, system-ui; font-size:12px; font-weight:800; letter-spacing:0.06em; text-decoration:none;">Explore Products →</a>
+</nav>`;
+  result = result.replace(
+    /(<div\s+id="comp-lw3c3n7z_r_comp-m8mvebwp"[\s\S]*?<\/button>\s*<\/div>)/i,
+    (_m, closeDiv) => `${closeDiv}${ryanDrawerHtml}`
+  );
+
   // 3. Hero Section (annotation 02 — text + image + video, each independent)
   if (data.hero) {
     const heroTitleHtml = `<h1 class="font_0 wixui-rich-text__text"><span class="wixui-rich-text__text">${escapeHtml(data.hero.title)}</span></h1>`;
@@ -678,12 +931,37 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     if (data.hero.heroImage) {
       result = patchImgByAlt(result, 'drop', data.hero.heroImage);
     }
-    if (data.hero.heroVideoUrl) {
+    const heroVid = data.hero.heroVideoUrl || (data.hero as any).heroVideo;
+    if (heroVid) {
       // Existing hero bg video only — playback attrs untouched.
-      result = patchVideoSrc(result, 'comp-lwxgxhly_video', data.hero.heroVideoUrl);
+      result = patchVideoSrc(result, 'comp-lwxgxhly_video', heroVid);
     }
-    if (data.hero.heroVideoPoster) {
-      result = patchVideoPoster(result, 'comp-lwxgxhly_video', data.hero.heroVideoPoster);
+    const heroPoster = data.hero.heroVideoPoster || data.hero.backgroundImage;
+    if (heroPoster) {
+      result = patchVideoPoster(result, 'comp-lwxgxhly_video', heroPoster);
+      const oldPoster = (result.match(/<wow-image\b[^>]*id="comp-lwxgxhly_img"[^>]*>[\s\S]*?<img\b[^>]*?\ssrc="([^"]*)"/i) || [])[1] || '';
+      result = syncOldUri(result, oldPoster, heroPoster);
+      result = result.replace(
+        /(<wow-image\b[^>]*id="comp-lwxgxhly_img"[^>]*>[\s\S]*?<img\b[^>]*?)(\ssrc="[^"]*")/i,
+        (_m, head) => `${head} src="${heroPoster}"`
+      );
+      result = normalizeSwappedImgs(result, heroPoster);
+    }
+    if (data.hero.backgroundImage) {
+      // Hero band background photo (bg-layer inner img, no alt text).
+      result = patchBg(result, 'comp-lwxgxhly', data.hero.backgroundImage);
+      result = patchBg(result, 'bgLayers_comp-lwxgxhly', data.hero.backgroundImage);
+      result = patchImgInLayer(result, 'bgLayers_comp-lwxgxhly', data.hero.backgroundImage);
+      result = result.replace(
+        /(<wow-image\b[^>]*id="comp-lwxgxhly_img"[^>]*style=")[^"]*(")/i,
+        (_m, head, tail) => `${head}opacity: 1; display: block;${tail}`
+      );
+      if (!data.hero.heroVideoUrl) {
+        result = result.replace(
+          /(<video\b[^>]*id="comp-lwxgxhly_video"[^>]*style=")[^"]*(")/i,
+          (_m, head, tail) => `${head}display: none !important; opacity: 0;${tail}`
+        );
+      }
     }
     if (data.hero.awardBadgeImage) {
       result = patchImgByAlt(result, 'aesthetics award winner', data.hero.awardBadgeImage);
@@ -903,10 +1181,19 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
       if (si.facebook) result = patchUriFragmentAll(result, '11062b_362ef89dec51403eb0ee59a21bde967c', si.facebook);
       if (si.x) result = patchUriFragmentAll(result, '11062b_e82f42804b3546dfa8e426e752b24542', si.x);
     }
+    // Footer social profile links (Instagram/YouTube/Facebook/X, class
+    // FvIvPq) point to Obagi accounts — neutralize to "#" until Ryan
+    // profiles exist. Lookahead keeps it order-independent (href may
+    // precede class). Icon artwork untouched.
+    result = result.replace(
+      /(<a\b(?=[^>]*class="FvIvPq")[^>]*href=")[^"]*(")/gi,
+      (_m, head, tail) => `${head}#${tail}`
+    );
     // Full footer branding — logo image swap + 4 nav links (label + href).
-    if (data.footer.logoImage || data.footer.logoHref) {
-      result = patchFooterLogo(result, data.footer.logoImage, data.footer.logoHref);
-    }
+    const footerLogoSrc = data.footer.logoImage?.trim() || data.header?.logoUrl?.trim() || '/ryan/ryan-logo.png';
+    const footerLogoHref = data.footer.logoHref?.trim() || '/';
+    result = patchFooterLogo(result, footerLogoSrc, footerLogoHref, data.footer.leftText);
+    if (data.footer.logoImage) result = normalizeSwappedImgs(result, data.footer.logoImage);
     const footerLinks = data.footer.links;
     if (footerLinks) {
       for (let i = 0; i < FOOTER_LINK_DIVS.length; i += 1) {
@@ -964,10 +1251,18 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
       result = patchVideoSrc(result, 'comp-mlau0bjm_video', data.awardVideo.videoUrl);
     }
     if (data.awardVideo.posterImage) {
+      result = patchVideoPoster(result, 'comp-mlau0bjm_video', data.awardVideo.posterImage);
+      const oldPoster = (result.match(/<wow-image\b[^>]*id="comp-mlau0bjm_img"[^>]*>[\s\S]*?<img\b[^>]*?\ssrc="([^"]*)"/i) || [])[1] || '';
+      result = syncOldUri(result, oldPoster, data.awardVideo.posterImage);
       result = result.replace(
         /(<wow-image\b[^>]*id="comp-mlau0bjm_img"[^>]*>[\s\S]*?<img\b[^>]*?)(\ssrc="[^"]*")/i,
         (_m, head) => `${head} src="${data.awardVideo!.posterImage}"`
       );
+      result = result.replace(
+        /(<wow-image\b[^>]*id="comp-mlau0bjm_img"[^>]*style=")[^"]*(")/i,
+        (_m, head, tail) => `${head}opacity: 1; display: block;${tail}`
+      );
+      result = normalizeSwappedImgs(result, data.awardVideo.posterImage);
     }
     if (data.awardVideo.overlayTitle) {
       result = result.replace(
@@ -991,6 +1286,46 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     );
   }
 
+  // 12b. Favicon — point every icon link (icon, shortcut, apple-touch,
+  // mask) at the Ryan logo. Href + type swapped; sizes/rel untouched.
+  result = result.replace(
+    /(<link\b[^>]*rel="[^"]*icon[^"]*"[^>]*href=")[^"]*(")/gi,
+    (_m, head, tail) => `${head}/ryan/ryan-logo.png${tail}`
+  );
+  result = result.replace(
+    /(<link\b[^>]*rel="[^"]*icon[^"]*"[^>]*type=")[^"]*(")/gi,
+    (_m, head, tail) => `${head}image/png${tail}`
+  );
+
+  // 12c. Social/SEO identity — Ryan domain + logo everywhere.
+  result = result.replace(
+    /(<link\b[^>]*rel="canonical"[^>]*href=")[^"]*(")/i,
+    (_m, head, tail) => `${head}https://ryandarma.com/${tail}`
+  );
+  const OG_TITLE = 'Ryan Dermaceutics | Ryan Products';
+  const OG_DESC = 'Explore Ryan Dermaceutics official site for transformative Products';
+  const OG_IMG = 'https://ryandarma.com/ryan/ryan-logo.png';
+  const ogSwaps: Array<[RegExp, string]> = [
+    [/(<meta\b[^>]*property="og:title"[^>]*content=")[^"]*(")/gi, OG_TITLE],
+    [/(<meta\b[^>]*property="og:description"[^>]*content=")[^"]*(")/gi, OG_DESC],
+    [/(<meta\b[^>]*property="og:image"[^>]*content=")[^"]*(")/gi, OG_IMG],
+    [/(<meta\b[^>]*property="og:url"[^>]*content=")[^"]*(")/gi, 'https://ryandarma.com/'],
+    [/(<meta\b[^>]*property="og:site_name"[^>]*content=")[^"]*(")/gi, 'Ryan Dermaceutics'],
+    [/(<meta\b[^>]*name="twitter:title"[^>]*content=")[^"]*(")/gi, OG_TITLE],
+    [/(<meta\b[^>]*name="twitter:description"[^>]*content=")[^"]*(")/gi, OG_DESC],
+    [/(<meta\b[^>]*name="twitter:image"[^>]*content=")[^"]*(")/gi, OG_IMG],
+  ];
+  for (const [re, val] of ogSwaps) {
+    result = result.replace(re, (_m, head, tail) => `${head}${val}${tail}`);
+  }
+  result = result.replace(
+    /(<meta\b[^>]*property="og:image:width"[^>]*content=")[^"]*(")/gi,
+    (_m, head, tail) => `${head}1200${tail}`
+  );
+  result = result.replace(
+    /(<meta\b[^>]*property="og:image:height"[^>]*content=")[^"]*(")/gi,
+    (_m, head, tail) => `${head}630${tail}`
+  );
   // 13. Floating chat labels — visible text only, widget behavior untouched.
   if (data.floating) {
     result = patchChatAriaLabel(result, data.floating.chatLabel);
@@ -1005,6 +1340,36 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     }
   }
 
+  // 13b. Remove Wix minimized-chat quick-reply popover
+  // (<div class="sQ58pJn ou1JQyw--right"> with the Obagi Nu-Derm /
+  // Explore Obagi / Aging Skin buttons). The chat button itself
+  // (.suyLqA9) is untouched — only the suggestion-bubble list is dropped.
+  result = result.replace(
+    /<div\s+class="sQ58pJn ou1JQyw--right">\s*<ul\s+class="srmuh7I">[\s\S]*?<\/ul>\s*<\/div>/,
+    ''
+  );
+
+  // 13b2. Remove the Wix chat "Need Help?" notification popover
+  // (<div data-hook="popover-content">…popover_62ytzm0ch…). The toast
+  // always ends with </button></div></div></div>, which bounds the match
+  // despite nested divs inside the buttons.
+  result = result.replace(
+    /<div\b[^>]*data-hook="popover-content"[^>]*>[\s\S]*?<\/button>\s*<\/div>\s*<\/div>\s*<\/div>/,
+    ''
+  );
+
+  // 13d. Ryan "Chat with AI" widget — RETIRED per request (markup no
+  // longer injected; initRyanChat exits silently without its nodes).
+  // 13c. Remove the rainbow-globe header SVG icon
+  // (<svg data-bbox="0 0 184.83 181.33">, the SPECTRA-button vector art).
+  // Only the icon is dropped — the button label/link stays functional.
+  result = result.replace(
+    /<svg\b[^>]*data-bbox="0 0 184\.83 181\.33"[^>]*>[\s\S]*?<\/svg>/,
+    ''
+  );
+  // 13e. Section 5 & motion clip cleanup — clear any 0-width clip-path values
+  result = result.replaceAll('--motion-clip-start: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);', '--motion-clip-start: none;');
+
   // 14. Scoped CSS (existing approved behavior — static, never CMS-editable).
   // Preserved verbatim: navbar dropdowns, carousel transitions, R&D widths,
   // partner/enquiry interactivity styles.
@@ -1016,10 +1381,581 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
   }
 
   /* 1. Navbar Dropdowns */
+  /* Mobile hamburger menu floats in from the LEFT (vanilla toggle in
+     sync.js adds body.obagi-menu-open; panel starts
+     off-canvas). Backdrop fades with it. */
+  #comp-lw3c3n7z_r_comp-m8mvebwi {
+    justify-self: start !important;
+    margin-right: auto !important;
+    transform: translateX(-110%) !important;
+    transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    will-change: transform !important;
+  }
+  body.obagi-menu-open #comp-lw3c3n7z_r_comp-m8mvebwi {
+    transform: translateX(0) !important;
+  }
+  /* Wix hides the overlay root via visibility + an opacity var until its
+     (dead) runtime adds --isMenuOpen — force both with our open class. */
+  body.obagi-menu-open #comp-lw3c3n7z_r_comp-m8mvebwf {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  [data-hook="hamburger-overlay-dialog"] {
+    opacity: 0 !important;
+    transition: opacity 0.3s ease !important;
+  }
+  body.obagi-menu-open [data-hook="hamburger-overlay-dialog"] {
+    opacity: 1 !important;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #comp-lw3c3n7z_r_comp-m8mvebwi,
+    [data-hook="hamburger-overlay-dialog"] {
+      transition: none !important;
+    }
+  }
+  /* Ryan mobile hamburger (replaces m8oie6mg button) — opens the link
+     list in a slide-in popup panel; mobile only. Open/close behavior in
+     sync.js (initRyanMobileBar). */
+  .ryan-mobile-wrap {
+    display: none !important;
+  }
+  @media (max-width: 999px) {
+    .ryan-mobile-wrap {
+      display: block !important;
+    }
+    #ryan-mobile-toggle {
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      width: 40px !important;
+      height: 40px !important;
+      border-radius: 10px !important;
+      border: 1px solid rgba(0, 118, 138, 0.25) !important;
+      background: #ffffff !important;
+      color: #004f5e !important;
+      cursor: pointer !important;
+    }
+    #ryan-mobile-toggle:hover {
+      background: #f0f9fa !important;
+    }
+    .ryan-mobile-popup[hidden] {
+      display: none !important;
+    }
+    .ryan-mobile-popup {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 1000002 !important;
+    }
+    .ryan-mobile-backdrop {
+      position: absolute !important;
+      inset: 0 !important;
+      background: rgba(0, 37, 48, 0.55) !important;
+    }
+    .ryan-mobile-panel {
+      position: absolute !important;
+      left: 0 !important;
+      top: 0 !important;
+      bottom: 0 !important;
+      width: 300px !important;
+      max-width: 86vw !important;
+      background: #ffffff !important;
+      box-shadow: 24px 0 64px rgba(0, 37, 48, 0.3) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      animation: ryanMobileIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    }
+    @keyframes ryanMobileIn {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+    .ryan-mobile-panel-head {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      padding: 14px 16px !important;
+      border-bottom: 1px solid #e2e8f0 !important;
+      font-size: 12px !important;
+      font-weight: 800 !important;
+      letter-spacing: 0.08em !important;
+      text-transform: uppercase !important;
+      color: #004f5e !important;
+    }
+    .ryan-mobile-panel-head button {
+      border: 0 !important;
+      background: #f1f5f9 !important;
+      border-radius: 8px !important;
+      width: 30px !important;
+      height: 30px !important;
+      cursor: pointer !important;
+      color: #475569 !important;
+      font-size: 14px !important;
+    }
+    .ryan-mobile-bar {
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 4px !important;
+      padding: 12px !important;
+      overflow-y: auto !important;
+    }
+    .ryan-mobile-bar a {
+      display: block !important;
+      font-family: 'Montserrat', sans-serif, system-ui !important;
+      font-size: 14px !important;
+      font-weight: 700 !important;
+      color: #004f5e !important;
+      padding: 12px !important;
+      border-radius: 10px !important;
+      text-decoration: none !important;
+    }
+    .ryan-mobile-bar a:hover {
+      background: #f0f9fa !important;
+      color: #00768a !important;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ryan-mobile-panel {
+      animation: none !important;
+    }
+  }
+  /* Duplicate portal hamburger overlay (empty menu shell) — the
+     m8mvebwf panel above carries the real injected nav. */
+  #portal-comp-lw3c3n7z_r_comp-m8oie6li {
+    display: none !important;
+  }
+  /* Header search trigger — docked in-flow beside the desktop nav as one
+     centered group (injected by §2; never overlaps). The old search slot
+     keeps only the fixed overlay + index script, so it takes no space. */
+  #comp-lw3c3n7z_r_comp-m8mtvgm3 {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 26px !important;
+  }
+  /* Mobile header: logo, search + hamburger share ONE centered row.
+     lwqc45ul stacks its children (search box, hamburger) vertically by
+     default — force a centered flex row; vertically center the top-bar
+     boxes so nothing floats high/low. Inline menu row below untouched. */
+  @media (max-width: 999px) {
+    .comp-lw3c3n7z_r_comp-lw3c3mu6-container {
+      align-items: center !important;
+    }
+    #comp-lw3c3n7z_r_comp-lwqc45m1,
+    #comp-lw3c3n7z_r_comp-lwqc45ul {
+      align-self: center !important;
+    }
+    .comp-lw3c3n7z_r_comp-lwqc45ul-container {
+      display: flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: flex-end !important;
+      gap: 6px !important;
+    }
+    /* Hamburger (two-bar) button hidden on mobile — inline nav serves it */
+    #comp-lw3c3n7z_r_comp-m8mvebvo,
+    #comp-lw3c3n7z_r_comp-m8mvebw9 {
+      display: none !important;
+    }
+  }
+  /* Single search trigger (docked beside the desktop nav; visible in the
+     menu row on mobile too). Small teal icon + larger logo on mobile. */
+  @media (max-width: 999px) {
+    #ryan-search-trigger svg {
+      width: 16px !important;
+      height: 16px !important;
+      color: #00768a !important;
+    }
+    #comp-lw3c3n7z_r_comp-m8mvebw9 svg {
+      width: 18px !important;
+      height: 18px !important;
+      color: #00768a !important;
+    }
+    #comp-lw3c3n7z_r_comp-lw3c38vb {
+      width: 110px !important;
+      height: auto !important;
+    }
+    #comp-lw3c3n7z_r_comp-lw3c38vb img {
+      width: 100% !important;
+      height: auto !important;
+      object-fit: contain !important;
+    }
+  }
+  /* NOTE: the old search slot keeps only the fixed overlay + index
+     script — zero in-flow footprint, so it needs no hiding. */
+  /* Header underlay (.LNYVZi.ayCf9D) stays transparent at all times —
+     top, scrolled, and pinned/sticky. Scoped to the header bgLayers
+     node only; the other 18 page underlays are untouched. */
+  #bgLayers_comp-lw3c3n7z_r_comp-lw3c3mu6 .LNYVZi.ayCf9D,
+  #comp-lw3c3n7z .LNYVZi.ayCf9D {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    opacity: 1 !important;
+  }
+  /* While the Ryan search popup is open the header goes solid white —
+     see-through content behind the panel looks broken. Higher
+     specificity + later order beats the transparent rule above. */
+  body.ryan-search-open #bgLayers_comp-lw3c3n7z_r_comp-lw3c3mu6 .LNYVZi.ayCf9D,
+  body.ryan-search-open #comp-lw3c3n7z .LNYVZi.ayCf9D {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    background-image: none !important;
+  }
+  /* 1c. Footer logo — Ryan Dermaceutics large branding matching official site layout */
+  #comp-ml6nay6u_r_comp-lx02zbs6 {
+    width: auto !important;
+    max-width: 280px !important;
+    min-width: 180px !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
+    margin: 0 !important;
+    padding: 8px 0 0 !important;
+    display: block !important;
+    align-self: start !important;
+    justify-self: start !important;
+  }
+  #comp-ml6nay6u_r_comp-lx02zbs6 .IT88M3 {
+    position: static !important;
+    display: block !important;
+    width: auto !important;
+    height: auto !important;
+    inset: auto !important;
+  }
+  #comp-ml6nay6u_r_comp-lx02zbs6 .iL7Pq5,
+  #comp-ml6nay6u_r_comp-lx02zbs6 div[data-testid^="svgRoot"] {
+    width: 100% !important;
+    height: auto !important;
+    display: block !important;
+    position: static !important;
+  }
+  #comp-ml6nay6u_r_comp-lx02zbs6 img {
+    width: 260px !important;
+    max-width: 100% !important;
+    height: auto !important;
+    max-height: 95px !important;
+    display: block !important;
+    object-fit: contain !important;
+  }
+  @media (max-width: 750px) {
+    #comp-ml6nay6u_r_comp-lx02zbs6 {
+      max-width: 220px !important;
+      margin: 0 auto 16px auto !important;
+      justify-self: center !important;
+    }
+    #comp-ml6nay6u_r_comp-lx02zbs6 img {
+      width: 220px !important;
+      margin: 0 auto !important;
+    }
+  }
+  .comp-ml6nay6u_r_comp-ljckoxjc-container {
+    padding: 16px 0 !important;
+  }
+  /* 1b. Ryan site search (trigger + overlay, markup from §1d) */  .ryan-search-trigger {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: transparent !important;
+    border: 0 !important;
+    cursor: pointer !important;
+    color: #003d4d !important;
+    font-family: 'Montserrat', sans-serif, system-ui !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+    padding: 10px 4px !important;
+  }
+  .ryan-search-trigger:hover { color: #00768a !important; }
+  .ryan-search-overlay[hidden] { display: none !important; }
+  .ryan-search-overlay {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 1000000 !important;
+  }
+  .ryan-search-backdrop {
+    position: absolute !important;
+    inset: 0 !important;
+    background: transparent !important;
+  }
+  .ryan-search-panel {
+    position: relative !important;
+    max-width: 620px !important;
+    margin: 12vh auto 0 !important;
+    background: #ffffff !important;
+    border-radius: 16px !important;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.25) !important;
+    overflow: hidden !important;
+  }
+  .ryan-search-bar {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    padding: 14px 16px !important;
+    border-bottom: 1px solid rgba(0, 118, 138, 0.15) !important;
+    color: #00768a !important;
+  }
+  #ryan-search-input {
+    flex: 1 !important;
+    border: 0 !important;
+    outline: none !important;
+    font-size: 15px !important;
+    color: #0f172a !important;
+    background: transparent !important;
+  }
+  .ryan-search-close {
+    border: 0 !important;
+    background: #f1f5f9 !important;
+    border-radius: 8px !important;
+    width: 28px !important;
+    height: 28px !important;
+    cursor: pointer !important;
+    color: #475569 !important;
+  }
+  .ryan-search-results {
+    max-height: 46vh !important;
+    overflow-y: auto !important;
+    padding: 8px !important;
+  }
+  .ryan-search-group-label {
+    font-size: 10px !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    color: #00768a !important;
+    padding: 10px 10px 4px !important;
+  }
+  .ryan-search-item {
+    display: block !important;
+    padding: 8px 10px !important;
+    border-radius: 10px !important;
+    text-decoration: none !important;
+  }
+  .ryan-search-item:hover { background: #f0f9fa !important; }
+  .ryan-search-item-title {
+    display: block !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #003d4d !important;
+  }
+  .ryan-search-item-sub {
+    display: block !important;
+    font-size: 11px !important;
+    color: #64748b !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .ryan-search-empty, .ryan-search-hint {
+    padding: 18px 12px !important;
+    font-size: 13px !important;
+    color: #64748b !important;
+    text-align: center !important;
+  }
+  .ryan-search-popular {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    align-items: center !important;
+    padding: 12px 16px !important;
+    border-top: 1px solid rgba(0, 118, 138, 0.15) !important;
+    font-size: 12px !important;
+    color: #64748b !important;
+  }
+  .ryan-search-popular a {
+    padding: 4px 10px !important;
+    background: #f1f5f9 !important;
+    border-radius: 999px !important;
+    color: #004f5e !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+  }
+  /* 1d. Ryan Chat with AI (markup from §13d; only chat UI — the dead
+     Wix launcher subtree is removed in §13b3) */
+  #ryan-chat-root {
+    position: fixed !important;
+    right: 20px !important;
+    bottom: 20px !important;
+    z-index: 1000001 !important;
+    font-family: system-ui, -apple-system, sans-serif !important;
+  }
+  #ryan-chat-trigger {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: #002530 !important;
+    color: #ffffff !important;
+    border: 0 !important;
+    border-radius: 999px !important;
+    padding: 12px 18px !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.04em !important;
+    cursor: pointer !important;
+    box-shadow: 0 12px 32px rgba(0, 37, 48, 0.35) !important;
+    position: relative !important;
+    transition: transform 0.2s ease !important;
+  }
+  #ryan-chat-trigger:hover { transform: scale(1.05) !important; }
+  #ryan-chat-trigger svg { color: #fbbf24 !important; }
+  .ryan-chat-ping {
+    position: absolute !important;
+    top: 6px !important;
+    right: 8px !important;
+    width: 8px !important;
+    height: 8px !important;
+    border-radius: 999px !important;
+    background: #34d399 !important;
+    animation: ryan-chat-ping 1.6s ease-out infinite !important;
+  }
+  @keyframes ryan-chat-ping {
+    0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6); }
+    100% { box-shadow: 0 0 0 9px rgba(52, 211, 153, 0); }
+  }
+  #ryan-chat-panel[hidden] { display: none !important; }
+  #ryan-chat-panel {
+    width: 320px !important;
+    max-width: calc(100vw - 40px) !important;
+    height: 480px !important;
+    max-height: calc(100vh - 120px) !important;
+    background: #ffffff !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(0, 118, 138, 0.18) !important;
+    box-shadow: 0 24px 64px rgba(0, 37, 48, 0.3) !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin-bottom: 12px !important;
+  }
+  .ryan-chat-head {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    background: #002530 !important;
+    color: #ffffff !important;
+    padding: 12px 14px !important;
+  }
+  .ryan-chat-avatar {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 999px !important;
+    background: rgba(255,255,255,0.12) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: #fbbf24 !important;
+    flex-shrink: 0 !important;
+  }
+  .ryan-chat-titles { flex: 1 !important; }
+  .ryan-chat-titles strong {
+    display: block !important;
+    font-size: 13px !important;
+  }
+  .ryan-chat-titles small {
+    display: block !important;
+    font-size: 10px !important;
+    color: rgba(255,255,255,0.7) !important;
+  }
+  .ryan-chat-close {
+    border: 0 !important;
+    background: transparent !important;
+    color: rgba(255,255,255,0.8) !important;
+    cursor: pointer !important;
+    font-size: 14px !important;
+    padding: 4px 8px !important;
+  }
+  .ryan-chat-messages {
+    flex: 1 !important;
+    overflow-y: auto !important;
+    background: #f8fafc !important;
+    padding: 12px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    font-size: 12px !important;
+  }
+  .ryan-chat-msg-ai, .ryan-chat-msg-user { display: flex !important; }
+  .ryan-chat-msg-ai { justify-content: flex-start !important; }
+  .ryan-chat-msg-user { justify-content: flex-end !important; }
+  .ryan-chat-bubble {
+    max-width: 85% !important;
+    padding: 9px 12px !important;
+    border-radius: 14px !important;
+    line-height: 1.5 !important;
+  }
+  .ryan-chat-msg-ai .ryan-chat-bubble {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1px solid #e2e8f0 !important;
+    border-top-left-radius: 4px !important;
+  }
+  .ryan-chat-msg-user .ryan-chat-bubble {
+    background: #003d4d !important;
+    color: #ffffff !important;
+    border-top-right-radius: 4px !important;
+  }
+  .ryan-chat-links { margin-top: 6px !important; }
+  .ryan-chat-links a {
+    display: block !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    color: #00768a !important;
+    text-decoration: none !important;
+    padding: 3px 0 !important;
+  }
+  .ryan-chat-typing { color: #94a3b8 !important; }
+  .ryan-chat-chips {
+    display: flex !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    padding: 8px 12px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #f1f5f9 !important;
+  }
+  .ryan-chat-chips button {
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    padding: 5px 10px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(0, 118, 138, 0.25) !important;
+    background: #f0f9fa !important;
+    color: #004f5e !important;
+    cursor: pointer !important;
+  }
+  .ryan-chat-form {
+    display: flex !important;
+    gap: 8px !important;
+    padding: 10px 12px !important;
+    background: #ffffff !important;
+    border-top: 1px solid #e2e8f0 !important;
+  }
+  #ryan-chat-input {
+    flex: 1 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 999px !important;
+    padding: 8px 14px !important;
+    font-size: 12px !important;
+    outline: none !important;
+    color: #0f172a !important;
+  }
+  #ryan-chat-input:focus { border-color: #00768a !important; }
+  .ryan-chat-form button[type="submit"] {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 999px !important;
+    border: 0 !important;
+    background: #003d4d !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-shrink: 0 !important;
+  }
   #comp-lw3c3n7z-pinned-layer,
   #comp-lw3c3n7z {
     transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1) !important;
-    will-change: transform !important;
+    /* NOTE: no will-change:transform here — it would become the
+       containing block for the fixed search/menu popups inside the
+       header, clipping them to the 88px bar instead of the viewport. */
   }
   #comp-lw3c3n7z-pinned-layer.obagi-nav-hidden,
   #comp-lw3c3n7z.obagi-nav-hidden {
@@ -1105,60 +2041,180 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     #comp-lw3c3n7z_r_comp-m8mvebw9 {
       display: block !important;
     }
+    /* Hide the header Explore Products CTA on mobile (hamburger serves nav) */
+    #comp-lw3c3n7z_r_comp-mlethlmo {
+      display: none !important;
+    }
   }
 
-  /* 2. R&D Science Cards — fill width, no outer side gap, no left margin */
-  @media (min-width: 900px) {
-    #comp-mlqlfcyi .max-width-container,
-    #comp-mlqlfcyi-container {
-      max-width: 100% !important;
-      width: 100% !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-    }
-    #comp-mlqlfcyn,
-    #comp-mlqlfcyn-container {
-      width: 100% !important;
-      max-width: none !important;
-      margin: 0 !important;
-      padding-left: 0 !important;
-      padding-right: 0 !important;
-      box-sizing: border-box !important;
-    }
+  /* 1e. Section 5 — 4-Image Mosaic Gallery Panel: ensure fully visible, clear motion clips */
+  #comp-lwz20kzt,
+  #comp-lwz20kzt *,
+  #comp-lwz20l0d11,
+  #comp-lwz20l0e14,
+  #comp-lwz20l0g2,
+  #comp-lwz20l0g6,
+  #comp-lwz20l0f16,
+  #comp-ml6lwrwb,
+  #comp-lwz23869,
+  #comp-ml6m00og,
+  [data-motion-enter="done"],
+  [style*="--motion-clip-start"] {
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #comp-lwz20kzt [data-testid="imageX"],
+  #comp-lwz20kzt wow-image,
+  #comp-lwz20kzt wow-image img,
+  #comp-lwz20kzt picture,
+  #comp-lwz20kzt img {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
+  }
+  /* 1f. Hero Section Background Image & Video Poster Visibility */
+  #comp-lwxgxhly_img,
+  #comp-lwxgxhly_img img {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  /* 2. R&D Science Cards — Clean column layout matching official site (no double card, no box-shadows) */
+  #comp-mlqlfcyi .max-width-container,
+  #comp-mlqlfcyi-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  #comp-mlqlfcyn,
+  #comp-mlqlfcyn-container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    box-sizing: border-box !important;
+  }
+  #comp-mlqlfcyn .comp-mlqlfcyn-container {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-start !important;
+    gap: 24px !important;
+    flex-wrap: nowrap !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 10px 16px 30px !important;
+    box-sizing: border-box !important;
+  }
+  #comp-mlqlfcyn .comp-mlqlfcyn-container > [id^="comp-mlqlfcyr6__"] {
+    flex: 1 1 0 !important;
+    max-width: none !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    transition: none !important;
+  }
+  #comp-mlqlfcyn .inner-box {
+    display: none !important;
+  }
+  #comp-mlqlfcyn [class*="comp-mlqlfcyt2__"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  #comp-mlqlfcyn [class*="comp-mlqlfcyz7__"] {
+    width: 100% !important;
+    border-radius: 4px !important;
+    overflow: hidden !important;
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 0 16px 0 !important;
+    background: transparent !important;
+  }
+  #comp-mlqlfcyn [id^="comp-mlqlfcyz7__"] img,
+  #comp-mlqlfcyn [id^="comp-mlqlfcyt2__"] img {
+    width: 100% !important;
+    aspect-ratio: 16/10 !important;
+    object-fit: cover !important;
+    border-radius: 4px !important;
+    box-shadow: none !important;
+    display: block !important;
+  }
+  /* Typography for R&D cards matching official site */
+  #comp-mlqlfcyn [id^="comp-mlqlfcyy5__"] {
+    margin: 12px 0 8px 0 !important;
+  }
+  #comp-mlqlfcyn [id^="comp-mlqlfcyy5__"] p,
+  #comp-mlqlfcyn [id^="comp-mlqlfcyy5__"] .font_5,
+  #comp-mlqlfcyn [id^="comp-mlqlfcyy5__"] .font_7 {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #111827 !important;
+    line-height: 1.3 !important;
+    letter-spacing: -0.01em !important;
+    margin: 0 !important;
+  }
+  #comp-mlqlfcyn [id^="comp-mlqlfcyu4__"] p,
+  #comp-mlqlfcyn [id^="comp-mlqlfcyu4__"] .font_8 {
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    color: #475569 !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+  }
+
+  /* Responsive: tablet & mobile layout */
+  @media (max-width: 900px) {
     #comp-mlqlfcyn .comp-mlqlfcyn-container {
-      display: flex !important;
-      flex-direction: row !important;
-      justify-content: space-between !important;
-      align-items: stretch !important;
-      gap: 16px !important;
-      flex-wrap: nowrap !important;
-      width: 100% !important;
-      max-width: none !important;
-      margin: 0 !important;
-      padding: 0 16px !important;
-      box-sizing: border-box !important;
+      flex-wrap: wrap !important;
+      gap: 20px !important;
     }
     #comp-mlqlfcyn .comp-mlqlfcyn-container > [id^="comp-mlqlfcyr6__"] {
-      flex: 1 1 25% !important;
-      max-width: 25% !important;
-      width: 25% !important;
-      min-width: 0 !important;
-      box-sizing: border-box !important;
-      display: flex !important;
-      flex-direction: column !important;
+      flex: 1 1 calc(50% - 10px) !important;
+      max-width: calc(50% - 10px) !important;
+      width: auto !important;
     }
-    [id^="comp-mlqlfcyz7__"] img,
-    [id^="comp-mlqlfcyt2__"] img {
+  }
+  @media (max-width: 600px) {
+    #comp-mlqlfcyn .comp-mlqlfcyn-container > [id^="comp-mlqlfcyr6__"] {
+      flex: 1 1 100% !important;
+      max-width: 100% !important;
       width: 100% !important;
-      aspect-ratio: 4/3 !important;
-      object-fit: cover !important;
-      border-radius: 12px !important;
     }
   }
 
   /* 3a. Award video/poster — full bleed, desktop height locked ~250px, mobile visible */
+  #comp-mlau06ju {
+    position: relative !important;
+    z-index: 20 !important;
+    margin-top: 0 !important;
+    display: block !important;
+    width: 100% !important;
+    min-height: 250px !important;
+  }
   #comp-mlau06ju,
   #comp-mlau06ju .max-width-container,
   #comp-mlau06ju-container {
@@ -1168,6 +2224,7 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     padding-right: 0 !important;
     margin-left: 0 !important;
     margin-right: 0 !important;
+    margin-top: 0 !important;
   }
   #comp-mlau0bjm,
   #bgLayers_comp-mlau0bjm,
@@ -1483,6 +2540,34 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     position: fixed !important;
     inset: 0 !important;
   }
+
+  /* Footer Logo Pop-up / Scale Effect on Hover & Click (User Requested) */
+  #comp-ml6nay6u_r_comp-lx02zbs6 {
+    display: inline-block !important;
+  }
+  #comp-ml6nay6u_r_comp-lx02zbs6 a {
+    display: inline-block !important;
+    text-decoration: none !important;
+  }
+  #comp-ml6nay6u_r_comp-lx02zbs6 img,
+  #comp-ml6nay6u_r_comp-lx02zbs6 .ryan-footer-logo-img {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease !important;
+    transform-origin: center center !important;
+    cursor: pointer !important;
+    will-change: transform !important;
+    transform: scale(1) !important;
+  }
+  #comp-ml6nay6u_r_comp-lx02zbs6:hover img,
+  #comp-ml6nay6u_r_comp-lx02zbs6 a:hover img,
+  #comp-ml6nay6u_r_comp-lx02zbs6:focus-within img {
+    transform: scale(1.14) !important;
+    filter: drop-shadow(0 8px 20px rgba(0, 118, 138, 0.32)) !important;
+  }
+  #comp-ml6nay6u_r_comp-lx02zbs6:active img,
+  #comp-ml6nay6u_r_comp-lx02zbs6 a:active img {
+    transform: scale(0.96) !important;
+    transition-duration: 0.12s !important;
+  }
 </style>
 `;
 
@@ -1491,6 +2576,47 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
   } else {
     result = scopedStyles + result;
   }
+
+  // 15. Neuter the Wix Thunderbolt runtime. It cannot boot off-origin
+  // (hardcoded production origin everywhere): cross-origin Worker,
+  // blob: URLs minted for obagiindia.com, obagiindia.com/_api calls,
+  // sentry/frog telemetry. Its bundles throw during init (React
+  // externals, loader 404s, workers) — that throw-flood IS the console
+  // noise in this task. SSR markup + styles are untouched, so first
+  // paint/design is identical; every behavior the page needs is covered
+  // elsewhere: custom SSR+CSS navs (§2), Ryan search (§1d) + chat (§13d),
+  // carousel/enquiry/nav-hide/mobile-menu in obagi-cms-sync.js, native
+  // <video> autoplay + anchor scrolling.
+  // A. HTTrack mirror runtime scripts: thunderbolt bundles, requirejs,
+  //    loader, sentry, form/chat widgets (img/css mirror refs kept —
+  //    they render fine).
+  result = result.replace(
+    /<script\b[^>]*src="[^"]*(?:obagi products_files|Obagi%20India)[^"]*"[^>]*>\s*<\/script>/gi,
+    ''
+  );
+  // B. blob: script minted for the production origin — blocked locally.
+  result = result.replace(
+    /<script\b[^>]*src="blob:[^"]*"[^>]*>\s*<\/script>/gi,
+    ''
+  );
+  // C. Inline inits that throw/phone home: cross-origin Worker builder,
+  //    sentry SDK + beacons, frog beacons. Matched per single <script>
+  //    block (non-greedy, never spans blocks) with a predicate.
+  //    application/json data blocks are excluded outright — the viewer
+  //    model legitimately mentions clientWorkerUrl/sentry DSNs as data,
+  //    and its parse scripts must keep finding it (else new errors).
+  result = result.replace(
+    /<script(?![^>]*\bsrc=)(?![^>]*type="application\/json")[^>]*>[\s\S]*?<\/script>/gi,
+    (m) =>
+      /clientWorker|sentry-next\.wixpress\.com|sentry_key|frog\.wix\.com/.test(m)
+        ? ''
+        : m
+  );
+  // D. Strip Wix custom elements bundles that re-resolve & overwrite native <img> and <video>
+  result = result.replace(
+    /<script\b[^>]*data-url="[^"]*(?:initCustomElements|custom-element-utils)[^"]*"[^>]*>[\s\S]*?<\/script>/gi,
+    ''
+  );
 
   return result;
 }

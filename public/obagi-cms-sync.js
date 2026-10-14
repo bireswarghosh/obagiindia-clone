@@ -7,7 +7,8 @@
  * - This script intentionally contains ZERO CMS-apply logic: no fetching,
  *   no localStorage reads, no setText/setImg/setBg, no MutationObserver.
  *   It can never overwrite server-rendered content with stale defaults.
- * - Preserved behaviors only: brand-pillars auto-carousel + Partner→Enquiry flow.
+ * - Preserved behaviors only: brand-pillars auto-carousel + Partner→Enquiry flow
+ *   + nav hide-on-scroll + Wix chat force-close + Ryan site-search overlay.
  */
 (function () {
   'use strict';
@@ -456,12 +457,398 @@
     });
   }
 
+  // ── Ryan site search (trigger + overlay injected by patcher §1d) ──────
+  // Reads #ryan-search-index JSON, filters client-side, groups results.
+  // No fetching, no CMS writes — pure interactivity.
+  var SEARCH_GROUPS = [
+    ['product', 'Products'],
+    ['guide', 'Therapeutic Guides'],
+    ['insight', 'Clinical Insights'],
+    ['library', 'Reference Library'],
+    ['page', 'Pages']
+  ];
+
+  function escHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function getSearchIndex() {
+    try {
+      var el = document.getElementById('ryan-search-index');
+      if (!el) return [];
+      var data = JSON.parse(el.textContent || '[]');
+      return Array.isArray(data) ? data : [];
+    } catch (e) { return []; }
+  }
+
+  function renderSearchResults(query) {
+    var box = document.getElementById('ryan-search-results');
+    if (!box) return;
+    var q = (query || '').trim().toLowerCase();
+    if (q.length < 2) {
+      box.innerHTML = '<div class="ryan-search-hint">Type at least 2 characters to search products, guides, insights &amp; library.</div>';
+      return;
+    }
+    var index = getSearchIndex();
+    var words = q.split(/\s+/);
+    var hits = [];
+    for (var i = 0; i < index.length; i++) {
+      var e = index[i];
+      var hay = ((e.title || '') + ' ' + (e.keys || '')).toLowerCase();
+      var ok = true;
+      for (var w = 0; w < words.length; w++) {
+        if (hay.indexOf(words[w]) === -1) { ok = false; break; }
+      }
+      if (ok) hits.push(e);
+      if (hits.length >= 40) break;
+    }
+    if (!hits.length) {
+      box.innerHTML = '<div class="ryan-search-empty">No matches for &ldquo;' + escHtml(query.trim()) +
+        '&rdquo;. Try a product, ingredient or condition.</div>';
+      return;
+    }
+    var html = '';
+    for (var g = 0; g < SEARCH_GROUPS.length; g++) {
+      var type = SEARCH_GROUPS[g][0], label = SEARCH_GROUPS[g][1];
+      var items = [];
+      for (var k = 0; k < hits.length; k++) {
+        if (hits[k].t === type) items.push(hits[k]);
+        if (items.length >= 8) break;
+      }
+      if (!items.length) continue;
+      html += '<div class="ryan-search-group-label">' + label + '</div>';
+      for (var j = 0; j < items.length; j++) {
+        html += '<a class="ryan-search-item" href="' + escHtml(items[j].url) + '">' +
+          '<span class="ryan-search-item-title">' + escHtml(items[j].title) + '</span>' +
+          '<span class="ryan-search-item-sub">' + escHtml(items[j].sub || '') + '</span></a>';
+      }
+    }
+    box.innerHTML = html;
+  }
+
+  function openRyanSearch() {
+    var overlay = document.getElementById('ryan-search-overlay');
+    var input = document.getElementById('ryan-search-input');
+    if (!overlay || !input) return;
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+    document.body.classList.add('ryan-search-open');
+    input.value = '';
+    renderSearchResults('');
+    setTimeout(function() { input.focus(); }, 30);
+  }
+
+  function closeRyanSearch() {
+    var overlay = document.getElementById('ryan-search-overlay');
+    if (!overlay) return;
+    overlay.hidden = true;
+    document.body.style.overflow = '';
+    document.body.classList.remove('ryan-search-open');
+  }
+
+  function initRyanSearch() {
+    var input = document.getElementById('ryan-search-input');
+    // Both trigger copies (desktop-in-nav + mobile slot) open the overlay.
+    var triggers = document.querySelectorAll('#ryan-search-trigger, #ryan-search-trigger-mobile');
+    if (!triggers.length) return;
+    for (var i = 0; i < triggers.length; i++) {
+      triggers[i].addEventListener('click', function(e) {
+        e.preventDefault();
+        openRyanSearch();
+      });
+    }
+    // Delegated opener for repurposed buttons (e.g. hamburger → search).
+    document.addEventListener('click', function(e) {
+      var t = e.target;
+      if (t && t.closest && t.closest('[data-ryan-search-open]')) {
+        e.preventDefault();
+        openRyanSearch();
+      }
+    });
+    document.addEventListener('click', function(e) {
+      var t = e.target;
+      if (t && t.closest && t.closest('[data-ryan-search-close]')) closeRyanSearch();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeRyanSearch();
+    });
+    if (input) {
+      input.addEventListener('input', function() { renderSearchResults(input.value); });
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          var q = input.value.trim();
+          if (q) window.location.href = '/products?q=' + encodeURIComponent(q);
+        }
+      });
+    }
+  }
+
+  // ── Ryan Chat with AI (popup injected by patcher §13d) ──────────────
+  var RYAN_CHAT_GREETING = 'Hello! I am the Ryan Dermaceutics Clinical Assistant. Ask me about our formulations, therapeutic guides or product monographs.';
+
+  function ryanChatTopLinks(query, n) {
+    var out = [];
+    try {
+      var el = document.getElementById('ryan-search-index');
+      if (!el) return out;
+      var index = JSON.parse(el.textContent || '[]');
+      var words = query.trim().toLowerCase().split(/\s+/);
+      for (var i = 0; i < index.length && out.length < (n || 3); i++) {
+        var hay = ((index[i].title || '') + ' ' + (index[i].keys || '')).toLowerCase();
+        var ok = true;
+        for (var w = 0; w < words.length; w++) {
+          if (hay.indexOf(words[w]) === -1) { ok = false; break; }
+        }
+        if (ok) out.push(index[i]);
+      }
+    } catch (e) {}
+    return out;
+  }
+
+  function ryanChatReplyText(q) {
+    var t = q.toLowerCase();
+    if (/^(hi|hello|hey|namaste|good (morning|afternoon|evening))\b/.test(t) && t.length < 24) {
+      return 'Hello! Ask me about acne, hair fall, antifungals, allergy care, corticosteroids or any Ryan formulation.';
+    }
+    if (t.indexOf('pigment') !== -1 || t.indexOf('melasma') !== -1 || t.indexOf('dark spot') !== -1 || t.indexOf('dark ') !== -1) {
+      return 'For hyperpigmentation and uneven tone, Ryan Dermaceutics offers specialized topical depigmenting and exfoliation formulations designed to restore barrier integrity. See the closest matches below.';
+    }
+    if (t.indexOf('hair') !== -1 || t.indexOf('alopecia') !== -1 || t.indexOf('minoxidil') !== -1 || t.indexOf('tressicle') !== -1 || t.indexOf('bald') !== -1) {
+      return 'For hair loss and androgenetic alopecia, our TRESSICLE portfolio includes TRESSICLE 5 (Minoxidil 5% Solution), TRESSICLE FORTE (Minoxidil 5% + Finasteride 0.1%) and oral TRESSICLE tablets.';
+    }
+    if (t.indexOf('steroid') !== -1 || t.indexOf('corticosteroid') !== -1 || t.indexOf('tenorium') !== -1 || t.indexOf('momerium') !== -1 || t.indexOf('psoriasis') !== -1 || t.indexOf('eczema') !== -1) {
+      return 'We provide a structured corticosteroid potency ladder — TENORIUM (Clobetasol Propionate), MOMERIUM (Mometasone Furoate), FLUTIRIUM (Fluticasone Propionate) — plus steroid-sparing ROLITAS (Tacrolimus).';
+    }
+    if (t.indexOf('allerg') !== -1 || t.indexOf('pruritus') !== -1 || t.indexOf('itch') !== -1 || t.indexOf('urticaria') !== -1 || t.indexOf('blismin') !== -1 || t.indexOf('hivozin') !== -1) {
+      return 'For acute and chronic pruritus and urticaria, our second-generation non-sedating H1 antihistamines include BLISMIN 20 (Bilastine 20 mg), BLISMIN M and HIVOZIN 5 (Levocetirizine 5 mg).';
+    }
+    if (t.indexOf('acne') !== -1 || t.indexOf('pimple') !== -1 || t.indexOf('isotretinoin') !== -1) {
+      return 'Our acne portfolio combines targeted topicals (benzoyl peroxide, adapalene, clindamycin) with systemic options aligned to global dermatology guidelines.';
+    }
+    if (t.indexOf('fungal') !== -1 || t.indexOf('fungus') !== -1 || t.indexOf('keto') !== -1 || t.indexOf('itraconazole') !== -1 || t.indexOf('dandruff') !== -1 || t.indexOf('kefin') !== -1 || t.indexOf('itfin') !== -1) {
+      return 'For fungal infections and scalp care, explore KEFIN (Ketoconazole) topicals and ITFIN (Itraconazole) oral capsules — full 19-section monographs included.';
+    }
+    if (t.indexOf('bacterial') !== -1 || t.indexOf('mupirocin') !== -1 || t.indexOf('doxy') !== -1) {
+      return 'Our antibacterial range includes CINIMUP (Mupirocin 2%) and LIXOCLIN-LB (Doxycycline + Lactic Acid Bacillus).';
+    }
+    if (t.indexOf('guide') !== -1 || t.indexOf('insight') !== -1 || t.indexOf('library') !== -1 || t.indexOf('learn') !== -1) {
+      return 'Our Therapeutic Resources hub has topic guides, clinical insights and a dermatology reference library. Closest matches:';
+    }
+    if (t.indexOf('contact') !== -1 || t.indexOf('doctor') !== -1 || t.indexOf('prescrib') !== -1) {
+      return 'For Doctors: prescribing-information cards, the reference library and medical-information support are one click away. Closest matches:';
+    }
+    return 'Ryan Dermaceutics formulations are physician-prescribed dermatological treatments made under strict WHO-GMP standards. Here is what matches your question — or try the site search for everything:';
+  }
+
+  function ryanChatAddMsg(sender, html) {
+    var box = document.getElementById('ryan-chat-messages');
+    if (!box) return null;
+    var row = document.createElement('div');
+    row.className = sender === 'user' ? 'ryan-chat-msg-user' : 'ryan-chat-msg-ai';
+    var b = document.createElement('div');
+    b.className = 'ryan-chat-bubble';
+    if (sender === 'user') b.textContent = html;
+    else b.innerHTML = html;
+    row.appendChild(b);
+    box.appendChild(row);
+    box.scrollTop = box.scrollHeight;
+    return row;
+  }
+
+  function ryanChatSend(text) {
+    var q = (text || '').trim();
+    if (!q) return;
+    ryanChatAddMsg('user', q);
+    var typing = ryanChatAddMsg('ai', '<span class="ryan-chat-typing">Typing…</span>');
+    setTimeout(function() {
+      if (typing && typing.parentNode) typing.parentNode.removeChild(typing);
+      var links = ryanChatTopLinks(q, 3);
+      var html = escHtml(ryanChatReplyText(q));
+      if (links.length) {
+        html += '<div class="ryan-chat-links">';
+        for (var i = 0; i < links.length; i++) {
+          html += '<a href="' + escHtml(links[i].url) + '">→ ' + escHtml(links[i].title) + '</a>';
+        }
+        html += '</div>';
+      }
+      ryanChatAddMsg('ai', html);
+    }, 450);
+  }
+
+  function initRyanChat() {
+    var root = document.getElementById('ryan-chat-root');
+    var trigger = document.getElementById('ryan-chat-trigger');
+    var panel = document.getElementById('ryan-chat-panel');
+    var form = document.getElementById('ryan-chat-form');
+    var input = document.getElementById('ryan-chat-input');
+    if (!root || !trigger || !panel) return;
+    trigger.addEventListener('click', function(e) {
+      e.preventDefault();
+      var opening = panel.hidden;
+      panel.hidden = !opening;
+      trigger.style.display = opening ? 'none' : '';
+      if (opening) {
+        var box = document.getElementById('ryan-chat-messages');
+        if (box && !box.hasChildNodes()) ryanChatAddMsg('ai', escHtml(RYAN_CHAT_GREETING));
+        if (input) setTimeout(function() { input.focus(); }, 30);
+      }
+    });
+    document.addEventListener('click', function(e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest('[data-ryan-chat-close]')) {
+        panel.hidden = true;
+        trigger.style.display = '';
+      }
+      var chip = t.closest('[data-ryan-chat-chip]');
+      if (chip && panel && !panel.hidden) {
+        if (input) input.value = chip.getAttribute('data-ryan-chat-chip') || '';
+        ryanChatSend(input ? input.value : '');
+        if (input) input.value = '';
+      }
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !panel.hidden) {
+        panel.hidden = true;
+        trigger.style.display = '';
+      }
+    });
+    if (form) {
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (input) {
+          ryanChatSend(input.value);
+          input.value = '';
+        }
+      });
+    }
+  }
+
+  // ── Ryan mobile hamburger menu (vanilla replacement for the Wix
+  // Thunderbolt menu runtime, neutered server-side in patcher §15).
+  // Overlay starts closed (data-visible="false"); toggle is explicit
+  // inline display so it never depends on Wix-injected stylesheets.
+  function initMobileMenu() {
+    var openWrap = document.getElementById('comp-lw3c3n7z_r_comp-m8mvebvo');
+    var overlay = document.getElementById('comp-lw3c3n7z_r_comp-m8mvebwf');
+    var closeWrap = document.getElementById('comp-lw3c3n7z_r_comp-m8mvebwp');
+    if (!openWrap || !overlay) return;
+    var closeTimer = null;
+    if (overlay.getAttribute('data-visible') !== 'true') {
+      overlay.style.display = 'none';
+    }
+    function setOpen(open) {
+      if (closeTimer) { clearTimeout(closeTimer); closeTimer = null; }
+      if (open) {
+        overlay.style.display = 'block';
+        // Next frame so the slide-in transition can run.
+        requestAnimationFrame(function() {
+          requestAnimationFrame(function() {
+            document.body.classList.add('obagi-menu-open');
+          });
+        });
+      } else {
+        document.body.classList.remove('obagi-menu-open');
+        closeTimer = setTimeout(function() {
+          overlay.style.display = 'none';
+          closeTimer = null;
+        }, 400);
+      }
+      overlay.setAttribute('data-visible', open ? 'true' : 'false');
+      var btn = openWrap.querySelector('button');
+      if (btn) btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
+    openWrap.addEventListener('click', function(e) {
+      // Repurposed as search trigger (patcher §1e) — menu stands down.
+      if (e.target && e.target.closest && e.target.closest('[data-ryan-search-open]')) return;
+      e.preventDefault();
+      setOpen(true);
+    });
+    if (closeWrap) {
+      closeWrap.addEventListener('click', function(e) {
+        e.preventDefault();
+        setOpen(false);
+      });
+    }
+    var backdrop = overlay.querySelector('[data-hook="hamburger-overlay-dialog"]');
+    if (backdrop) {
+      backdrop.addEventListener('click', function() { setOpen(false); });
+    }
+    overlay.addEventListener('click', function(e) {
+      var t = e.target;
+      if (t && t.closest && t.closest('a')) setOpen(false);
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && overlay.getAttribute('data-visible') === 'true') setOpen(false);
+    });
+  }
+
+  // ── Ryan mobile hamburger popup menu (§2c) ───────────────────────
+  function initRyanMobileBar() {
+    var toggle = document.getElementById('ryan-mobile-toggle');
+    if (!toggle) return;
+    var wrap = toggle.closest('.ryan-mobile-wrap');
+    var popup = wrap ? wrap.querySelector('.ryan-mobile-popup') : null;
+    if (!popup) return;
+    function setOpen(open) {
+      popup.hidden = !open;
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      document.body.style.overflow = open ? 'hidden' : '';
+    }
+    toggle.addEventListener('click', function(e) {
+      e.preventDefault();
+      setOpen(popup.hidden);
+    });
+    popup.addEventListener('click', function(e) {
+      var t = e.target;
+      if (!t || !t.closest) return;
+      if (t.closest('[data-ryan-mobile-close]') || t.closest('.ryan-mobile-bar a')) setOpen(false);
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && !popup.hidden) setOpen(false);
+    });
+  }
+
+  // ── Autoplay Videos: Ensure muted native videos play smoothly across all browsers ──
+  function initAutoplayVideos() {
+    var vids = document.querySelectorAll('video');
+    vids.forEach(function(v) {
+      v.muted = true;
+      v.setAttribute('muted', '');
+      v.setAttribute('playsinline', '');
+      v.setAttribute('autoplay', '');
+      v.setAttribute('loop', '');
+      var playPromise = v.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(function() {
+          var onInteraction = function() {
+            v.play().catch(function() {});
+            document.removeEventListener('click', onInteraction);
+            document.removeEventListener('touchstart', onInteraction);
+          };
+          document.addEventListener('click', onInteraction, { once: true });
+          document.addEventListener('touchstart', onInteraction, { once: true });
+        });
+      }
+    });
+  }
+
   // ── Boot once. Single DOMContentLoaded listener; no observers, no re-apply. ──
+  // Each init is isolated so one failure can never kill the others.
   function boot() {
-    initPillarsCarousel(3800);
-    initPartnerEnquiryInteractivity();
-    initNavHideOnScroll();
-    initChatPopupClose();
+    var inits = [initPillarsCarousel, initPartnerEnquiryInteractivity, initNavHideOnScroll, initChatPopupClose, initRyanSearch, initRyanChat, initMobileMenu, initRyanMobileBar, initAutoplayVideos];
+    var args = [[3800], [], [], [], [], [], [], [], []];
+    for (var i = 0; i < inits.length; i++) {
+      try { inits[i].apply(null, args[i]); }
+      catch (e) { if (window.console && console.warn) console.warn('[OBAGI] init failed:', e && e.message); }
+    }
   }
 
   if (document.readyState === 'loading') {

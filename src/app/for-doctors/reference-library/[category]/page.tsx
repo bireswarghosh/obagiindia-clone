@@ -24,11 +24,30 @@ export default function ReferenceLibraryCategoryPage() {
   const params = useParams();
   const categorySlug = (params?.category as string) || 'fungal-infections';
 
-  const category: LibraryCategory = REFERENCE_LIBRARY_CATEGORIES[categorySlug] || REFERENCE_LIBRARY_CATEGORIES['fungal-infections'];
+  const defaultCategory: LibraryCategory = REFERENCE_LIBRARY_CATEGORIES[categorySlug] || REFERENCE_LIBRARY_CATEGORIES['fungal-infections'];
+  const [category, setCategory] = useState<LibraryCategory>(defaultCategory);
+
+  React.useEffect(() => {
+    fetch('/api/db/library?type=category')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && Array.isArray(data.items)) {
+          const found = data.items.find((it: any) => it.slug === categorySlug);
+          if (found) {
+            setCategory({
+              ...found.data,
+              name: found.title,
+              description: found.data?.description || '',
+            });
+          }
+        }
+      })
+      .catch(() => {});
+  }, [categorySlug]);
 
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredConditions = category.conditionReferences.filter(c =>
+  const filteredConditions = (category.conditionReferences || []).filter(c =>
     c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.subtitle.toLowerCase().includes(searchQuery.toLowerCase())
   );

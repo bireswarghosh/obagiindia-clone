@@ -37,8 +37,27 @@ export default function TherapeuticGuideTopicPage() {
   const router = useRouter();
   const slug = (params?.slug as string) || 'acne-and-acne-management';
 
-  // Retrieve guide data or fallback to acne
-  const guide: TherapeuticGuide = THERAPEUTIC_GUIDES_DATA[slug] || THERAPEUTIC_GUIDES_DATA['acne-and-acne-management'];
+  const defaultGuide: TherapeuticGuide = THERAPEUTIC_GUIDES_DATA[slug] || THERAPEUTIC_GUIDES_DATA['acne-and-acne-management'];
+  const [guide, setGuide] = useState<TherapeuticGuide>(defaultGuide);
+
+  React.useEffect(() => {
+    fetch(`/api/db/guides?slug=${encodeURIComponent(slug)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && data.guide) {
+          const g = data.guide;
+          setGuide({
+            ...g.data,
+            id: g.id,
+            slug: g.slug,
+            title: g.title,
+            subtitle: g.subtitle || g.data?.subtitle || '',
+            image: g.cover_image || g.data?.image || '',
+          });
+        }
+      })
+      .catch(() => {});
+  }, [slug]);
 
   // Navigation tabs state
   const [activeTab, setActiveTab] = useState<'overview' | 'classification' | 'presentation' | 'treatment' | 'topical' | 'systemic' | 'considerations' | 'maintenance' | 'counselling'>('topical');

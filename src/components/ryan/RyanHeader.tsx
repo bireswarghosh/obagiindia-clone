@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -10,6 +10,18 @@ export default function RyanHeader() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [doctorsDropdown, setDoctorsDropdown] = useState(false);
+
+  useEffect(() => {
+    document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [mobileMenuOpen]);
 
   const isHome = pathname === '/' || pathname === '/home';
   const isAbout = pathname?.includes('about');
@@ -245,9 +257,40 @@ export default function RyanHeader() {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
-      {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-teal-100 px-4 pt-3 pb-6 space-y-4 shadow-lg animate-fade-in">
+      {/* Mobile Drawer — floats in from the LEFT */}
+      <div
+        className={`lg:hidden fixed inset-0 z-[60] ${mobileMenuOpen ? '' : 'pointer-events-none'}`}
+        aria-hidden={!mobileMenuOpen}
+      >
+        {/* Backdrop */}
+        <div
+          onClick={() => setMobileMenuOpen(false)}
+          className={`absolute inset-0 bg-[#002530]/55 transition-opacity duration-300 ${
+            mobileMenuOpen ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+        {/* Panel */}
+        <div
+          className={`absolute left-0 top-0 bottom-0 w-[86%] max-w-sm bg-white shadow-2xl flex flex-col transition-transform duration-[380ms] ease-[cubic-bezier(0.16,1,0.3,1)] ${
+            mobileMenuOpen ? 'translate-x-0' : '-translate-x-[110%]'
+          }`}
+          role="dialog"
+          aria-label="Site navigation"
+        >
+          <div className="flex items-center justify-between px-4 py-3 border-b border-teal-100 shrink-0">
+            <span className="text-xs font-black tracking-widest text-[#004f5e] uppercase">
+              Ryan Dermaceutics
+            </span>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-2 text-slate-500 hover:text-[#00768a] hover:bg-slate-100 rounded-lg transition"
+              aria-label="Close navigation"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-4 pt-3 pb-6 space-y-4">
           <div className="p-3 bg-teal-50/80 rounded-xl space-y-2 border border-teal-100">
             <div className="text-xs font-bold text-[#006070] uppercase tracking-wider">For Doctors Portal</div>
             <Link
@@ -321,8 +364,9 @@ export default function RyanHeader() {
               Explore Products →
             </Link>
           </div>
+          </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

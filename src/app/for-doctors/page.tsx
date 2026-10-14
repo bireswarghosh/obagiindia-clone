@@ -200,9 +200,9 @@ export default function ForDoctorsLandingPage() {
               {(content.hero?.features || []).map(feat => (
                 <div
                   key={feat.id}
-                  className="flex items-center gap-3 p-3.5 sm:p-4 rounded-xl bg-white/80 backdrop-blur-xs border border-teal-100/90 shadow-2xs hover:shadow-sm hover:border-teal-300 transition-all"
+                  className="flex items-center gap-3 p-3.5 sm:p-4 rounded-2xl bg-white/60 backdrop-blur-md border border-white/70 shadow-[0_8px_24px_rgba(0,61,77,0.10)] hover:shadow-[0_12px_32px_rgba(0,118,138,0.20)] hover:bg-white/85 hover:-translate-y-0.5 transition-all"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center shrink-0 border border-teal-100">
+                  <div className="w-10 h-10 rounded-xl bg-white/80 backdrop-blur flex items-center justify-center shrink-0 border border-white/70 shadow-sm">
                     {renderHeroIcon(feat.iconName)}
                   </div>
                   <span className="text-[11px] sm:text-xs font-bold text-[#003d4d] leading-snug uppercase tracking-tight">
@@ -218,7 +218,7 @@ export default function ForDoctorsLandingPage() {
       {/* ========================================================= */}
       {/* 2. QUICK ACCESS ("HOW CAN WE SUPPORT YOU?")               */}
       {/* ========================================================= */}
-      <section className="py-14 sm:py-16 bg-white border-b border-slate-100">
+      <section className="py-14 sm:py-16 bg-gradient-to-b from-teal-50/80 via-[#f8fafc] to-white border-b border-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12">
             <span className="text-xs font-black tracking-widest text-[#00768a] uppercase block mb-1.5">
@@ -236,7 +236,7 @@ export default function ForDoctorsLandingPage() {
             {(content.quickAccess?.cards || []).map(card => (
               <div
                 key={card.id}
-                className="group flex flex-col justify-between bg-[#fbfdfd] hover:bg-white rounded-2xl border border-teal-100/80 hover:border-teal-300 p-5 shadow-xs hover:shadow-md transition-all duration-300"
+                className="group flex flex-col justify-between bg-white/70 backdrop-blur-md rounded-2xl border border-white/70 p-5 shadow-[0_8px_24px_rgba(0,61,77,0.08)] hover:bg-white/90 hover:shadow-[0_16px_38px_rgba(0,118,138,0.18)] hover:border-teal-200 hover:-translate-y-1 transition-all duration-300"
               >
                 <div>
                   <div className="w-full h-24 rounded-xl overflow-hidden relative bg-teal-50/60 mb-4 border border-teal-100/50">
@@ -297,23 +297,24 @@ export default function ForDoctorsLandingPage() {
             </Link>
           </div>
 
-          {/* 8 Circles Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-4 sm:gap-6">
+          {/* 8 Circles Grid — 4 large cards per row (2 rows) */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 sm:gap-8">
             {(content.therapeuticAreas?.categories || []).map(cat => (
               <Link
                 key={cat.id}
                 href={cat.link}
-                className="group flex flex-col items-center text-center p-3 rounded-2xl hover:bg-white hover:shadow-sm border border-transparent hover:border-teal-100 transition-all duration-300"
+                className="group flex flex-col items-center text-center p-4 sm:p-6 rounded-2xl bg-white/60 backdrop-blur-md border border-white/70 shadow-[0_8px_24px_rgba(0,61,77,0.06)] hover:bg-white hover:shadow-[0_16px_38px_rgba(0,118,138,0.16)] hover:border-teal-100 hover:-translate-y-1 transition-all duration-300"
               >
-                <div className="relative w-20 h-20 sm:w-22 sm:h-22 rounded-full overflow-hidden border-2 border-teal-200/80 shadow-xs mb-3 group-hover:scale-105 group-hover:border-[#00768a] transition-all duration-300">
+                <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full overflow-hidden border-2 border-teal-200/80 shadow-[0_10px_28px_rgba(0,61,77,0.14)] mb-4 group-hover:scale-105 group-hover:border-[#00768a] transition-all duration-300">
                   <Image
                     src={cat.image}
                     alt={cat.name}
                     fill
-                    className="object-cover"
+                    sizes="(max-width: 640px) 112px, 144px"
+                    className="object-cover object-center group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                <span className="text-xs font-bold text-[#003d4d] leading-snug mb-1 group-hover:text-[#00768a] transition-colors">
+                <span className="text-xs sm:text-sm font-bold text-[#003d4d] leading-snug mb-1.5 min-h-[2.5rem] flex items-center justify-center group-hover:text-[#00768a] transition-colors">
                   {cat.name}
                 </span>
                 <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#00768a] uppercase tracking-wider group-hover:underline">
@@ -364,9 +365,9 @@ export default function ForDoctorsLandingPage() {
                   {(content.scientificApproach?.features || []).map(f => (
                     <div
                       key={f.id}
-                      className="flex flex-col items-start gap-2 p-3 rounded-xl bg-white/90 border border-teal-100/80 shadow-2xs"
+                      className="flex flex-col items-start gap-2 p-3 rounded-2xl bg-white/60 backdrop-blur-md border border-white/70 shadow-[0_8px_20px_rgba(0,61,77,0.08)] hover:shadow-[0_12px_28px_rgba(0,118,138,0.18)] hover:bg-white/85 hover:-translate-y-0.5 transition-all"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-teal-50 flex items-center justify-center border border-teal-100">
+                      <div className="w-8 h-8 rounded-lg bg-white/80 backdrop-blur flex items-center justify-center border border-white/70 shadow-sm">
                         {renderScienceIcon(f.iconName)}
                       </div>
                       <span className="text-[10px] sm:text-[11px] font-bold text-[#003d4d] uppercase leading-tight">
@@ -384,7 +385,7 @@ export default function ForDoctorsLandingPage() {
       {/* ========================================================= */}
       {/* 5. FEATURED PROFESSIONAL RESOURCES ("STAY UPDATED")       */}
       {/* ========================================================= */}
-      <section className="py-14 sm:py-16 bg-[#f8fafc] border-b border-slate-200/80">
+      <section className="py-14 sm:py-16 bg-gradient-to-b from-white via-teal-50/50 to-[#f8fafc] border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
             <div>
@@ -413,7 +414,7 @@ export default function ForDoctorsLandingPage() {
               <Link
                 key={art.id}
                 href={art.linkUrl}
-                className="group flex flex-col justify-between bg-white rounded-2xl border border-slate-200/80 hover:border-teal-300 overflow-hidden shadow-2xs hover:shadow-md transition-all duration-300"
+                className="group flex flex-col justify-between bg-white/70 backdrop-blur-md rounded-2xl border border-white/70 overflow-hidden shadow-[0_8px_24px_rgba(0,61,77,0.08)] hover:bg-white/90 hover:border-teal-200 hover:shadow-[0_16px_38px_rgba(0,118,138,0.18)] hover:-translate-y-1 transition-all duration-300"
               >
                 <div>
                   <div className="relative w-full h-36 bg-slate-100 overflow-hidden">

@@ -35,8 +35,8 @@ export default function ReferenceLibraryTopicDetailPage() {
   const matchedCondition = categoryData?.conditionReferences?.find(c => c.slug === topicSlug) ||
     categoryData?.therapeuticReferences?.find(c => c.slug === topicSlug);
 
-  const baseTopic = SAMPLE_TOPIC_PAGES[topicSlug] || SAMPLE_TOPIC_PAGES['tinea-corporis'];
-  const topic: LibraryTopic = SAMPLE_TOPIC_PAGES[topicSlug] ? SAMPLE_TOPIC_PAGES[topicSlug] : {
+  const baseTopic = SAMPLE_TOPIC_PAGES['tinea-corporis'] || Object.values(SAMPLE_TOPIC_PAGES)[0];
+  const initialTopic: LibraryTopic = SAMPLE_TOPIC_PAGES[topicSlug] ? SAMPLE_TOPIC_PAGES[topicSlug] : {
     ...baseTopic,
     slug: topicSlug,
     title: matchedCondition?.title || baseTopic.title,
@@ -45,6 +45,27 @@ export default function ReferenceLibraryTopicDetailPage() {
     image: matchedCondition?.thumbnail || baseTopic.image,
     quickSummary: matchedCondition?.subtitle ? `${matchedCondition.title}: ${matchedCondition.subtitle}` : baseTopic.quickSummary,
   };
+
+  const [topic, setTopic] = useState<LibraryTopic>(initialTopic);
+
+  React.useEffect(() => {
+    fetch('/api/db/library?type=topic')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && Array.isArray(data.items)) {
+          const found = data.items.find((it: any) => it.slug === topicSlug);
+          if (found) {
+            setTopic({
+              ...found.data,
+              slug: found.slug,
+              title: found.title,
+              image: found.image_url || found.data?.image || '',
+            });
+          }
+        }
+      })
+      .catch(() => {});
+  }, [topicSlug]);
 
   // State for 11 accordions (01 and 02 open by default)
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({

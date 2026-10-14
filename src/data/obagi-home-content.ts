@@ -128,6 +128,8 @@ export interface ObagiHomeContent {
     heroImage: string;
     heroVideoUrl?: string; // annotation 02 — existing hero bg video (comp-lwxgxhly_video), src-swap only
     heroVideoPoster?: string;
+    // Hero band background photo (bgLayers_comp-lwxgxhly inner img, no alt).
+    backgroundImage?: string;
     awardBadgeImage: string;
     historyIntroText: string;
     historyIntroTextColor?: string;
@@ -236,6 +238,9 @@ export interface ObagiHomeContent {
     logoImage?: string;
     // Logo link target.
     logoHref?: string;
+    // Footer-left brand text (same footer text style). Wins over logoImage
+    // when both are set; empty = logoImage/original logic applies.
+    leftText?: string;
     // Footer nav links — 4 fixed slots mapped to the 4 Wix anchors.
     // Empty label = keep that original slot untouched.
     links?: { label: string; href: string }[];
@@ -276,7 +281,7 @@ export interface ObagiHomeContent {
 export const defaultObagiHomeContent: ObagiHomeContent = {
   // Header Nav & Logo
   header: {
-    logoUrl: '',
+    logoUrl: '/ryan/ryan-logo.png',
     navMenu: [
       { label: 'Company', link: '/about' },
       { label: 'Products', link: '/products' },
@@ -292,8 +297,9 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
     awardBadge: 'WINNER 2025\nSkin Product / Range of the Year\n-Aesthetic Awards',
     awardBadgeColor: '#000000',
     heroImage: 'https://static.wixstatic.com/media/4833d7_43702b8008e5402c8c805580c51dbcd8~mv2.jpg',
-    heroVideoUrl: '',
-    heroVideoPoster: '',
+    heroVideoUrl: 'https://video.wixstatic.com/video/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60/720p/mp4/file.mp4',
+    heroVideoPoster: 'https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg/v1/fill/w_1265,h_585,al_c,q_85,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg',
+    backgroundImage: '',
     awardBadgeImage: 'https://static.wixstatic.com/media/4833d7_3a4748500da24047881d90f975d42006~mv2.jpg',
     historyIntroText: 'With over 35 years of clinically proven results, Obagi Medical Products are the Number 1 physician dispensed skin care range in the world. Obagi Medical products have grown from humble beginnings to having hundreds of thousands of devotees, our vision however hasn’t changed – to transform the skin industry and create a more confident and fearless future. We never take our eyes off tomorrow. That’s the secret to creating a skin care future that is intelligent, accessible and healthier than ever.',
     historyIntroTextColor: '#000000'
@@ -596,21 +602,22 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
     backgroundImage: ''
   },
   footer: {
-    copyright: '©2026 Obagi. All rights reserved. Obagi® Systems and Products are physician dispensed and should be used under the guidance of a skin care professional.',
+    copyright: '©2026 Ryan Dermaceutics. All rights reserved. Ryan Dermaceutics and Products are physician dispensed and should be used under the guidance of a skin care professional.',
     copyrightColor: '#000000',
     backgroundImage: '',
-    logoImage: '',
-    logoHref: 'https://www.obagiindia.com/',
+    logoImage: '/ryan/ryan-logo.png',
+    logoHref: '/',
+    leftText: '',
     links: [
-      { label: 'TERMS & CONDITIONS', href: 'https://www.obagiindia.com/terms-and-coniditions' },
-      { label: 'PRIVACY POLICY', href: 'https://www.obagiindia.com/privacy-policy' },
-      { label: 'ACCESSIBILITY STATEMENT', href: 'https://www.obagiindia.com/accessibility-statement' },
-      { label: 'CONTACT US', href: 'https://www.obagiindia.com/contact-us' },
+      { label: 'TERMS & CONDITIONS', href: '/terms-and-conditions' },
+      { label: 'PRIVACY POLICY', href: '/privacy-policy' },
+      { label: 'ACCESSIBILITY STATEMENT', href: '/accessibility-statement' },
+      { label: 'CONTACT US', href: '/contact-us' },
     ],
   },
   awardVideo: {
     videoUrl: 'https://video.wixstatic.com/video/4833d7_958d8b59c22f449990b3c2a75c660389/720p/mp4/file.mp4',
-    posterImage: 'https://static.wixstatic.com/media/4833d7_43702b8008e5402c8c805580c51dbcd8~mv2.jpg',
+    posterImage: 'https://static.wixstatic.com/media/4833d7_958d8b59c22f449990b3c2a75c660389f001.jpg/v1/fill/w_1265,h_200,al_c,q_80,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_958d8b59c22f449990b3c2a75c660389f001.jpg',
     overlayTitle: 'New Beauty Award 2024 Winner'
   },
   collectionsBg: {
@@ -620,8 +627,8 @@ export const defaultObagiHomeContent: ObagiHomeContent = {
     slot14BackgroundImage: ''
   },
   seo: {
-    pageTitle: 'Obagi India | obagi products',
-    metaDescription: 'Explore Obagi Medical India\'s official site for transformative skincare solutions that target fine lines, wrinkles, dark spots, hyperpigmentation, and more.'
+    pageTitle: 'Ryan Dermaceutics | Ryan Products',
+    metaDescription: 'Explore Ryan Dermaceutics official site for transformative Products'
   },
   floating: {
     chatLabel: 'Chat with AI',

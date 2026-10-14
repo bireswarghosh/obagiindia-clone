@@ -44,7 +44,27 @@ export default function ClinicalInsightArticlePage() {
     );
   }
 
-  const article: ClinicalInsight = CLINICAL_INSIGHTS_DATA[slug] || CLINICAL_INSIGHTS_DATA['understanding-acne'];
+  const defaultArticle: ClinicalInsight = CLINICAL_INSIGHTS_DATA[slug] || CLINICAL_INSIGHTS_DATA['understanding-acne'];
+  const [article, setArticle] = React.useState<ClinicalInsight>(defaultArticle);
+
+  React.useEffect(() => {
+    fetch(`/api/db/insights?slug=${encodeURIComponent(slug)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && data.insight) {
+          const ins = data.insight;
+          setArticle({
+            ...ins.data,
+            id: ins.id,
+            slug: ins.slug,
+            title: ins.title,
+            subtitle: ins.subtitle || ins.data?.subtitle || '',
+            image: ins.featured_image || ins.data?.image || '',
+          });
+        }
+      })
+      .catch(() => {});
+  }, [slug]);
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">

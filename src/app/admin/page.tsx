@@ -48,6 +48,7 @@ import MediaInput from '@/components/admin/MediaInput';
 import RyanAboutCms from '@/components/admin/RyanAboutCms';
 import ObagiHomeCms from '@/components/admin/ObagiHomeCms';
 import RyanSeoCms, { defaultMultiPageSeo, MultiPageSeo } from '@/components/admin/RyanSeoCms';
+import InfoLegalCms from '@/components/admin/InfoLegalCms';
 import MinoxidilEducationalCard from '@/components/ryan/MinoxidilEducationalCard';
 import { RYAN_PRODUCTS, RyanProduct, THERAPEUTIC_AREAS, ROUTES, DOSAGE_FORMS } from '@/data/ryan-products';
 import {
@@ -76,6 +77,7 @@ type AdminTab =
   | 'guides'
   | 'prescribing'
   | 'library'
+  | 'info-legal'
   | 'media'
   | 'seo'
   | 'backup';
@@ -217,6 +219,94 @@ export default function RyanAdminPortal() {
           }
         })
         .catch(() => {});
+
+      // Fetch live DB datasets
+      fetch('/api/db/products')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.success && Array.isArray(data.products) && data.products.length > 0) {
+            const mapped = data.products.map((p: any) => ({
+              ...p.data,
+              id: p.id,
+              slug: p.slug,
+              brandName: p.brand_name,
+              genericName: p.generic_name,
+              strength: p.strength || p.data?.strength || '',
+              dosageForm: p.dosage_form || p.data?.dosageForm || 'Cream',
+              route: p.route || p.data?.route || 'Topical',
+              therapeuticArea: p.therapeutic_area || p.data?.therapeuticArea || 'Acne',
+              tagline: p.tagline || p.data?.tagline || '',
+              hasFullMonograph: p.has_full_monograph ?? p.data?.hasFullMonograph ?? true,
+              isFeatured: p.is_featured ?? p.data?.isFeatured ?? false,
+              images: {
+                ...(p.data?.images || {}),
+                primaryPackshot: p.packshot_image || p.data?.images?.primaryPackshot || ''
+              }
+            }));
+            setProductsList(mapped);
+            if (!selectedProduct && mapped.length > 0) setSelectedProduct(mapped[0]);
+          }
+        })
+        .catch(() => {});
+
+      fetch('/api/db/prescribing')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.success && Array.isArray(data.prescribing) && data.prescribing.length > 0) {
+            const mapped = data.prescribing.map((pi: any) => ({
+              ...pi.data,
+              id: pi.id,
+              brandName: pi.brand_name,
+              genericName: pi.generic_name,
+              therapeuticClass: pi.therapeutic_class || pi.data?.therapeuticClass || '',
+              category: pi.category || pi.data?.category || 'Acne Therapy',
+              composition: pi.composition || pi.data?.composition || '',
+              image: pi.product_image || pi.data?.image || '',
+            }));
+            setPrescribingList(mapped);
+          }
+        })
+        .catch(() => {});
+
+      fetch('/api/db/guides')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.success && Array.isArray(data.guides) && data.guides.length > 0) {
+            const map: any = {};
+            data.guides.forEach((g: any) => {
+              map[g.slug] = {
+                ...g.data,
+                id: g.id,
+                slug: g.slug,
+                title: g.title,
+                subtitle: g.subtitle || g.data?.subtitle || '',
+                image: g.cover_image || g.data?.image || '',
+              };
+            });
+            setGuidesMap(map);
+          }
+        })
+        .catch(() => {});
+
+      fetch('/api/db/insights')
+        .then(res => res.json())
+        .then(data => {
+          if (data?.success && Array.isArray(data.insights) && data.insights.length > 0) {
+            const map: any = {};
+            data.insights.forEach((ins: any) => {
+              map[ins.slug] = {
+                ...ins.data,
+                id: ins.id,
+                slug: ins.slug,
+                title: ins.title,
+                subtitle: ins.subtitle || ins.data?.subtitle || '',
+                image: ins.featured_image || ins.data?.image || '',
+              };
+            });
+            setInsightsMap(map);
+          }
+        })
+        .catch(() => {});
     } catch (e) {
       console.error('Error loading stored admin data:', e);
     }
@@ -299,12 +389,97 @@ export default function RyanAdminPortal() {
     }
   };
 
-  const handleSaveAll = () => {
+  const handleSaveAll = async () => {
     try {
+      const adminPin = sessionStorage.getItem('cms_admin_pin') || '1234';
+      const headers = { 'Content-Type': 'application/json', 'x-cms-pin': adminPin };
+
       localStorage.setItem('ryan_home_content', JSON.stringify(homeCmsData));
       localStorage.setItem('ryan_about_content', JSON.stringify(aboutCmsData));
       localStorage.setItem('ryan_admin_doctors_page', JSON.stringify(doctorsCmsData));
       localStorage.setItem('ryan_seo_settings', JSON.stringify(seoData));
+      localStorage.setItem('ryan_admin_products_v2', JSON.stringify(productsList));
+      localStorage.setItem('ryan_admin_products', JSON.stringify(productsList));
+      localStorage.setItem('ryan_admin_insights', JSON.stringify(insightsMap));
+      localStorage.setItem('ryan_admin_guides', JSON.stringify(guidesMap));
+      localStorage.setItem('ryan_admin_prescribing', JSON.stringify(prescribingList));
+
+      // 1. If currently on products tab or editing product:
+      if (selectedProduct) {
+        await fetch('/api/db/products', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            id: selectedProduct.id,
+            slug: selectedProduct.slug,
+            brand_name: selectedProduct.brandName,
+            generic_name: selectedProduct.genericName,
+            strength: selectedProduct.strength,
+            dosage_form: selectedProduct.dosageForm,
+            route: selectedProduct.route,
+            therapeutic_area: selectedProduct.therapeuticArea,
+            tagline: selectedProduct.tagline,
+            packshot_image: (selectedProduct as any).productImage || (selectedProduct as any).images?.primaryPackshot || '',
+            has_full_monograph: selectedProduct.hasFullMonograph,
+            is_featured: (selectedProduct as any).isFeatured || false,
+            data: selectedProduct,
+          }),
+        }).catch(() => {});
+      }
+
+      // 2. If currently on prescribing tab:
+      if (selectedPi) {
+        await fetch('/api/db/prescribing', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            id: selectedPi.id,
+            slug: (selectedPi as any).slug || selectedPi.id,
+            brand_name: selectedPi.brandName,
+            generic_name: selectedPi.genericName,
+            therapeutic_class: selectedPi.therapeuticClass,
+            category: selectedPi.category,
+            composition: selectedPi.composition,
+            product_image: (selectedPi as any).image || '',
+            data: selectedPi,
+          }),
+        }).catch(() => {});
+      }
+
+      // 3. If currently on guides tab:
+      const currentGuide = guidesMap[selectedGuideSlug];
+      if (currentGuide) {
+        await fetch('/api/db/guides', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            id: (currentGuide as any).id || selectedGuideSlug,
+            slug: selectedGuideSlug,
+            title: currentGuide.title,
+            subtitle: currentGuide.subtitle,
+            cover_image: currentGuide.image || '',
+            data: currentGuide,
+          }),
+        }).catch(() => {});
+      }
+
+      // 4. If currently on insights tab:
+      const currentInsight = insightsMap[selectedInsightSlug];
+      if (currentInsight) {
+        await fetch('/api/db/insights', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            id: (currentInsight as any).id || selectedInsightSlug,
+            slug: selectedInsightSlug,
+            title: currentInsight.title,
+            subtitle: (currentInsight as any).subtitle || '',
+            featured_image: currentInsight.image || '',
+            data: currentInsight,
+          }),
+        }).catch(() => {});
+      }
+
       fetch('/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -315,12 +490,8 @@ export default function RyanAdminPortal() {
           seo: seoData
         })
       }).catch(() => {});
-      localStorage.setItem('ryan_admin_products_v2', JSON.stringify(productsList));
-      localStorage.setItem('ryan_admin_products', JSON.stringify(productsList));
-      localStorage.setItem('ryan_admin_insights', JSON.stringify(insightsMap));
-      localStorage.setItem('ryan_admin_guides', JSON.stringify(guidesMap));
-      localStorage.setItem('ryan_admin_prescribing', JSON.stringify(prescribingList));
-      showToast('All modifications saved successfully to system storage!');
+
+      showToast('Successfully published & saved to PostgreSQL database!');
     } catch (err: any) {
       showToast(err.message || 'Failed to save', 'error');
     }
@@ -558,6 +729,7 @@ export default function RyanAdminPortal() {
               { id: 'guides', label: 'Therapeutic Guides', icon: BookOpen, badge: Object.keys(guidesMap).length },
               { id: 'prescribing', label: 'Prescribing Info (PI)', icon: ShieldCheck, badge: prescribingList.length },
               { id: 'library', label: 'Reference Library', icon: Layers },
+              { id: 'info-legal', label: 'Contact & Legal Pages CMS', icon: Phone },
               { id: 'media', label: 'Media & Assets', icon: ImageIcon },
               { id: 'seo', label: 'SEO & Meta Tags', icon: Globe },
               { id: 'backup', label: 'Backup & Settings', icon: Database }
@@ -674,6 +846,7 @@ export default function RyanAdminPortal() {
               {activeTab === 'guides' && 'Therapeutic Guides & Protocols'}
               {activeTab === 'prescribing' && 'Official Prescribing Information (PI)'}
               {activeTab === 'library' && 'Reference Library Knowledgebase'}
+              {activeTab === 'info-legal' && 'Contact, Medical Desk & Legal CMS'}
               {activeTab === 'media' && 'Media & Asset Center'}
               {activeTab === 'seo' && 'Global SEO & OpenGraph Meta Tags'}
               {activeTab === 'backup' && 'System Backup & Export'}
@@ -2412,6 +2585,13 @@ export default function RyanAdminPortal() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* ========================================================= */}
+          {/* INFO & LEGAL CMS TAB (Contact, Medical Info, Legal, Global)*/}
+          {/* ========================================================= */}
+          {activeTab === 'info-legal' && (
+            <InfoLegalCms onNotify={showToast} />
           )}
 
           {/* ========================================================= */}

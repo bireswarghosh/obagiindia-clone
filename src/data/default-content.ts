@@ -29,11 +29,11 @@ export const defaultSiteData: FullSiteData = {
     region: 'ap-south-1'
   },
   seo: {
-    metaTitle: 'Ryan Dermaceutics | Specialized Dermatology Division',
-    metaDescription: 'Ryan Dermaceutics, a specialized division of Ethics Medinova Private Limited, delivers advanced dermatological and trichological formulations backed by science.',
+    metaTitle: 'Ryan Dermaceutics | Ryan Products',
+    metaDescription: 'Explore Ryan Dermaceutics official site for transformative Products',
     keywords: 'Ryan Dermaceutics, Ethics Medinova, Dermatology India, Tressicle, Tenorium, Blismin, Flutirium, topical dermatology, oral dermatology',
     ogImage: '/ryan/ryan-logo-full.jpg',
-    canonicalUrl: 'https://obagiindia.vercel.app/'
+    canonicalUrl: 'https://ryandarma.com/'
   },
   header: {
     logoText: 'RYAN DERMACEUTICS',

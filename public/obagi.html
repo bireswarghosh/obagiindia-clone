@@ -3369,9 +3369,39 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   /* 6. Seamless Next Section: 1-2 Finger Gap, Natural Video Height, No Overlap */
   #comp-mlau06ju {
     position: relative !important;
-    z-index: 2 !important;
+    z-index: 20 !important;
+    margin-top: 0 !important;
     overflow: hidden !important;
     will-change: transform !important;
+  }
+
+  /* 7. Section 5 4-Image Mosaic Gallery Panel: Full Visibility */
+  #comp-lwz20kzt,
+  #comp-lwz20kzt *,
+  #comp-lwz20l0d11,
+  #comp-lwz20l0e14,
+  #comp-lwz20l0g2,
+  #comp-lwz20l0g6,
+  #comp-lwz20l0f16,
+  #comp-ml6lwrwb,
+  #comp-lwz23869,
+  #comp-ml6m00og,
+  [data-motion-enter="done"],
+  [style*="--motion-clip-start"] {
+    clip-path: none !important;
+    -webkit-clip-path: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #comp-lwz20kzt [data-testid="imageX"],
+  #comp-lwz20kzt wow-image,
+  #comp-lwz20kzt wow-image img,
+  #comp-lwz20kzt picture,
+  #comp-lwz20kzt img {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
   }
 
   /* CLIPPING FIX: the video component's natural Wix height is aspect-ratio
@@ -3554,23 +3584,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
         function adjustVideoMargin() {
-          var isMobile = window.innerWidth <= 768;
-          if (isMobile) {
-            var trackEnd = cardSec.getBoundingClientRect().bottom + window.scrollY;
-            var bH = videoSec.getBoundingClientRect().height || 130;
-            var curTop = videoSec.getBoundingClientRect().top + window.scrollY;
-            var curMargin = parseFloat(getComputedStyle(videoSec).marginTop) || 0;
-            var targetMargin = trackEnd - bH - (curTop - curMargin);
-            if (targetMargin > 0) targetMargin = 0;
-            videoSec.style.setProperty('margin-top', targetMargin + 'px', 'important');
-          } else {
-            var gap = 53;
-            var cardBox = document.querySelector('#comp-lwsw0td7');
-            var cardBoxBottom = cardBox ? (cardBox.offsetTop + cardBox.offsetHeight) : 605;
-            var neededMargin = -(window.innerHeight - (cardBoxBottom + gap));
-            if (neededMargin > 0) neededMargin = 0;
-            videoSec.style.setProperty('margin-top', neededMargin + 'px', 'important');
-          }
+          videoSec.style.setProperty('margin-top', '0px', 'important');
         }
         adjustVideoMargin();
         window.addEventListener('resize', adjustVideoMargin);

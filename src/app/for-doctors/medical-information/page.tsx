@@ -8,19 +8,13 @@ import {
   FileText,
   FlaskConical,
   ShieldAlert,
-  AlertOctagon,
   CheckCircle2,
   Clock,
   Sparkles,
   ChevronRight,
-  Send,
   Upload,
   Mail,
-  HelpCircle,
   Stethoscope,
-  Building,
-  User,
-  Phone,
   ShieldCheck,
   PackageCheck
 } from 'lucide-react';
@@ -85,7 +79,51 @@ const QUALITY_ISSUE_TYPES = [
   'Suspected Quality / Efficacy Deviation'
 ];
 
+/* ---------- shared class tokens (kept here so the whole page stays consistent) ---------- */
+const FIELD =
+  'w-full px-3.5 py-2.5 rounded-xl bg-slate-50/80 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#00768a] focus:ring-2 focus:ring-teal-100 focus:bg-white transition-all';
+const FIELD_ROSE =
+  'w-full px-3.5 py-2.5 rounded-xl bg-slate-50/80 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all';
+const FIELD_SM =
+  'w-full px-3 py-2 rounded-xl bg-slate-50/80 border border-slate-200 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-[#00768a] focus:ring-2 focus:ring-teal-100 focus:bg-white transition-all';
+const FIELD_SM_ROSE =
+  'w-full px-3 py-2 rounded-xl bg-slate-50/80 border border-slate-200 text-slate-700 placeholder-slate-400 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all';
+const AREA =
+  'w-full p-3.5 rounded-xl bg-slate-50/80 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#00768a] focus:ring-2 focus:ring-teal-100 focus:bg-white transition-all';
+const AREA_ROSE =
+  'w-full p-3.5 rounded-xl bg-slate-50/80 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-100 focus:bg-white transition-all';
+const CARD =
+  "relative overflow-hidden bg-white/85 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-white/70 shadow-[0_12px_34px_rgba(0,61,77,0.09)] hover:shadow-[0_20px_48px_rgba(0,118,138,0.16)] transition-all duration-300 scroll-mt-28 before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-1.5 before:bg-gradient-to-r before:from-[#00768a] before:via-teal-400 before:to-cyan-400";
+const CARD_ROSE =
+  "relative overflow-hidden bg-white/85 backdrop-blur-md rounded-3xl p-6 sm:p-8 border border-rose-100 shadow-[0_12px_34px_rgba(0,61,77,0.09)] hover:shadow-[0_20px_48px_rgba(190,18,60,0.16)] transition-all duration-300 scroll-mt-28 before:content-[''] before:absolute before:inset-x-0 before:top-0 before:h-1.5 before:bg-gradient-to-r before:from-rose-500 before:via-pink-400 before:to-rose-400";
+const TILE_TEAL =
+  'w-11 h-11 rounded-2xl bg-gradient-to-br from-[#00768a] to-cyan-400 text-white flex items-center justify-center shrink-0 shadow-lg shadow-teal-900/25';
+const TILE_CYAN =
+  'w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-500 to-teal-400 text-white flex items-center justify-center shrink-0 shadow-lg shadow-cyan-900/25';
+const TILE_ROSE =
+  'w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-400 text-white flex items-center justify-center shrink-0 shadow-lg shadow-rose-900/25';
+const TILE_AMBER =
+  'w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-400 text-white flex items-center justify-center shrink-0 shadow-lg shadow-amber-900/25';
+const TILE_EMERALD =
+  'w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-400 text-white flex items-center justify-center shrink-0 shadow-lg shadow-emerald-900/25';
+const SUBMIT =
+  'w-full py-3 rounded-xl bg-gradient-to-r from-[#00768a] to-[#00a0bd] hover:from-[#005f70] hover:to-[#0089a6] active:scale-[0.98] text-white font-bold uppercase tracking-wider text-xs shadow-lg shadow-teal-900/20 transition-all flex items-center justify-center gap-2 mt-4';
+
 export default function MedicalInformationPage() {
+  const [products, setProducts] = useState<string[]>(RYAN_PRODUCTS);
+
+  React.useEffect(() => {
+    fetch('/api/db/products')
+      .then(res => res.json())
+      .then(data => {
+        if (data?.success && Array.isArray(data.products) && data.products.length > 0) {
+          const names = ['Select Product', ...data.products.map((p: any) => p.brand_name), 'Other Ryan Product'];
+          setProducts(names);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   // Form submission status states
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
 
@@ -142,6 +180,19 @@ export default function MedicalInformationPage() {
     }, 6000);
   };
 
+  const trustPillars = [
+    { icon: FileText, title: 'ACCURATE INFORMATION', sub: 'Product-related scientific support', tile: TILE_TEAL },
+    { icon: Clock, title: 'SCIENTIFIC RESPONSE', sub: 'Timely and evidence-based', tile: TILE_CYAN },
+    { icon: ShieldCheck, title: 'PATIENT SAFETY', sub: 'Commitment to pharmacovigilance', tile: TILE_ROSE },
+    { icon: Stethoscope, title: 'PROFESSIONAL SUPPORT', sub: 'For healthcare professionals', tile: TILE_EMERALD }
+  ];
+
+  const heroChips = [
+    { icon: Clock, label: 'Prompt scientific response' },
+    { icon: ShieldCheck, label: 'CDSCO-aligned pharmacovigilance' },
+    { icon: Stethoscope, label: 'Dedicated HCP channel' }
+  ];
+
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">
       <RyanHeader />
@@ -158,9 +209,20 @@ export default function MedicalInformationPage() {
       )}
 
       {/* ========================================================= */}
-      {/* 1. HERO SECTION */}
+      {/* 1. HERO SECTION                                           */}
       {/* ========================================================= */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#e6f4f7] via-[#f1f9fb] to-[#f8fafc] border-b border-teal-100/60 pt-6 pb-12 lg:pt-8 lg:pb-16">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#e6f4f7] via-[#f1f9fb] to-[#dceff4] border-b border-teal-100/60 pt-6 pb-14 lg:pt-8 lg:pb-20">
+        {/* Decorative glows + dotted texture */}
+        <div className="pointer-events-none absolute -top-24 -right-16 w-96 h-96 rounded-full bg-teal-300/25 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-20 w-80 h-80 rounded-full bg-cyan-300/25 blur-3xl" />
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(0,118,138,0.14) 1px, transparent 1px)',
+            backgroundSize: '26px 26px'
+          }}
+        />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-6">
@@ -173,42 +235,59 @@ export default function MedicalInformationPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Header */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100/80 border border-teal-200 text-[#006070] text-xs font-bold uppercase tracking-widest">
+            <div className="lg:col-span-7 space-y-5">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-md border border-white/80 text-[#006070] text-xs font-bold uppercase tracking-widest shadow-sm">
                 <Sparkles className="w-3.5 h-3.5 text-[#00768a]" />
                 FOR DOCTORS
               </div>
 
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#003d4d] tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#003d4d] tracking-tight leading-[1.08]">
                 MEDICAL <br className="hidden sm:inline" />
-                <span className="text-[#00768a]">INFORMATION</span>
+                <span className="bg-gradient-to-r from-[#00768a] to-cyan-500 bg-clip-text text-transparent">
+                  INFORMATION
+                </span>
               </h1>
 
               <p className="text-slate-600 text-sm sm:text-base leading-relaxed max-w-2xl">
                 Connect with our Medical Information team for product-related scientific information, prescribing queries, safety information, quality concerns and other professional enquiries.
               </p>
 
+              {/* Mini trust chips */}
+              <div className="flex flex-wrap gap-2.5 pt-1">
+                {heroChips.map((chip, i) => (
+                  <span
+                    key={i}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/70 backdrop-blur-md border border-white/80 text-[11px] font-semibold text-[#006070] shadow-sm"
+                  >
+                    <chip.icon className="w-3.5 h-3.5 text-[#00768a]" />
+                    {chip.label}
+                  </span>
+                ))}
+              </div>
+
               <div className="pt-2 flex flex-wrap gap-3 text-xs">
                 <a
                   href="#product-enquiry"
-                  className="px-4 py-2 rounded-lg bg-[#00768a] text-white font-bold hover:bg-[#005f70] transition shadow-xs"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#00768a] text-white font-bold hover:bg-[#005f70] transition shadow-lg shadow-teal-900/20 active:scale-95"
                 >
                   Product Information Enquiry
+                  <ChevronRight className="w-4 h-4" />
                 </a>
                 <a
                   href="#safety-reporting"
-                  className="px-4 py-2 rounded-lg bg-white border border-rose-200 text-rose-700 font-bold hover:bg-rose-50 transition shadow-xs"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white/80 backdrop-blur-md border border-rose-200 text-rose-700 font-bold hover:bg-rose-50 transition shadow-sm active:scale-95"
                 >
+                  <ShieldAlert className="w-4 h-4" />
                   Pharmacovigilance Reporting
                 </a>
               </div>
             </div>
 
-            {/* Right Graphic Banner (Seamless Organic Gradient Blending) */}
+            {/* Right Graphic Banner */}
             <div className="lg:col-span-5 relative flex justify-center">
               <div className="absolute -inset-4 bg-gradient-to-tr from-teal-300/30 to-cyan-200/20 rounded-full blur-3xl pointer-events-none -z-10" />
-              <div className="relative mx-auto max-w-md lg:max-w-none w-full rounded-3xl overflow-hidden shadow-2xl">
-                <div className="relative h-64 sm:h-76 w-full overflow-hidden">
+              <div className="relative mx-auto max-w-md lg:max-w-none w-full rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/60">
+                <div className="relative h-64 sm:h-72 w-full overflow-hidden">
                   <Image
                     src="/ryan/hero-medical-doc.jpg"
                     alt="Your Questions Our Support - Ryan Medical Information"
@@ -221,7 +300,7 @@ export default function MedicalInformationPage() {
                   {/* Cursive overlay text */}
                   <div className="absolute bottom-4 left-5 right-5 text-white">
                     <div className="font-serif italic text-xl sm:text-2xl text-teal-100 font-medium">
-                      "Your Questions, Our Support"
+                      &ldquo;Your Questions, Our Support&rdquo;
                     </div>
                     <div className="text-[11px] text-teal-200/80 font-medium tracking-wide mt-0.5">
                       Direct scientific channel for healthcare practitioners
@@ -229,60 +308,40 @@ export default function MedicalInformationPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Floating response badge */}
+              <div className="absolute -bottom-3 right-2 sm:right-6 inline-flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-white/90 backdrop-blur-md border border-white/80 shadow-xl">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
+                </span>
+                <span className="text-[11px] font-bold text-[#005566] uppercase tracking-wide">Med Info Team Online</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ========================================================= */}
-      {/* 2. FOUR TRUST PILLAR BADGES (Matching Mockup)             */}
+      {/* 2. FOUR TRUST PILLAR BADGES                               */}
       {/* ========================================================= */}
-      <section className="bg-white border-b border-teal-100/80 py-5">
+      <section className="relative bg-gradient-to-b from-white via-teal-50/60 to-white border-b border-teal-100/80 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 text-center md:text-left">
-            {/* Badge 1 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-2.5">
-              <div className="w-10 h-10 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-[#00768a] shrink-0">
-                <FileText className="w-5 h-5" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
+            {trustPillars.map((pillar) => (
+              <div
+                key={pillar.title}
+                className="group flex flex-col md:flex-row items-center md:items-start gap-3 p-4 rounded-2xl bg-white/70 backdrop-blur-md border border-white/70 shadow-[0_8px_24px_rgba(0,61,77,0.08)] hover:shadow-[0_16px_36px_rgba(0,118,138,0.18)] hover:-translate-y-1 hover:bg-white/95 transition-all duration-300 text-center md:text-left"
+              >
+                <div className={pillar.tile}>
+                  <pillar.icon className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">{pillar.title}</h4>
+                  <p className="text-[11px] text-slate-500 mt-0.5">{pillar.sub}</p>
+                </div>
               </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">ACCURATE INFORMATION</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Product-related scientific support</p>
-              </div>
-            </div>
-
-            {/* Badge 2 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-2.5">
-              <div className="w-10 h-10 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center justify-center text-[#00768a] shrink-0">
-                <Clock className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">SCIENTIFIC RESPONSE</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Timely and evidence-based</p>
-              </div>
-            </div>
-
-            {/* Badge 3 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-2.5">
-              <div className="w-10 h-10 rounded-lg bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 shrink-0">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">PATIENT SAFETY</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">Commitment to pharmacovigilance</p>
-              </div>
-            </div>
-
-            {/* Badge 4 */}
-            <div className="flex flex-col md:flex-row items-center md:items-start gap-2.5">
-              <div className="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 shrink-0">
-                <Stethoscope className="w-5 h-5" />
-              </div>
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wide">PROFESSIONAL SUPPORT</h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">For healthcare professionals</p>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
@@ -291,14 +350,27 @@ export default function MedicalInformationPage() {
       {/* 3. FOUR CLINICAL DOCTOR INQUIRY FORMS (2x2 Grid)          */}
       {/* ========================================================= */}
       <section className="py-12 lg:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-          
+        {/* Section heading */}
+        <div className="text-center max-w-2xl mx-auto mb-10">
+          <span className="text-xs font-black tracking-widest text-[#00768a] uppercase block mb-1.5">
+            MEDICAL INFORMATION REQUESTS
+          </span>
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[#003d4d] tracking-tight uppercase">
+            Submit An Enquiry
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-2 font-normal">
+            Choose the relevant channel below. Every submission is routed directly to our Medical Affairs team.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
+
           {/* ===================================================== */}
           {/* FORM A: PRODUCT INFORMATION ENQUIRY                   */}
           {/* ===================================================== */}
-          <div id="product-enquiry" className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-sm hover:shadow-md transition-all">
+          <div id="product-enquiry" className={CARD}>
             <div className="flex items-start gap-3 mb-5">
-              <div className="w-10 h-10 rounded-lg bg-teal-50 border border-teal-100 flex items-center justify-center text-[#00768a] shrink-0">
+              <div className={TILE_TEAL}>
                 <FileText className="w-5 h-5" />
               </div>
               <div>
@@ -319,9 +391,9 @@ export default function MedicalInformationPage() {
                     required
                     value={formA.product}
                     onChange={(e) => setFormA({ ...formA, product: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                    className={FIELD}
                   >
-                    {RYAN_PRODUCTS.map((prod, i) => (
+                    {products.map((prod, i) => (
                       <option key={i} value={i === 0 ? '' : prod}>{prod}</option>
                     ))}
                   </select>
@@ -333,7 +405,7 @@ export default function MedicalInformationPage() {
                     required
                     value={formA.infoType}
                     onChange={(e) => setFormA({ ...formA, infoType: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                    className={FIELD}
                   >
                     {INFORMATION_TYPES.map((type, i) => (
                       <option key={i} value={i === 0 ? '' : type}>{type}</option>
@@ -350,12 +422,12 @@ export default function MedicalInformationPage() {
                   placeholder="Please enter your detailed question regarding composition, dosing, clinical trials, or precautions..."
                   value={formA.question}
                   onChange={(e) => setFormA({ ...formA, question: e.target.value })}
-                  className="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                  className={AREA}
                 />
               </div>
 
               {/* Doctor Details Grid */}
-              <div className="pt-2 border-t border-slate-100">
+              <div className="pt-3 mt-1 border-t border-slate-100">
                 <span className="block font-bold text-[11px] uppercase tracking-wider text-[#006070] mb-2.5">
                   Healthcare Professional Details
                 </span>
@@ -368,7 +440,7 @@ export default function MedicalInformationPage() {
                       placeholder="Dr. Full Name"
                       value={formA.name}
                       onChange={(e) => setFormA({ ...formA, name: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                      className={FIELD_SM}
                     />
                   </div>
                   <div>
@@ -379,7 +451,7 @@ export default function MedicalInformationPage() {
                       placeholder="e.g. MBBS / MD / DNB (Dermatology)"
                       value={formA.qualification}
                       onChange={(e) => setFormA({ ...formA, qualification: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                      className={FIELD_SM}
                     />
                   </div>
                   <div>
@@ -390,7 +462,7 @@ export default function MedicalInformationPage() {
                       placeholder="Your Hospital or Clinic Name"
                       value={formA.hospital}
                       onChange={(e) => setFormA({ ...formA, hospital: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                      className={FIELD_SM}
                     />
                   </div>
                   <div>
@@ -401,7 +473,7 @@ export default function MedicalInformationPage() {
                       placeholder="e.g. Mumbai, Delhi, Bangalore"
                       value={formA.city}
                       onChange={(e) => setFormA({ ...formA, city: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                      className={FIELD_SM}
                     />
                   </div>
                   <div>
@@ -412,7 +484,7 @@ export default function MedicalInformationPage() {
                       placeholder="doctor@institution.org"
                       value={formA.email}
                       onChange={(e) => setFormA({ ...formA, email: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                      className={FIELD_SM}
                     />
                   </div>
                   <div>
@@ -423,16 +495,13 @@ export default function MedicalInformationPage() {
                       placeholder="+91 98765 43210"
                       value={formA.mobile}
                       onChange={(e) => setFormA({ ...formA, mobile: e.target.value })}
-                      className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                      className={FIELD_SM}
                     />
                   </div>
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-2.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] active:scale-95 text-white font-bold uppercase tracking-wider text-xs shadow-md transition-all flex items-center justify-center gap-2 mt-4"
-              >
+              <button type="submit" className={SUBMIT}>
                 SUBMIT ENQUIRY
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -442,9 +511,9 @@ export default function MedicalInformationPage() {
           {/* ===================================================== */}
           {/* FORM B: SCIENTIFIC INFORMATION REQUEST                */}
           {/* ===================================================== */}
-          <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-sm hover:shadow-md transition-all">
+          <div className={CARD}>
             <div className="flex items-start gap-3 mb-5">
-              <div className="w-10 h-10 rounded-lg bg-cyan-50 border border-cyan-100 flex items-center justify-center text-[#00768a] shrink-0">
+              <div className={TILE_CYAN}>
                 <FlaskConical className="w-5 h-5" />
               </div>
               <div>
@@ -466,7 +535,7 @@ export default function MedicalInformationPage() {
                   placeholder="Enter Product Name or API (e.g. Tacrolimus, Itraconazole SB)"
                   value={formB.productIngredient}
                   onChange={(e) => setFormB({ ...formB, productIngredient: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                  className={FIELD}
                 />
               </div>
 
@@ -478,7 +547,7 @@ export default function MedicalInformationPage() {
                   placeholder="e.g. Clinical data, Mechanism of Action, Comparative studies, Bioavailability"
                   value={formB.topic}
                   onChange={(e) => setFormB({ ...formB, topic: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                  className={FIELD}
                 />
               </div>
 
@@ -490,7 +559,7 @@ export default function MedicalInformationPage() {
                   placeholder="Please state your specific clinical or pharmacological question in detail..."
                   value={formB.specificQuestion}
                   onChange={(e) => setFormB({ ...formB, specificQuestion: e.target.value })}
-                  className="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                  className={AREA}
                 />
               </div>
 
@@ -501,11 +570,11 @@ export default function MedicalInformationPage() {
                   placeholder="e.g. Reference journal citation, specific study, or trial registry number"
                   value={formB.supportingInfo}
                   onChange={(e) => setFormB({ ...formB, supportingInfo: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                  className={FIELD}
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-100 mt-1">
                 <div>
                   <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Doctor Name *</label>
                   <input
@@ -514,7 +583,7 @@ export default function MedicalInformationPage() {
                     placeholder="Your Name"
                     value={formB.name}
                     onChange={(e) => setFormB({ ...formB, name: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                    className={FIELD_SM}
                   />
                 </div>
                 <div>
@@ -525,7 +594,7 @@ export default function MedicalInformationPage() {
                     placeholder="Email"
                     value={formB.email}
                     onChange={(e) => setFormB({ ...formB, email: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                    className={FIELD_SM}
                   />
                 </div>
                 <div>
@@ -536,15 +605,12 @@ export default function MedicalInformationPage() {
                     placeholder="Mobile"
                     value={formB.mobile}
                     onChange={(e) => setFormB({ ...formB, mobile: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                    className={FIELD_SM}
                   />
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-2.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] active:scale-95 text-white font-bold uppercase tracking-wider text-xs shadow-md transition-all flex items-center justify-center gap-2 mt-4"
-              >
+              <button type="submit" className={SUBMIT}>
                 SUBMIT REQUEST
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -554,13 +620,13 @@ export default function MedicalInformationPage() {
           {/* ===================================================== */}
           {/* FORM C: REPORT A PRODUCT SAFETY EVENT (Pharmacovigilance)*/}
           {/* ===================================================== */}
-          <div id="safety-reporting" className="bg-white rounded-2xl p-6 sm:p-7 border border-rose-200/90 shadow-sm hover:shadow-md transition-all">
+          <div id="safety-reporting" className={CARD_ROSE}>
             <div className="flex items-start gap-3 mb-5">
-              <div className="w-10 h-10 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 shrink-0">
+              <div className={TILE_ROSE}>
                 <ShieldAlert className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-extrabold text-sm sm:text-base text-slate-900 uppercase tracking-wide flex items-center gap-2">
+                <h3 className="font-extrabold text-sm sm:text-base text-slate-900 uppercase tracking-wide flex items-center gap-2 flex-wrap">
                   <span>Report A Product Safety Event</span>
                   <span className="text-[10px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-full uppercase">
                     Pharmacovigilance
@@ -580,9 +646,9 @@ export default function MedicalInformationPage() {
                     required
                     value={formC.product}
                     onChange={(e) => setFormC({ ...formC, product: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    className={FIELD_ROSE}
                   >
-                    {RYAN_PRODUCTS.map((prod, i) => (
+                    {products.map((prod, i) => (
                       <option key={i} value={i === 0 ? '' : prod}>{prod}</option>
                     ))}
                   </select>
@@ -595,7 +661,7 @@ export default function MedicalInformationPage() {
                     placeholder="Enter Batch No."
                     value={formC.batchNo}
                     onChange={(e) => setFormC({ ...formC, batchNo: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                    className={FIELD_ROSE}
                   />
                 </div>
               </div>
@@ -608,7 +674,7 @@ export default function MedicalInformationPage() {
                   placeholder="Please describe the suspected adverse event, onset latency, severity, and clinical resolution..."
                   value={formC.eventDescription}
                   onChange={(e) => setFormC({ ...formC, eventDescription: e.target.value })}
-                  className="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-rose-500"
+                  className={AREA_ROSE}
                 />
               </div>
 
@@ -619,42 +685,37 @@ export default function MedicalInformationPage() {
                     type="date"
                     value={formC.eventDate}
                     onChange={(e) => setFormC({ ...formC, eventDate: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none"
+                    className={FIELD_SM_ROSE}
                   />
                 </div>
                 <div>
-                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Patient Age & Sex</label>
+                  <label className="block text-[11px] font-medium text-slate-600 mb-0.5">Patient Age &amp; Sex</label>
                   <input
                     type="text"
                     placeholder="e.g. 34 yrs / Female"
                     value={formC.patientAgeSex}
                     onChange={(e) => setFormC({ ...formC, patientAgeSex: e.target.value })}
-                    className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 focus:outline-none"
+                    className={FIELD_SM_ROSE}
                   />
                 </div>
               </div>
 
-              <div className="relative p-3 rounded-xl bg-rose-50/60 border border-rose-100 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-rose-200">
-                    <Image
-                      src="/ryan/safety-shield.jpg"
-                      alt="Pharmacovigilance Shield"
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="text-[11px] text-slate-600 leading-tight">
-                    <span className="font-bold text-rose-900 block">Confidential & Compliant</span>
-                    All reported events are processed under strict Pharmacovigilance and CDSCO regulatory guidelines.
-                  </div>
+              <div className="relative p-3.5 rounded-2xl bg-rose-50/70 border border-rose-100 flex items-center gap-3">
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-rose-200 shadow-sm">
+                  <Image
+                    src="/ryan/safety-shield.jpg"
+                    alt="Pharmacovigilance Shield"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="text-[11px] text-slate-600 leading-tight">
+                  <span className="font-bold text-rose-900 block">Confidential &amp; Compliant</span>
+                  All reported events are processed under strict Pharmacovigilance and CDSCO regulatory guidelines.
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-2.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] active:scale-95 text-white font-bold uppercase tracking-wider text-xs shadow-md transition-all flex items-center justify-center gap-2 mt-4"
-              >
+              <button type="submit" className={SUBMIT}>
                 REPORT SAFETY EVENT
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -664,9 +725,9 @@ export default function MedicalInformationPage() {
           {/* ===================================================== */}
           {/* FORM D: REPORT A PRODUCT QUALITY ISSUE                */}
           {/* ===================================================== */}
-          <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-sm hover:shadow-md transition-all">
+          <div className={CARD}>
             <div className="flex items-start gap-3 mb-5">
-              <div className="w-10 h-10 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0">
+              <div className={TILE_AMBER}>
                 <PackageCheck className="w-5 h-5" />
               </div>
               <div>
@@ -687,9 +748,9 @@ export default function MedicalInformationPage() {
                     required
                     value={formD.product}
                     onChange={(e) => setFormD({ ...formD, product: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                    className={FIELD}
                   >
-                    {RYAN_PRODUCTS.map((prod, i) => (
+                    {products.map((prod, i) => (
                       <option key={i} value={i === 0 ? '' : prod}>{prod}</option>
                     ))}
                   </select>
@@ -703,7 +764,7 @@ export default function MedicalInformationPage() {
                     placeholder="Enter Batch No."
                     value={formD.batchNo}
                     onChange={(e) => setFormD({ ...formD, batchNo: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                    className={FIELD}
                   />
                 </div>
               </div>
@@ -714,7 +775,7 @@ export default function MedicalInformationPage() {
                   required
                   value={formD.issueType}
                   onChange={(e) => setFormD({ ...formD, issueType: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                  className={FIELD}
                 >
                   {QUALITY_ISSUE_TYPES.map((issue, i) => (
                     <option key={i} value={i === 0 ? '' : issue}>{issue}</option>
@@ -730,13 +791,13 @@ export default function MedicalInformationPage() {
                   placeholder="Please describe the defect, packing anomaly, discoloration, or seal condition..."
                   value={formD.description}
                   onChange={(e) => setFormD({ ...formD, description: e.target.value })}
-                  className="w-full p-3 rounded-lg bg-slate-50 border border-slate-200 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-[#00768a]"
+                  className={AREA}
                 />
               </div>
 
               {/* Upload Illustration & Action */}
-              <div className="flex items-center gap-3 p-3 bg-slate-50 border border-dashed border-slate-300 rounded-xl">
-                <div className="relative w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-slate-200">
+              <div className="flex items-center gap-3 p-3.5 bg-slate-50/80 border border-dashed border-slate-300 rounded-2xl hover:border-[#00768a] transition-colors">
+                <div className="relative w-12 h-12 rounded-xl overflow-hidden shrink-0 border border-slate-200 shadow-sm">
                   <Image
                     src="/ryan/quality-inspect.jpg"
                     alt="Quality Inspection"
@@ -754,10 +815,7 @@ export default function MedicalInformationPage() {
                 </div>
               </div>
 
-              <button
-                type="submit"
-                className="w-full py-2.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] active:scale-95 text-white font-bold uppercase tracking-wider text-xs shadow-md transition-all flex items-center justify-center gap-2 mt-4"
-              >
+              <button type="submit" className={SUBMIT}>
                 SUBMIT QUALITY COMPLAINT
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -770,24 +828,27 @@ export default function MedicalInformationPage() {
       {/* ========================================================= */}
       {/* 4. DIRECT TEAM CONTACT BANNER                             */}
       {/* ========================================================= */}
-      <section className="bg-gradient-to-r from-[#e6f4f7] via-[#eff8fa] to-[#e6f4f7] border-y border-teal-200/80 py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <div className="space-y-1 text-center md:text-left">
-              <span className="text-[11px] font-bold text-[#00768a] uppercase tracking-widest">
+      <section className="relative overflow-hidden bg-gradient-to-br from-[#003d4d] via-[#005a6e] to-[#00768a] py-12">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(255,255,255,0.10),transparent)] pointer-events-none" />
+        <div className="absolute -bottom-16 right-0 w-72 h-72 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="rounded-3xl bg-white/10 backdrop-blur-md border border-white/20 p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-2xl">
+            <div className="space-y-1.5 text-center md:text-left">
+              <span className="text-[11px] font-bold text-teal-200 uppercase tracking-widest">
                 DIRECT PHARMACEUTICAL CHANNEL
               </span>
-              <h3 className="text-xl sm:text-2xl font-extrabold text-[#003d4d] tracking-tight uppercase">
+              <h3 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight uppercase">
                 Connect With Our Medical Information Team
               </h3>
-              <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
+              <p className="text-xs sm:text-sm text-teal-50/90 max-w-2xl leading-relaxed">
                 For professional enquiries, you can also reach our medical information team directly through email. We aim to respond to all genuine enquiries promptly.
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 shrink-0">
-              <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white border border-teal-200 shadow-xs">
-                <div className="w-9 h-9 rounded-lg bg-teal-50 flex items-center justify-center text-[#00768a]">
+              <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white/95 border border-white/60 shadow-lg">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00768a] to-cyan-400 flex items-center justify-center text-white shadow-md">
                   <Mail className="w-4 h-4" />
                 </div>
                 <div>
@@ -800,7 +861,7 @@ export default function MedicalInformationPage() {
 
               <a
                 href="mailto:medinfo@ryandermaceutics.com"
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold uppercase tracking-wider shadow-md transition-all whitespace-nowrap"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-teal-50 text-[#004f5e] text-xs font-bold uppercase tracking-wider shadow-lg active:scale-95 transition-all whitespace-nowrap"
               >
                 Contact Our Team
                 <ChevronRight className="w-4 h-4" />
