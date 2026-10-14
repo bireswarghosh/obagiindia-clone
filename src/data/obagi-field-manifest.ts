@@ -33,6 +33,7 @@ export const OBAGI_FIELD_MANIFEST: FieldEntry[] = [
   { key: 'home.hero.awardBadge', label: 'Aesthetic Awards badge text', section: 'hero', target: '#comp-lxriaddt', type: 'text', annotation: '02' },
   { key: 'home.hero.videoSource', label: 'Hero background video', section: 'hero', target: '#comp-lwxgxhly_video[src]', type: 'video', annotation: '02' },
   { key: 'home.hero.videoPoster', label: 'Hero video poster', section: 'hero', target: '#comp-lwxgxhly_video[poster]', type: 'image', annotation: '02' },
+  { key: 'home.hero.backgroundImage', label: 'Hero band background photo', section: 'hero', target: '#bgLayers_comp-lwxgxhly first img (no alt)', type: 'image', annotation: '02', note: 'Empty = keep original' },
   // ── 03 Marquee (tab: marquee) ───────────────────────────────────────
   { key: 'home.marquee.tickerText', label: 'Ticker text (all segments)', section: 'marquee', target: 'data-testid="marquee-item-text" ×4 (inner + data-text)', type: 'text', annotation: '03', note: 'One text node; per-segment impossible (design lock)' },
   { key: 'home.marquee.backgroundImage', label: 'Marquee strip background', section: 'marquee', target: '#bgLayers_comp-mlqkez2p', type: 'image', annotation: '03', note: 'No inner img — URL layer shows' },
@@ -107,6 +108,9 @@ export const OBAGI_FIELD_MANIFEST: FieldEntry[] = [
   { key: 'home.footer.backgroundImage', label: 'Footer background', section: 'footer-bg', target: '#bgLayers_comp-ml6nay6u_r_comp-ljcmlawf', type: 'image', annotation: '15', note: 'No inner img — URL layer shows' },
   // ── 15 Footer/newsletter/floating/socials (tab: footer) ─────────────
   { key: 'home.footer.copyright', label: 'Footer legal/copyright', section: 'footer', target: '#comp-ml6nay6u_r_comp-lx0hp721', type: 'text', annotation: '15' },
+  { key: 'home.footer.logoImage', label: 'Footer logo image (replaces vector SVG)', section: 'footer', target: '#comp-ml6nay6u_r_comp-lx02zbs6 a (innerHTML img swap)', type: 'image', annotation: '15', note: 'Empty = keep original SVG' },
+  { key: 'home.footer.logoHref', label: 'Footer logo link target', section: 'footer', target: '#comp-ml6nay6u_r_comp-lx02zbs6 a[href]', type: 'text', annotation: '15' },
+  { key: 'home.footer.leftText', label: 'Footer left brand text (instead of logo)', section: 'footer', target: '#comp-ml6nay6u_r_comp-lx02zbs6 a (span text)', type: 'text', annotation: '15', note: 'Wins over logoImage when both set' },
   { key: 'home.footer.logoImage', label: 'Footer logo image (replaces vector SVG)', section: 'footer', target: '#comp-ml6nay6u_r_comp-lx02zbs6 a (innerHTML img swap)', type: 'image', annotation: '15', note: 'Empty = keep original SVG' },
   { key: 'home.footer.logoHref', label: 'Footer logo link target', section: 'footer', target: '#comp-ml6nay6u_r_comp-lx02zbs6 a[href]', type: 'text', annotation: '15' },
   { key: 'home.footer.links[0].label', label: 'Footer link 1 label', section: 'footer', target: '#comp-ml6nay6u_r_comp-lx03t9a4 a (text)', type: 'text', annotation: '15' },
