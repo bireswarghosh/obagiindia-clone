@@ -2235,8 +2235,8 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
   }
   #comp-lwsw0td95__item-j9plerjk {
     z-index: 10 !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
   @media (max-width: 768px) {
     #comp-lwsw0td7 {
