@@ -3258,13 +3258,18 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   /* 2. Flagship Pinned Scroll Track & Sticky Viewport */
   #comp-lwrl9iel {
-    position: relative !important;
-    height: 220vh !important;
-    min-height: 220vh !important;
+    position: relative;
+    height: 52vh !important;
+    min-height: 52vh !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
     background: transparent !important;
+    overflow: visible !important;
+  }
+
+  .pin-spacer,
+  .pin-spacer > #comp-lwrl9iel {
     overflow: visible !important;
   }
 
@@ -3274,11 +3279,11 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   }
 
   #comp-lwrl9iel > .comp-lwrl9iel-container {
-    position: sticky !important;
-    top: 0 !important;
-    left: 0 !important;
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
     width: 100% !important;
-    height: 52vh !important;
+    height: 100% !important;
     max-width: 100% !important;
     overflow: visible !important;
     display: block !important;
@@ -3294,7 +3299,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: 52vh !important;
+    height: 100% !important;
     z-index: 1 !important;
     pointer-events: none !important;
     margin: 0 !important;
@@ -3333,8 +3338,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   @media (max-width: 768px) {
     #comp-lwrl9iel {
-      height: 240vh !important;
-      min-height: 240vh !important;
+      height: 72vh !important;
+      min-height: 72vh !important;
     }
     #comp-lwrl9iel > .comp-lwrl9iel-container {
       height: 72vh !important;
@@ -3642,10 +3647,10 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
     if (cardSec && cardItems.length > 0) {
       var isMobile = window.innerWidth <= 768;
-      // Snappy, responsive track height matching official site
-      var totalTrackVh = isMobile ? 240 : 220;
-      cardSec.style.setProperty('height', totalTrackVh + 'vh', 'important');
-      cardSec.style.setProperty('min-height', totalTrackVh + 'vh', 'important');
+      // Banner height in document flow: Section 7 (#comp-mlau06ju) sits directly below by default!
+      var baseSecVh = isMobile ? 72 : 52;
+      cardSec.style.setProperty('height', baseSecVh + 'vh', 'important');
+      cardSec.style.setProperty('min-height', baseSecVh + 'vh', 'important');
 
       // Desktop: fit card box to tallest card content (live site sizes by content)
       var fitBox = document.querySelector('#comp-lwsw0td7');
@@ -3670,14 +3675,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           { clipPath: startClip },
           {
             clipPath: endClip,
-            ease: 'power1.out',
+            ease: 'none',
             scrollTrigger: {
               trigger: cardSec,
               start: 'top bottom', // Starts the moment the section enters from the bottom of the viewport
-              end: function() {
-                return '+=' + (window.innerHeight * (isMobile ? 1.6 : 1.8));
-              },
-              scrub: isMobile ? 1.0 : 1.2
+              end: 'top top',    // Gradually spreads with every scroll until touching the header/navbar
+              scrub: isMobile ? 0.3 : 0.4
             }
           }
         );
@@ -3698,14 +3701,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           transformOrigin: 'top center'
         });
       }
-      // Card 2 and Card 3 start safely below with zero opacity and clean separation (no sticking to bottom!)
+      // Card 2 and Card 3: strictly hidden (visibility: hidden and far below at 160%)
+      // so neither card can EVER peek from below until its predecessor has completely flipped away!
       if (cardItems[1]) {
         gsap.set(cardItems[1], {
-          yPercent: 120,
+          yPercent: 160,
           y: 0,
           rotateX: 0,
           opacity: 0,
-          visibility: 'visible',
+          visibility: 'hidden',
           scale: 0.96,
           zIndex: 20,
           transformPerspective: 1200,
@@ -3714,11 +3718,11 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
       if (cardItems[2]) {
         gsap.set(cardItems[2], {
-          yPercent: 120,
+          yPercent: 160,
           y: 0,
           rotateX: 0,
           opacity: 0,
-          visibility: 'visible',
+          visibility: 'hidden',
           scale: 0.96,
           zIndex: 10,
           transformPerspective: 1200,
@@ -3726,30 +3730,37 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         });
       }
 
+      var pinDist = window.innerHeight * (isMobile ? 3.6 : 3.2);
+
       var tl = gsap.timeline({
         scrollTrigger: {
           trigger: cardSec,
           start: 'top top',
-          end: 'bottom bottom',
+          end: '+=' + pinDist,
+          pin: true,
+          pinSpacing: true,
+          anticipatePin: 1,
           scrub: isMobile ? 0.7 : 0.8
         }
       });
 
       var flipY = isMobile ? -360 : -320;
 
-      // Phase 1 (t = 0 to 0.8): Card 1 glides up to center
+      // Phase 1 (t = 0 to 1.0): Card 1 glides up to center
       if (cardItems[0]) {
         tl.to(cardItems[0], {
           yPercent: 0,
           opacity: 1,
           visibility: 'visible',
           ease: 'power2.out',
-          duration: 0.8
+          duration: 1.0
         }, 0);
       }
 
-      // Phase 2 (t = 1.4 to 2.3): Card 1 flips back into shelf
-      // Card 2 enters and glides up cleanly to center (no clinging to card 1!)
+      // Reading Hold for Card 1: t = 1.0 to 2.0 (user comfortably reads card 1)
+
+      // Phase 2 (t = 2.0 to 3.1): Card 1 flips back into shelf
+      // Smooth, perceptible 3D flip!
       if (cardItems[0]) {
         tl.to(cardItems[0], {
           rotateX: 78,
@@ -3757,13 +3768,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           y: flipY,
           opacity: 1,
           ease: 'power2.inOut',
-          duration: 0.9
-        }, 1.4);
+          duration: 1.1
+        }, 2.0);
       }
 
+      // Card 2 ONLY starts entering AFTER Card 1 has completely flipped! (t = 3.2 to 4.2)
       if (cardItems[1]) {
         tl.fromTo(cardItems[1],
-          { yPercent: 110, opacity: 0, rotateX: 0, scale: 0.96 },
+          { yPercent: 160, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
           {
             yPercent: 0,
             y: 0,
@@ -3772,14 +3784,16 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
             opacity: 1,
             visibility: 'visible',
             ease: 'power2.out',
-            duration: 0.9
+            duration: 1.0
           },
-          1.55
+          3.2
         );
       }
 
-      // Phase 3 (t = 3.05 to 3.95): Card 2 flips back into shelf
-      // Card 3 enters and glides up cleanly to center (no clinging to card 2!)
+      // Reading Hold for Card 2: t = 4.2 to 5.2 (Card 3 is 100% invisible, cannot peek!)
+
+      // Phase 3 (t = 5.2 to 6.3): Card 2 flips back into shelf
+      // Smooth, perceptible 3D flip!
       if (cardItems[1]) {
         tl.to(cardItems[1], {
           rotateX: 78,
@@ -3787,13 +3801,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           y: flipY,
           opacity: 1,
           ease: 'power2.inOut',
-          duration: 0.9
-        }, 3.05);
+          duration: 1.1
+        }, 5.2);
       }
 
+      // Card 3 ONLY starts entering AFTER Card 2 has completely flipped away! (t = 6.4 to 7.4)
       if (cardItems[2]) {
         tl.fromTo(cardItems[2],
-          { yPercent: 110, opacity: 0, rotateX: 0, scale: 0.96 },
+          { yPercent: 160, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
           {
             yPercent: 0,
             y: 0,
@@ -3802,13 +3817,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
             opacity: 1,
             visibility: 'visible',
             ease: 'power2.out',
-            duration: 0.9
+            duration: 1.0
           },
-          3.2
+          6.4
         );
       }
 
-      // Phase 4 (t = 4.7 to 5.6): Card 3 flips back into shelf and vanishes cleanly!
+      // Reading Hold for Card 3: t = 7.4 to 8.4
+
+      // Phase 4 (t = 8.4 to 9.5): Card 3 flips back into shelf and vanishes cleanly!
       if (cardItems[2]) {
         tl.to(cardItems[2], {
           rotateX: 78,
@@ -3816,16 +3833,16 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           y: flipY,
           opacity: 0,
           ease: 'power2.inOut',
-          duration: 0.9
-        }, 4.7);
+          duration: 1.1
+        }, 8.4);
       }
 
       // All shelf cards (Card 1, Card 2) also fade out smoothly so NO white line / shelf mark remains!
       tl.to([cardItems[0], cardItems[1]], {
         opacity: 0,
         ease: 'power1.out',
-        duration: 0.6
-      }, 4.9);
+        duration: 0.7
+      }, 8.7);
 
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
