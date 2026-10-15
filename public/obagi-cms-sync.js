@@ -902,8 +902,19 @@
         tryPlay();
       };
       document.addEventListener('click', onInteraction, { passive: true });
-      document.addEventListener('touchstart', onInteraction, { passive: true });
     });
+
+    var heroVid = document.getElementById('comp-lwxgxhly_video');
+    if (heroVid) {
+      var resumeHero = function() {
+        if (window.scrollY < 800 && heroVid.paused) {
+          heroVid.play().catch(function() {});
+        }
+      };
+      window.addEventListener('scroll', resumeHero, { passive: true });
+      window.addEventListener('touchmove', resumeHero, { passive: true });
+      window.addEventListener('touchend', resumeHero, { passive: true });
+    }
   }
 
   // ── Boot once. Single DOMContentLoaded listener; no observers, no re-apply. ──

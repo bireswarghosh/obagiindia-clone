@@ -3143,6 +3143,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     will-change: transform, clip-path, border-radius !important;
     transform-origin: center top !important;
   }
+  #comp-lwxgxhly,
+  #videoContainer_comp-lwxgxhly {
+    background: #000 url("https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg/v1/fill/w_1265,h_585,al_c,q_85,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg") center center / cover no-repeat !important;
+  }
+  #comp-mlau0bjm,
+  #videoContainer_comp-mlau0bjm {
+    background: #fff url("https://static.wixstatic.com/media/4833d7_958d8b59c22f449990b3c2a75c660389f001.jpg/v1/fill/w_1265,h_200,al_c,q_80,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_958d8b59c22f449990b3c2a75c660389f001.jpg") center center / cover no-repeat !important;
+  }
   #comp-lwxgxhly_img {
     transition: opacity 0.6s ease-in-out !important;
   }
@@ -3267,18 +3275,20 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 10 !important;
   }
 
-  /* 3. Pink Serum Background: Full-width top 45-50% (Exact Image 1) */
+  /* 3. Pink Serum Background: Bounded upper band (~58vh on desktop, ~72vh on mobile matching official screenshots) */
   #comp-lwrmnb3j {
     position: absolute !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: 100% !important;
+    height: 58vh !important;
     z-index: 1 !important;
     pointer-events: none !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: hidden !important;
+    background: transparent !important;
   }
 
   #comp-lwrmnb3j > .comp-lwrmnb3j-container {
@@ -3289,6 +3299,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    overflow: hidden !important;
   }
 
   #comp-lwrlbohf {
@@ -3305,13 +3316,16 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 1 !important;
     transform: none !important;
     will-change: clip-path !important;
-    clip-path: circle(20% at 50% 55%);
+    clip-path: circle(22% at 50% 55%);
   }
 
   @media (max-width: 768px) {
+    #comp-lwrmnb3j {
+      height: 72vh !important;
+    }
     #comp-lwrlbohf {
       height: 100% !important;
-      clip-path: circle(18% at 50% 68%);
+      clip-path: circle(34% at 50% 52%);
     }
   }
 
@@ -3461,9 +3475,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
   }
 
-  #comp-lwsw0td95__item1 { z-index: 10; opacity: 1 !important; }
-  #comp-lwsw0td95__item-j9ples3e { z-index: 11; opacity: 1 !important; visibility: hidden; }
-  #comp-lwsw0td95__item-j9plerjk { z-index: 12; opacity: 1 !important; visibility: hidden; }
+  #comp-lwsw0td95__item1 { z-index: 30 !important; opacity: 1 !important; visibility: visible !important; }
+  #comp-lwsw0td95__item-j9ples3e { z-index: 20 !important; opacity: 1 !important; visibility: visible !important; }
+  #comp-lwsw0td95__item-j9plerjk { z-index: 10 !important; opacity: 0 !important; visibility: hidden !important; }
 
   /* Completely remove / hide Chat with AI floating elements per Vibe Annotation 1 */
   [data-hook="minimizedChat"],
@@ -3599,8 +3613,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     var cardSec = document.querySelector('#comp-lwrl9iel');
     if (pinkImg && cardSec) {
       var isMobile = window.innerWidth <= 768;
-      var startClip = isMobile ? 'circle(18% at 50% 68%)' : 'circle(20% at 50% 55%)';
-      var endClip = 'circle(130% at 50% 50%)';
+      var startClip = isMobile ? 'circle(34% at 50% 52%)' : 'circle(22% at 50% 55%)';
+      var endClip = isMobile ? 'circle(115% at 50% 50%)' : 'circle(125% at 50% 50%)';
 
       // Pink circle expands upwards as cardSec enters the viewport, expanding to full bleed (100% width and height)
       gsap.fromTo(pinkImg,
@@ -3610,8 +3624,10 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           ease: 'power1.out',
           scrollTrigger: {
             trigger: cardSec,
-            start: isMobile ? 'top 85%' : 'top 75%',
-            end: 'top top',
+            start: isMobile ? 'top 85%' : 'top 80%',
+            end: function() {
+              return '+=' + (window.innerHeight * (isMobile ? 1.05 : 1.2));
+            },
             scrub: 1.0
           }
         }
@@ -3627,13 +3643,6 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     if (card1) cardItems.push(card1);
     if (card2) cardItems.push(card2);
     if (card3) cardItems.push(card3);
-
-    var extraCards = document.querySelectorAll('#comp-lwsw0td7 [id*="__item"]');
-    extraCards.forEach(function(c) {
-      if (!cardItems.includes(c) && (c.id.includes('comp-lwsw0td95') || (c.parentElement && c.parentElement.id.includes('comp-lwsw0td7')))) {
-        cardItems.push(c);
-      }
-    });
 
     if (cardSec && cardItems.length > 0) {
       var isMobile = window.innerWidth <= 768;
@@ -3656,22 +3665,49 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         window.addEventListener('resize', doFit);
       }
 
-      // Card 1 starts peeking from bottom (top ~30% visible on mobile, half on desktop matching Screenshot 1)
-      // Cards 2 & 3 wait off-screen below (visibility: hidden) so they NEVER peek before their turn!
-      // Opacity stays 100% solid (1) always per user request (no fading/decreasing opacity)
-      var peekYPercent = isMobile ? 68 : 55;
-      cardItems.forEach(function(card, idx) {
-        gsap.set(card, {
-          yPercent: idx === 0 ? peekYPercent : 140,
+      // Initial card positions:
+      // - Card 1 starts half-visible / peeking from bottom (yPercent: 55 on desktop, 68 on mobile) with opacity 1
+      // - Card 2 peeks underneath Card 1 (yPercent: 88 on mobile, 100 on desktop) with opacity 1 and zIndex: 20
+      // - Card 3 is COMPLETELY HIDDEN (visibility: hidden, opacity: 0, yPercent: 200) so it CAN NEVER peek prematurely!
+      if (cardItems[0]) {
+        gsap.set(cardItems[0], {
+          yPercent: isMobile ? 68 : 55,
           y: 0,
           rotateX: 0,
           opacity: 1,
-          visibility: idx === 0 ? 'visible' : 'hidden',
+          visibility: 'visible',
           scale: 1,
+          zIndex: 30,
           transformPerspective: 1200,
           transformOrigin: 'top center'
         });
-      });
+      }
+      if (cardItems[1]) {
+        gsap.set(cardItems[1], {
+          yPercent: isMobile ? 88 : 100,
+          y: 0,
+          rotateX: 0,
+          opacity: 1,
+          visibility: 'visible',
+          scale: 1,
+          zIndex: 20,
+          transformPerspective: 1200,
+          transformOrigin: 'top center'
+        });
+      }
+      if (cardItems[2]) {
+        gsap.set(cardItems[2], {
+          yPercent: 200,
+          y: 0,
+          rotateX: 0,
+          opacity: 0,
+          visibility: 'hidden',
+          scale: 1,
+          zIndex: 10,
+          transformPerspective: 1200,
+          transformOrigin: 'top center'
+        });
+      }
 
       var tl = gsap.timeline({
         scrollTrigger: {
@@ -3687,8 +3723,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       var flipDuration = 0.9;
       var flipY = isMobile ? -360 : -320;
 
-      // Step 1: When section pins, Card 1 glides up from peeking position to center (100% solid opacity)
-      if (cardItems.length > 0) {
+      // Phase 1: Card 1 glides up from peeking position to center with 100% solid opacity
+      if (cardItems[0]) {
         tl.to(cardItems[0], {
           yPercent: 0,
           opacity: 1,
@@ -3700,13 +3736,11 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
       var currentTime = riseDuration + restDuration;
 
-      // Step 2..N: Each card flips 3D backwards into shelf with FULL OPACITY 1 (NO opacity decreasing)
-      for (var i = 0; i < cardItems.length; i++) {
-        var currentCard = cardItems[i];
-        var isLast = (i === cardItems.length - 1);
-
-        // Current card flips backward into 3D shelf with 100% solid opacity
-        tl.to(currentCard, {
+      // Phase 2: Card 1 flips backwards into 3D shelf with 100% solid opacity.
+      // Card 2 glides up to center with 100% solid opacity.
+      // Card 3 only peeks after Card 1 has flipped!
+      if (cardItems[0]) {
+        tl.to(cardItems[0], {
           rotateX: 78,
           scale: 0.94,
           y: flipY,
@@ -3714,26 +3748,70 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           ease: 'power2.inOut',
           duration: flipDuration
         }, currentTime);
+      }
 
-        if (!isLast) {
-          var nextCard = cardItems[i + 1];
-          if (nextCard) {
-            // Next card becomes visible and enters with 100% solid opacity
-            tl.set(nextCard, { visibility: 'visible', opacity: 1 }, currentTime + 0.25);
-            tl.to(nextCard, {
-              yPercent: 0,
-              y: 0,
-              rotateX: 0,
-              scale: 1,
-              opacity: 1,
-              ease: 'power2.out',
-              duration: flipDuration
-            }, currentTime + 0.25);
-          }
-          currentTime += flipDuration + restDuration;
-        } else {
-          currentTime += flipDuration + 0.2;
-        }
+      if (cardItems[1]) {
+        tl.to(cardItems[1], {
+          yPercent: 0,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
+          opacity: 1,
+          visibility: 'visible',
+          ease: 'power2.out',
+          duration: flipDuration
+        }, currentTime + 0.2);
+      }
+
+      // Card 3 peeks into bottom queue behind Card 2 (NOT before!)
+      if (cardItems[2]) {
+        tl.set(cardItems[2], {
+          visibility: 'visible',
+          opacity: 1,
+          yPercent: isMobile ? 88 : 100
+        }, currentTime + flipDuration);
+      }
+
+      currentTime += flipDuration + restDuration;
+
+      // Phase 3: Card 2 flips backwards into 3D shelf with 100% solid opacity.
+      // Card 3 glides up to center with 100% solid opacity.
+      if (cardItems[1]) {
+        tl.to(cardItems[1], {
+          rotateX: 78,
+          scale: 0.94,
+          y: flipY,
+          opacity: 1,
+          ease: 'power2.inOut',
+          duration: flipDuration
+        }, currentTime);
+      }
+
+      if (cardItems[2]) {
+        tl.to(cardItems[2], {
+          yPercent: 0,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
+          opacity: 1,
+          visibility: 'visible',
+          ease: 'power2.out',
+          duration: flipDuration
+        }, currentTime + 0.2);
+      }
+
+      currentTime += flipDuration + restDuration;
+
+      // Phase 4: Card 3 flips backwards as Section 7 rolls up underneath it
+      if (cardItems[2]) {
+        tl.to(cardItems[2], {
+          rotateX: 78,
+          scale: 0.94,
+          y: flipY,
+          opacity: 1,
+          ease: 'power2.inOut',
+          duration: flipDuration
+        }, currentTime);
       }
 
       var videoSec = document.querySelector('#comp-mlau06ju');
@@ -3815,6 +3893,24 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         playVid();
       });
     });
+
+    // Rapid-scroll keep-alive for Hero Video on Mobile
+    var heroVid = document.getElementById('comp-lwxgxhly_video');
+    if (heroVid) {
+      var resumeHero = function() {
+        if (window.scrollY < 800 && heroVid.paused) {
+          heroVid.play().catch(function() {});
+        }
+      };
+      window.addEventListener('scroll', resumeHero, { passive: true });
+      window.addEventListener('touchmove', resumeHero, { passive: true });
+      window.addEventListener('touchend', resumeHero, { passive: true });
+      document.addEventListener('visibilitychange', function() {
+        if (!document.hidden && window.scrollY < 800 && heroVid.paused) {
+          heroVid.play().catch(function() {});
+        }
+      });
+    }
 
     ScrollTrigger.refresh();
     console.log('[OBAGI] Successfully initialized 3D card flip & scroll animations.');

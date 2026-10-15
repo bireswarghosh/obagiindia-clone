@@ -2224,18 +2224,19 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
 
   /* 1i. Section 6 Product Cards - 3D Perspective Flip Cards on Desktop & Mobile */
   #comp-lwsw0td95__item1 {
-    z-index: 10;
+    z-index: 30 !important;
     opacity: 1 !important;
+    visibility: visible !important;
   }
   #comp-lwsw0td95__item-j9ples3e {
-    z-index: 11;
+    z-index: 20 !important;
     opacity: 1 !important;
-    visibility: hidden;
+    visibility: visible !important;
   }
   #comp-lwsw0td95__item-j9plerjk {
-    z-index: 12;
-    opacity: 1 !important;
-    visibility: hidden;
+    z-index: 10 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
   }
   @media (max-width: 768px) {
     #comp-lwsw0td7 {
