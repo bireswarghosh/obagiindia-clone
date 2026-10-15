@@ -3486,9 +3486,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
   }
 
-  #comp-lwsw0td95__item1 { z-index: 30 !important; opacity: 1 !important; visibility: visible !important; }
-  #comp-lwsw0td95__item-j9ples3e { z-index: 20 !important; opacity: 1 !important; visibility: visible !important; }
-  #comp-lwsw0td95__item-j9plerjk { z-index: 10 !important; opacity: 1 !important; visibility: visible !important; }
+  #comp-lwsw0td95__item1 { z-index: 30 !important; }
+  #comp-lwsw0td95__item-j9ples3e { z-index: 20 !important; }
+  #comp-lwsw0td95__item-j9plerjk { z-index: 10 !important; }
 
   /* Completely remove / hide Chat with AI floating elements per Vibe Annotation 1 */
   [data-hook="minimizedChat"],
@@ -3652,17 +3652,28 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         window.addEventListener('resize', doFit);
       }
 
-      var startClip = isMobile ? 'circle(30% at 50% 50%)' : 'circle(22% at 50% 50%)';
+      var startClip = isMobile ? 'circle(28% at 50% 50%)' : 'circle(20% at 50% 50%)';
       var endClip = isMobile ? 'circle(120% at 50% 50%)' : 'circle(120% at 50% 50%)';
 
+      // Pink background circle: spreads continuously from bottom entrance until touching header!
       if (pinkImg) {
-        gsap.set(pinkImg, { clipPath: startClip });
+        gsap.fromTo(pinkImg,
+          { clipPath: startClip },
+          {
+            clipPath: endClip,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: cardSec,
+              start: 'top bottom', // Starts the moment the section enters from the bottom of the viewport
+              end: 'top top',    // Gradually spreads with every scroll until touching the header/navbar
+              scrub: isMobile ? 0.6 : 0.8
+            }
+          }
+        );
       }
 
       // Initial card positions:
-      // - Card 1 starts at peeking/rising position with opacity 1 and zIndex 30
-      // - Card 2 peeks underneath Card 1 (yPercent: 90 on mobile, 100 on desktop) with opacity 1 and zIndex 20
-      // - Card 3 starts tucked lower (yPercent: 130 on mobile, 140 on desktop) with opacity 1 and zIndex 10
+      // Card 1 starts at slight peek and glides to center
       if (cardItems[0]) {
         gsap.set(cardItems[0], {
           yPercent: isMobile ? 65 : 55,
@@ -3676,14 +3687,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           transformOrigin: 'top center'
         });
       }
+      // Card 2 and Card 3 start safely below with zero opacity and clean separation (no sticking to bottom!)
       if (cardItems[1]) {
         gsap.set(cardItems[1], {
-          yPercent: isMobile ? 90 : 100,
+          yPercent: 120,
           y: 0,
           rotateX: 0,
-          opacity: 1,
+          opacity: 0,
           visibility: 'visible',
-          scale: 1,
+          scale: 0.96,
           zIndex: 20,
           transformPerspective: 1200,
           transformOrigin: 'top center'
@@ -3691,12 +3703,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
       if (cardItems[2]) {
         gsap.set(cardItems[2], {
-          yPercent: isMobile ? 130 : 140,
+          yPercent: 120,
           y: 0,
           rotateX: 0,
-          opacity: 1,
+          opacity: 0,
           visibility: 'visible',
-          scale: 1,
+          scale: 0.96,
           zIndex: 10,
           transformPerspective: 1200,
           transformOrigin: 'top center'
@@ -3714,15 +3726,6 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
       var flipY = isMobile ? -360 : -320;
 
-      // Pink background circle: spreads continuously with scroll down, shrinks ("syncs") back with scroll up!
-      if (pinkImg) {
-        tl.fromTo(pinkImg,
-          { clipPath: startClip },
-          { clipPath: endClip, ease: 'none', duration: 2.0 },
-          0
-        );
-      }
-
       // Phase 1 (t = 0 to 0.8): Card 1 glides up to center
       if (cardItems[0]) {
         tl.to(cardItems[0], {
@@ -3734,9 +3737,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         }, 0);
       }
 
-      // Phase 2 (t = 1.4 to 2.3): Card 1 flips backwards into 3D shelf
-      // Card 2 glides up to center
-      // Card 3 moves to peeking position (yPercent: 90 / 100) behind Card 2
+      // Phase 2 (t = 1.4 to 2.3): Card 1 flips back into shelf
+      // Card 2 enters and glides up cleanly to center (no clinging to card 1!)
       if (cardItems[0]) {
         tl.to(cardItems[0], {
           rotateX: 78,
@@ -3749,33 +3751,24 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
 
       if (cardItems[1]) {
-        tl.to(cardItems[1], {
-          yPercent: 0,
-          y: 0,
-          rotateX: 0,
-          scale: 1,
-          opacity: 1,
-          visibility: 'visible',
-          ease: 'power2.out',
-          duration: 0.9
-        }, 1.55);
+        tl.fromTo(cardItems[1],
+          { yPercent: 110, opacity: 0, rotateX: 0, scale: 0.96 },
+          {
+            yPercent: 0,
+            y: 0,
+            rotateX: 0,
+            scale: 1,
+            opacity: 1,
+            visibility: 'visible',
+            ease: 'power2.out',
+            duration: 0.9
+          },
+          1.55
+        );
       }
 
-      if (cardItems[2]) {
-        tl.to(cardItems[2], {
-          yPercent: isMobile ? 90 : 100,
-          y: 0,
-          rotateX: 0,
-          scale: 1,
-          opacity: 1,
-          visibility: 'visible',
-          ease: 'power2.out',
-          duration: 0.9
-        }, 1.55);
-      }
-
-      // Phase 3 (t = 3.0 to 3.9): Card 2 flips backwards into 3D shelf
-      // Card 3 glides up to center (100% VISIBLE!)
+      // Phase 3 (t = 3.05 to 3.95): Card 2 flips back into shelf
+      // Card 3 enters and glides up cleanly to center (no clinging to card 2!)
       if (cardItems[1]) {
         tl.to(cardItems[1], {
           rotateX: 78,
@@ -3784,25 +3777,47 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           opacity: 1,
           ease: 'power2.inOut',
           duration: 0.9
-        }, 3.0);
+        }, 3.05);
       }
 
       if (cardItems[2]) {
-        tl.to(cardItems[2], {
-          yPercent: 0,
-          y: 0,
-          rotateX: 0,
-          scale: 1,
-          opacity: 1,
-          visibility: 'visible',
-          ease: 'power2.out',
-          duration: 0.9
-        }, 3.1);
+        tl.fromTo(cardItems[2],
+          { yPercent: 110, opacity: 0, rotateX: 0, scale: 0.96 },
+          {
+            yPercent: 0,
+            y: 0,
+            rotateX: 0,
+            scale: 1,
+            opacity: 1,
+            visibility: 'visible',
+            ease: 'power2.out',
+            duration: 0.9
+          },
+          3.2
+        );
       }
 
-      // Phase 4: Card 3 RESTS AT CENTER (DO NOT FLIP AWAY!)
-      // Holds Card 3 at center while Section 7 rolls up underneath it
-      tl.to({}, { duration: 0.6 });
+      // Phase 4 (t = 4.7 to 5.6): Card 3 flips back into shelf and vanishes cleanly!
+      if (cardItems[2]) {
+        tl.to(cardItems[2], {
+          rotateX: 78,
+          scale: 0.94,
+          y: flipY,
+          opacity: 0,
+          ease: 'power2.inOut',
+          duration: 0.9
+        }, 4.7);
+      }
+
+      // All shelf cards (Card 1, Card 2) also fade out smoothly so NO white line / shelf mark remains!
+      tl.to([cardItems[0], cardItems[1]], {
+        opacity: 0,
+        ease: 'power1.out',
+        duration: 0.6
+      }, 4.9);
+
+      // Buffer hold so Section 7 seamlessly rolls up without empty gap
+      tl.to({}, { duration: 0.4 });
 
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
