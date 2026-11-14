@@ -3138,6 +3138,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 </script>
 
 <style id="obagi-custom-interactive-styles">
+
   /* 1. Hero Morph Section */
   #comp-lwz2pnus, #comp-lwxgxhly {
     will-change: transform, clip-path, border-radius !important;
@@ -3249,11 +3250,24 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     text-shadow: 0 1px 4px rgba(0,0,0,0.5) !important;
   }
 
-  /* Hero dark background to prevent any white flash during morph or overscroll */
+  /* Hero white background requested by client */
   #comp-kbgaghri,
+  #comp-kbgaghri .QG9w8P,
   #comp-kbgaghri .LNYVZi,
-  #comp-kbgaghri > .comp-kbgaghri-container {
-    background-color: #0b1a20 !important;
+  #comp-kbgaghri .ayCf9D,
+  #comp-kbgaghri > .comp-kbgaghri-container,
+  #comp-kbgaghri [data-hook="bgLayers"],
+  #bgLayers_comp-kbgaghri,
+  #bgLayers_comp-kbgaghri * {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    --bg-overlay-color: #ffffff !important;
+    --bg: 255, 255, 255 !important;
+    --alpha-bg: 1 !important;
+  }
+  #comp-lwxgxhly,
+  #comp-lwz2pnus {
+    background-color: transparent !important;
   }
 
   /* 2. Flagship Pinned Scroll Track & Sticky Viewport */
@@ -3596,7 +3610,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   /* CLIPPING FIX: the video component's natural Wix height is aspect-ratio
      driven (250px @1600 - identical on live obagiindia.com). The old fixed
      225px/130px overrides squashed/cut the video on desktop. Height is no
-     longer forced; the component sizes itself. */</style>
+     longer forced; the component sizes itself. */
+</style>
 
 <script id="obagi-custom-interactive-script">
 (function() {
@@ -3609,18 +3624,18 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
     gsap.registerPlugin(ScrollTrigger);
 
-    // 1. Hero Morph (Shrink & Circle towards top)
+    // 1. Hero Morph (Exact round shrink towards upper center, smooth scroll scrub)
     var heroBox = document.querySelector('#comp-lwz2pnus') || document.querySelector('#comp-lwxgxhly');
     var heroSec = document.querySelector('#comp-kbgaghri');
     if (heroBox && heroSec) {
       var d = window.__OBAGI_DATA__;
       var enabled = !d || !d.hero || d.hero.morphEnabled !== false;
-      var speed = (d && d.hero && d.hero.morphSpeed) || 1;
+      var speed = (d && d.hero && d.hero.morphSpeed) || 0.5;
       if (enabled) {
         gsap.fromTo(heroBox,
-          { clipPath: 'circle(100% at 50% 50%)' },
+          { clipPath: 'circle(75% at 50% 50%)' },
           {
-            clipPath: 'circle(0% at 50% 50%)',
+            clipPath: 'circle(0% at 50% 14%)',
             ease: 'none',
             scrollTrigger: {
               trigger: heroSec,
@@ -3633,7 +3648,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
     }
 
-    // 2. Middle Section: Sticky Pink Serum Circle Spreading & 3D Perspective Card Choreography
+    // 2. Middle Section: Sticky Pink Serum Circle Spreading & 3D Perspective Card Flip (Fluid & Unstuck)
     var pinkImg = document.querySelector('#comp-lwrlbohf');
     var cardSec = document.querySelector('#comp-lwrl9iel');
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
@@ -3645,9 +3660,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     if (card2) cardItems.push(card2);
     if (card3) cardItems.push(card3);
 
-    if (cardSec && cardItems.length > 0) {
+    if (cardSec && cardItems.length >= 3) {
       var isMobile = window.innerWidth <= 768;
-      // Banner height in document flow: Section 7 (#comp-mlau06ju) sits directly below by default!
+      var isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
       var baseSecVh = isMobile ? 72 : 52;
       cardSec.style.setProperty('height', baseSecVh + 'vh', 'important');
       cardSec.style.setProperty('min-height', baseSecVh + 'vh', 'important');
@@ -3678,59 +3693,55 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
             ease: 'none',
             scrollTrigger: {
               trigger: cardSec,
-              start: 'top bottom', // Starts the moment the section enters from the bottom of the viewport
-              end: 'top top',    // Gradually spreads with every scroll until touching the header/navbar
+              start: 'top bottom',
+              end: 'top top',
               scrub: isMobile ? 0.3 : 0.4
             }
           }
         );
       }
 
-      // Initial card positions:
-      // Card 1 starts at slight peek and glides to center
-      if (cardItems[0]) {
-        gsap.set(cardItems[0], {
-          yPercent: isMobile ? 65 : 55,
-          y: 0,
-          rotateX: 0,
-          opacity: 1,
-          visibility: 'visible',
-          scale: 1,
-          zIndex: 30,
-          transformPerspective: 1200,
-          transformOrigin: 'top center'
-        });
-      }
-      // Card 2 and Card 3: strictly hidden (visibility: hidden and far below at 160%)
-      // so neither card can EVER peek from below until its predecessor has completely flipped away!
-      if (cardItems[1]) {
-        gsap.set(cardItems[1], {
-          yPercent: 160,
-          y: 0,
-          rotateX: 0,
-          opacity: 0,
-          visibility: 'hidden',
-          scale: 0.96,
-          zIndex: 20,
-          transformPerspective: 1200,
-          transformOrigin: 'top center'
-        });
-      }
-      if (cardItems[2]) {
-        gsap.set(cardItems[2], {
-          yPercent: 160,
-          y: 0,
-          rotateX: 0,
-          opacity: 0,
-          visibility: 'hidden',
-          scale: 0.96,
-          zIndex: 10,
-          transformPerspective: 1200,
-          transformOrigin: 'top center'
-        });
-      }
+      // Initial card states
+      gsap.set(cardItems[0], {
+        yPercent: isMobile ? 55 : 45,
+        y: 0,
+        rotateX: 0,
+        opacity: 1,
+        visibility: 'visible',
+        scale: 1,
+        zIndex: 30,
+        transformPerspective: 1200,
+        transformOrigin: 'top center'
+      });
 
-      var pinDist = window.innerHeight * (isMobile ? 3.6 : 3.2);
+      gsap.set(cardItems[1], {
+        yPercent: 120,
+        y: 0,
+        rotateX: 0,
+        opacity: 0,
+        visibility: 'hidden',
+        scale: 0.96,
+        zIndex: 20,
+        transformPerspective: 1200,
+        transformOrigin: 'top center'
+      });
+
+      gsap.set(cardItems[2], {
+        yPercent: 120,
+        y: 0,
+        rotateX: 0,
+        opacity: 0,
+        visibility: 'hidden',
+        scale: 0.96,
+        zIndex: 10,
+        transformPerspective: 1200,
+        transformOrigin: 'top center'
+      });
+
+      // Shorter, fluid pin distance so scroll NEVER feels stuck
+      var pinDist = window.innerHeight * (isMobile ? 2.3 : 2.0);
+
+      var flipY = isMobile ? -320 : (isTablet ? -280 : -250);
 
       var tl = gsap.timeline({
         scrollTrigger: {
@@ -3740,110 +3751,102 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           pin: true,
           pinSpacing: true,
           anticipatePin: 1,
-          scrub: isMobile ? 0.7 : 0.8
+          scrub: isMobile ? 0.4 : 0.45,
+          onLeaveBack: function() {
+            // When scrolling up past card section into hero/header:
+            // Ensure cards NEVER linger or remain visible in the header!
+            gsap.set(cardItems[1], { opacity: 0, visibility: 'hidden' });
+            gsap.set(cardItems[2], { opacity: 0, visibility: 'hidden' });
+            if (cardItems[0]) {
+              gsap.set(cardItems[0], { yPercent: isMobile ? 55 : 45, y: 0, rotateX: 0, opacity: 1, visibility: 'visible' });
+            }
+          },
+          onEnter: function() {
+            if (cardItems[0]) gsap.set(cardItems[0], { opacity: 1, visibility: 'visible' });
+          }
         }
       });
 
-      var flipY = isMobile ? -360 : -320;
+      // ─── Phase 1 (t = 0.0 to 0.7): Card 1 glides up to center ───
+      tl.to(cardItems[0], {
+        yPercent: 0,
+        opacity: 1,
+        visibility: 'visible',
+        ease: 'power2.out',
+        duration: 0.7
+      }, 0);
 
-      // Phase 1 (t = 0 to 1.0): Card 1 glides up to center
-      if (cardItems[0]) {
-        tl.to(cardItems[0], {
+      // Brief comfortable reading pause for Card 1 (0.7 to 0.9)
+
+      // ─── Phase 2 (t = 0.9 to 1.9): Card 1 flips UP & vanishes; Card 2 enters ───
+      // Card 1 performs full 3D flip upward and vanishes into top without getting stuck!
+      tl.to(cardItems[0], {
+        rotateX: 82,
+        scale: 0.90,
+        y: flipY,
+        opacity: 0,
+        ease: 'power2.inOut',
+        duration: 1.0
+      }, 0.9);
+
+      // Card 2 enters smoothly from below (1.2 to 1.9)
+      tl.fromTo(cardItems[1],
+        { yPercent: 120, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
+        {
           yPercent: 0,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
           opacity: 1,
           visibility: 'visible',
           ease: 'power2.out',
-          duration: 1.0
-        }, 0);
-      }
+          duration: 0.7
+        },
+        1.2
+      );
 
-      // Reading Hold for Card 1: t = 1.0 to 2.0 (user comfortably reads card 1)
+      // Brief comfortable reading pause for Card 2 (1.9 to 2.1)
 
-      // Phase 2 (t = 2.0 to 3.1): Card 1 flips back into shelf
-      // Smooth, perceptible 3D flip!
-      if (cardItems[0]) {
-        tl.to(cardItems[0], {
-          rotateX: 78,
-          scale: 0.94,
-          y: flipY,
-          opacity: 1,
-          ease: 'power2.inOut',
-          duration: 1.1
-        }, 2.0);
-      }
-
-      // Card 2 ONLY starts entering AFTER Card 1 has completely flipped! (t = 3.2 to 4.2)
-      if (cardItems[1]) {
-        tl.fromTo(cardItems[1],
-          { yPercent: 160, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
-          {
-            yPercent: 0,
-            y: 0,
-            rotateX: 0,
-            scale: 1,
-            opacity: 1,
-            visibility: 'visible',
-            ease: 'power2.out',
-            duration: 1.0
-          },
-          3.2
-        );
-      }
-
-      // Reading Hold for Card 2: t = 4.2 to 5.2 (Card 3 is 100% invisible, cannot peek!)
-
-      // Phase 3 (t = 5.2 to 6.3): Card 2 flips back into shelf
-      // Smooth, perceptible 3D flip!
-      if (cardItems[1]) {
-        tl.to(cardItems[1], {
-          rotateX: 78,
-          scale: 0.94,
-          y: flipY,
-          opacity: 1,
-          ease: 'power2.inOut',
-          duration: 1.1
-        }, 5.2);
-      }
-
-      // Card 3 ONLY starts entering AFTER Card 2 has completely flipped away! (t = 6.4 to 7.4)
-      if (cardItems[2]) {
-        tl.fromTo(cardItems[2],
-          { yPercent: 160, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
-          {
-            yPercent: 0,
-            y: 0,
-            rotateX: 0,
-            scale: 1,
-            opacity: 1,
-            visibility: 'visible',
-            ease: 'power2.out',
-            duration: 1.0
-          },
-          6.4
-        );
-      }
-
-      // Reading Hold for Card 3: t = 7.4 to 8.4
-
-      // Phase 4 (t = 8.4 to 9.5): Card 3 flips back into shelf and vanishes cleanly!
-      if (cardItems[2]) {
-        tl.to(cardItems[2], {
-          rotateX: 78,
-          scale: 0.94,
-          y: flipY,
-          opacity: 0,
-          ease: 'power2.inOut',
-          duration: 1.1
-        }, 8.4);
-      }
-
-      // All shelf cards (Card 1, Card 2) also fade out smoothly so NO white line / shelf mark remains!
-      tl.to([cardItems[0], cardItems[1]], {
+      // ─── Phase 3 (t = 2.1 to 3.1): Card 2 flips UP & vanishes; Card 3 enters ───
+      // Card 2 performs full 3D flip upward and vanishes into top without getting stuck!
+      tl.to(cardItems[1], {
+        rotateX: 82,
+        scale: 0.90,
+        y: flipY,
         opacity: 0,
-        ease: 'power1.out',
-        duration: 0.7
-      }, 8.7);
+        ease: 'power2.inOut',
+        duration: 1.0
+      }, 2.1);
 
+      // Card 3 enters smoothly from below (2.4 to 3.1)
+      tl.fromTo(cardItems[2],
+        { yPercent: 120, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
+        {
+          yPercent: 0,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
+          opacity: 1,
+          visibility: 'visible',
+          ease: 'power2.out',
+          duration: 0.7
+        },
+        2.4
+      );
+
+      // Brief comfortable reading pause for Card 3 (3.1 to 3.3)
+
+      // ─── Phase 4 (t = 3.3 to 4.1): Card 3 flips UP & vanishes into Section 7 ───
+      tl.to(cardItems[2], {
+        rotateX: 82,
+        scale: 0.90,
+        y: flipY,
+        opacity: 0,
+        ease: 'power2.inOut',
+        duration: 0.8
+      }, 3.3);
+
+      // Immediately after Card 3 flips, Section 7 appears seamlessly
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
         function adjustVideoMargin() {
