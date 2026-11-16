@@ -3138,143 +3138,17 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 </script>
 
 <style id="obagi-custom-interactive-styles">
-
   /* 1. Hero Morph Section */
   #comp-lwz2pnus, #comp-lwxgxhly {
     will-change: transform, clip-path, border-radius !important;
     transform-origin: center top !important;
   }
-  #comp-lwxgxhly,
-  #videoContainer_comp-lwxgxhly {
-    background: #000 url("https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg/v1/fill/w_1265,h_585,al_c,q_85,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg") center center / cover no-repeat !important;
-  }
-  #comp-mlau0bjm,
-  #videoContainer_comp-mlau0bjm {
-    background: #fff url("https://static.wixstatic.com/media/4833d7_958d8b59c22f449990b3c2a75c660389f001.jpg/v1/fill/w_1265,h_200,al_c,q_80,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_958d8b59c22f449990b3c2a75c660389f001.jpg") center center / cover no-repeat !important;
-  }
-  #comp-lwxgxhly_img {
-    transition: opacity 0.6s ease-in-out !important;
-  }
-  #comp-lwxgxhly.video-playing #comp-lwxgxhly_img,
-  #comp-lwxgxhly.video-playing #comp-lwxgxhly_img img,
-  body.hero-video-playing #comp-lwxgxhly_img,
-  body.hero-video-playing #comp-lwxgxhly_img img {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
 
-  /* Section 3 & Section 4 Spacing & Contrast */
-  @media (max-width: 768px) {
-    #comp-mlqmnjor {
-      padding-bottom: 24px !important;
-      margin-bottom: 0 !important;
-      position: relative !important;
-      z-index: 2 !important;
-    }
-  }
-  #comp-mlqlr0fm {
-    position: relative !important;
-    background-color: #002530 !important;
-    overflow: hidden !important;
-    padding: 50px 20px !important;
-    box-sizing: border-box !important;
-  }
-  #comp-mlqlr0fm #bgLayers_comp-mlqlr0fm,
-  #comp-mlqlr0fm #bgMedia_comp-mlqlr0fm,
-  #comp-mlqlr0fm #img_comp-mlqlr0fm {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 100% !important;
-  }
-  #comp-mlqlr0fm #img_comp-mlqlr0fm img {
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 100% !important;
-    object-fit: cover !important;
-    object-position: center center !important;
-  }
-  #comp-mlqlr0fm [data-testid="colorUnderlay"] {
-    background: linear-gradient(180deg, rgba(0, 32, 43, 0.75) 0%, rgba(0, 32, 43, 0.88) 100%) !important;
-    display: block !important;
-    position: absolute !important;
-    inset: 0 !important;
-    z-index: 1 !important;
-  }
-  #comp-mlqlr0fm .comp-mlqlr0fm-container {
-    position: relative !important;
-    z-index: 2 !important;
-    max-width: 900px !important;
-    margin: 0 auto !important;
-    padding: 0 !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-  }
-  #comp-mlqlr0fp {
-    width: 100% !important;
-    max-width: 800px !important;
-    margin: 0 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    text-align: center !important;
-  }
-  #comp-mlqlr0fr2 {
-    width: 100% !important;
-    margin-bottom: 16px !important;
-  }
-  #comp-mlqlr0fr2 :is(p,h1,h2,h3,span) {
-    color: #ffffff !important;
-    font-size: clamp(22px, 4vw, 36px) !important;
-    line-height: 1.3 !important;
-    font-weight: 700 !important;
-    text-align: center !important;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;
-  }
-  #comp-mlqlr0fq4 {
-    width: 100% !important;
-  }
-  #comp-mlqlr0fq4 :is(p,span) {
-    color: rgba(255, 255, 255, 0.94) !important;
-    font-size: clamp(13px, 2.5vw, 16px) !important;
-    line-height: 1.65 !important;
-    font-weight: 400 !important;
-    text-align: center !important;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.5) !important;
-  }
-
-  /* Hero white background requested by client */
-  #comp-kbgaghri,
-  #comp-kbgaghri .QG9w8P,
-  #comp-kbgaghri .LNYVZi,
-  #comp-kbgaghri .ayCf9D,
-  #comp-kbgaghri > .comp-kbgaghri-container,
-  #comp-kbgaghri [data-hook="bgLayers"],
-  #bgLayers_comp-kbgaghri,
-  #bgLayers_comp-kbgaghri * {
-    background: #ffffff !important;
-    background-color: #ffffff !important;
-    --bg-overlay-color: #ffffff !important;
-    --bg: 255, 255, 255 !important;
-    --alpha-bg: 1 !important;
-  }
-  #comp-lwxgxhly,
-  #comp-lwz2pnus {
-    background-color: transparent !important;
-  }
-
-  /* 2. Flagship Pinned Scroll Track & Sticky Viewport */
+  /* 2. Flagship Pinned Scroll Track & Sticky Viewport (100vh) */
   #comp-lwrl9iel {
-    position: relative;
-    height: 52vh !important;
-    min-height: 52vh !important;
+    position: relative !important;
+    height: 260vh !important;
+    min-height: 260vh !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
@@ -3282,31 +3156,21 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     overflow: visible !important;
   }
 
-  .pin-spacer,
-  .pin-spacer > #comp-lwrl9iel {
-    overflow: visible !important;
-  }
-
-  #bgLayers_comp-lwrl9iel,
-  #bgLayers_comp-lwrl9iel > div {
-    background: transparent !important;
-  }
-
   #comp-lwrl9iel > .comp-lwrl9iel-container {
-    position: relative !important;
-    top: auto !important;
-    left: auto !important;
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 100% !important;
-    height: 100% !important;
+    height: 100vh !important;
     max-width: 100% !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     display: block !important;
     padding: 0 !important;
     margin: 0 !important;
     z-index: 10 !important;
   }
 
-  /* 3. Pink Serum Background: Bounded upper band (~52vh on desktop, ~72vh on mobile matching official screenshots) */
+  /* 3. Pink Serum Background: Full-width top 45-50% (Exact Image 1) */
   #comp-lwrmnb3j {
     position: absolute !important;
     top: 0 !important;
@@ -3318,8 +3182,6 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     pointer-events: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
-    background: transparent !important;
   }
 
   #comp-lwrmnb3j > .comp-lwrmnb3j-container {
@@ -3330,7 +3192,6 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
   }
 
   #comp-lwrlbohf {
@@ -3347,23 +3208,13 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 1 !important;
     transform: none !important;
     will-change: clip-path !important;
-    clip-path: circle(14% at 50% 50%);
+    clip-path: circle(22% at 50% 55%);
   }
 
   @media (max-width: 768px) {
-    #comp-lwrl9iel {
-      height: 72vh !important;
-      min-height: 72vh !important;
-    }
-    #comp-lwrl9iel > .comp-lwrl9iel-container {
-      height: 72vh !important;
-    }
-    #comp-lwrmnb3j {
-      height: 72vh !important;
-    }
     #comp-lwrlbohf {
       height: 100% !important;
-      clip-path: circle(18% at 50% 50%);
+      clip-path: circle(18% at 50% 70%);
     }
   }
 
@@ -3381,7 +3232,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   /* 4. Cards Overlay Stage (Positioned below header with 3D perspective) */
   #comp-lwrmnbmd {
-    position: absolute !important;
+    position: sticky !important;
     top: 0px !important;
     left: 0 !important;
     width: 100% !important;
@@ -3391,8 +3242,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     align-items: center !important;
     justify-content: center !important;
     pointer-events: none !important;
-    margin: 0 !important;
-    overflow: visible !important;
+    margin-top: -100vh !important;
     perspective: 1400px !important;
     perspective-origin: 50% 35% !important;
   }
@@ -3477,46 +3327,48 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   }
 
   @media (max-width: 768px) {
-    #comp-lwsw0td7 {
-      width: min(340px, 92vw) !important;
-      max-width: 340px !important;
-      height: min(520px, 75vh) !important;
-      margin: 0 auto !important;
-      transform-style: preserve-3d !important;
+    #comp-lwrl9iel {
+      height: auto !important;
+      min-height: auto !important;
+      padding-top: 30px !important;
+      padding-bottom: 30px !important;
     }
-    #comp-lwsw0td7 [data-testid="imageX"] img,
-    #comp-lwsw0td7 wow-image img,
-    #comp-lwsw0td7 .comp-lwtcg9jk img {
-      max-width: 260px !important;
-      max-height: 160px !important;
-      object-fit: contain !important;
-      margin: 0 auto !important;
+    #comp-lwrl9iel > .comp-lwrl9iel-container {
+      position: relative !important;
+      top: auto !important;
+      height: auto !important;
+      overflow: visible !important;
+    }
+    #comp-lwsw0td7 {
+      height: auto !important;
+      position: relative !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 20px !important;
     }
     #comp-lwsw0td95__item1,
     #comp-lwsw0td95__item-j9ples3e,
     #comp-lwsw0td95__item-j9plerjk {
-      position: absolute !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
+      position: relative !important;
+      top: auto !important;
+      left: auto !important;
+      right: auto !important;
+      bottom: auto !important;
       width: 100% !important;
-      height: 100% !important;
-      border-radius: 16px !important;
-      box-shadow: 0 12px 30px -6px rgba(0, 0, 0, 0.18) !important;
-      background: #ffffff !important;
-      overflow: hidden !important;
-      transform-style: preserve-3d !important;
-      transform-origin: top center !important;
-      backface-visibility: hidden !important;
-      -webkit-backface-visibility: hidden !important;
-      will-change: transform, opacity !important;
+      height: auto !important;
+      min-height: 280px !important;
+      border-radius: 12px !important;
+      box-shadow: 0 10px 25px -6px rgba(0, 0, 0, 0.12) !important;
+      opacity: 1 !important;
+      transform: none !important;
+      margin-bottom: 24px !important;
+      display: block !important;
     }
   }
 
-  #comp-lwsw0td95__item1 { z-index: 30 !important; }
-  #comp-lwsw0td95__item-j9ples3e { z-index: 20 !important; }
-  #comp-lwsw0td95__item-j9plerjk { z-index: 10 !important; }
+  #comp-lwsw0td95__item1 { z-index: 13 !important; opacity: 1 !important; }
+  #comp-lwsw0td95__item-j9ples3e { z-index: 12 !important; }
+  #comp-lwsw0td95__item-j9plerjk { z-index: 11 !important; }
 
   /* Completely remove / hide Chat with AI floating elements per Vibe Annotation 1 */
   [data-hook="minimizedChat"],
@@ -3567,51 +3419,28 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   #comp-ml6lwrwb,
   #comp-lwz23869,
   #comp-ml6m00og,
-  /* Prevent image blanking / flickering / disappearing on scroll */
-  img:not(#comp-lwxgxhly_img img):not(#comp-mlau0bjm_img img),
-  wow-image:not(#comp-lwxgxhly_img):not(#comp-mlau0bjm_img):not(.bgVideoposter),
-  picture,
-  picture img {
-    opacity: 1 !important;
-    visibility: visible !important;
-    content-visibility: visible !important;
-  }
-  #comp-lwxgxhly.video-playing #comp-lwxgxhly_img,
-  #comp-lwxgxhly.video-playing #comp-lwxgxhly_img img,
-  body.hero-video-playing #comp-lwxgxhly_img,
-  body.hero-video-playing #comp-lwxgxhly_img img,
-  #comp-mlau0bjm.video-playing #comp-mlau0bjm_img,
-  #comp-mlau0bjm.video-playing #comp-mlau0bjm_img img,
-  .bgVideoposter[style*="opacity: 0"],
-  .bgVideoposter.is-hidden,
-  .video-playing .bgVideoposter {
-    opacity: 0 !important;
-    display: none !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-  }
-  #comp-lwxgxhly_video,
-  #comp-mlau0bjm_video,
-  video {
-    display: block !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  [data-motion-enter]:not(#comp-lwrlbohf):not(#comp-lwz2pnus):not(#comp-lwxgxhly),
-  [style*="--motion-clip-start"]:not(#comp-lwrlbohf):not(#comp-lwz2pnus):not(#comp-lwxgxhly) {
+  [data-motion-enter="done"],
+  [style*="--motion-clip-start"] {
     clip-path: none !important;
     -webkit-clip-path: none !important;
     animation: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
-  html, body {
-    -webkit-overflow-scrolling: touch;
+  #comp-lwz20kzt [data-testid="imageX"],
+  #comp-lwz20kzt wow-image,
+  #comp-lwz20kzt wow-image img,
+  #comp-lwz20kzt picture,
+  #comp-lwz20kzt img {
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: block !important;
   }
 
   /* CLIPPING FIX: the video component's natural Wix height is aspect-ratio
      driven (250px @1600 - identical on live obagiindia.com). The old fixed
      225px/130px overrides squashed/cut the video on desktop. Height is no
-     longer forced; the component sizes itself. */
-</style>
+     longer forced; the component sizes itself. */</style>
 
 <script id="obagi-custom-interactive-script">
 (function() {
@@ -3624,18 +3453,18 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
     gsap.registerPlugin(ScrollTrigger);
 
-    // 1. Hero Morph (Exact round shrink towards upper center, smooth scroll scrub)
+    // 1. Hero Morph (Shrink & Circle towards top)
     var heroBox = document.querySelector('#comp-lwz2pnus') || document.querySelector('#comp-lwxgxhly');
     var heroSec = document.querySelector('#comp-kbgaghri');
     if (heroBox && heroSec) {
       var d = window.__OBAGI_DATA__;
       var enabled = !d || !d.hero || d.hero.morphEnabled !== false;
-      var speed = (d && d.hero && d.hero.morphSpeed) || 0.5;
+      var speed = (d && d.hero && d.hero.morphSpeed) || 1;
       if (enabled) {
         gsap.fromTo(heroBox,
           { clipPath: 'circle(75% at 50% 50%)' },
           {
-            clipPath: 'circle(0% at 50% 14%)',
+            clipPath: 'circle(0% at 50% 50%)',
             ease: 'none',
             scrollTrigger: {
               trigger: heroSec,
@@ -3648,9 +3477,34 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
     }
 
-    // 2. Middle Section: Sticky Pink Serum Circle Spreading & 3D Perspective Card Flip (Fluid & Unstuck)
+    // 2. Middle Section: Sticky Pink Serum Circle Spreading
     var pinkImg = document.querySelector('#comp-lwrlbohf');
     var cardSec = document.querySelector('#comp-lwrl9iel');
+    if (pinkImg && cardSec) {
+      var isMobile = window.innerWidth <= 768;
+      var startClip = isMobile ? 'circle(18% at 50% 70%)' : 'circle(22% at 50% 55%)';
+      var endClip = isMobile ? 'circle(125% at 50% 50%)' : 'circle(115% at 50% 50%)';
+
+      // Pink circle starts expanding as cardSec enters viewport (while #1 Leading... scrolls up)
+      // and continues expanding while Card 1 enters, finishing when Card 1 settles in place
+      gsap.fromTo(pinkImg,
+        { clipPath: startClip },
+        {
+          clipPath: endClip,
+          ease: isMobile ? 'none' : 'power1.out',
+          scrollTrigger: {
+            trigger: cardSec,
+            start: isMobile ? 'top 95%' : 'top 65%',
+            end: function() {
+              return '+=' + (window.innerHeight * (isMobile ? 1.45 : 1.4));
+            },
+            scrub: 1.0
+          }
+        }
+      );
+    }
+
+    // 3. 3D Perspective Card Flip & Scroll Transition (Dynamic cards + seamless bottom page roll)
     var card1 = document.querySelector('#comp-lwsw0td95__item1');
     var card2 = document.querySelector('#comp-lwsw0td95__item-j9ples3e');
     var card3 = document.querySelector('#comp-lwsw0td95__item-j9plerjk');
@@ -3660,16 +3514,32 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     if (card2) cardItems.push(card2);
     if (card3) cardItems.push(card3);
 
-    if (cardSec && cardItems.length >= 3) {
-      var isMobile = window.innerWidth <= 768;
-      var isTablet = window.innerWidth > 768 && window.innerWidth <= 1024;
-      var baseSecVh = isMobile ? 72 : 52;
-      cardSec.style.setProperty('height', baseSecVh + 'vh', 'important');
-      cardSec.style.setProperty('min-height', baseSecVh + 'vh', 'important');
+    var extraCards = document.querySelectorAll('#comp-lwsw0td7 [id*="__item"]');
+    extraCards.forEach(function(c) {
+      if (!cardItems.includes(c) && (c.id.includes('comp-lwsw0td95') || (c.parentElement && c.parentElement.id.includes('comp-lwsw0td7')))) {
+        cardItems.push(c);
+      }
+    });
 
-      // Desktop: fit card box to tallest card content (live site sizes by content)
-      var fitBox = document.querySelector('#comp-lwsw0td7');
-      if (!isMobile && fitBox) {
+    if (cardSec && cardItems.length > 0) {
+      var isMobile = window.innerWidth <= 768;
+
+      if (isMobile) {
+        // Mobile: all cards in natural, beautiful flow - 100% visible immediately without scrolljacking
+        cardSec.style.setProperty('height', 'auto', 'important');
+        cardSec.style.setProperty('min-height', 'auto', 'important');
+        cardItems.forEach(function(card) {
+          gsap.set(card, {
+            clearProps: 'all'
+          });
+        });
+      } else {
+        var totalTrackVh = 100 + (cardItems.length) * 70;
+        cardSec.style.setProperty('height', totalTrackVh + 'vh', 'important');
+        cardSec.style.setProperty('min-height', totalTrackVh + 'vh', 'important');
+
+        // Desktop: fit card box to tallest card content (live site sizes by content)
+        var fitBox = document.querySelector('#comp-lwsw0td7');
         var doFit = function() {
           if (!fitBox || !cardItems.length) return;
           var fitH = 324, i;
@@ -3679,174 +3549,73 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         doFit();
         window.addEventListener('load', function() { doFit(); if (window.ScrollTrigger) ScrollTrigger.refresh(); });
         window.addEventListener('resize', doFit);
-      }
 
-      var startClip = isMobile ? 'circle(18% at 50% 50%)' : 'circle(14% at 50% 50%)';
-      var endClip = isMobile ? 'circle(95% at 50% 50%)' : 'circle(90% at 50% 50%)';
+        // Desktop: Card 1 starts at yPercent: 0 (visible on first view!), other cards wait below
+        cardItems.forEach(function(card, idx) {
+          gsap.set(card, {
+            yPercent: idx === 0 ? 0 : 110,
+            y: 0,
+            rotateX: 0,
+            opacity: 1,
+            scale: 1,
+            transformPerspective: 1200,
+            transformOrigin: 'top center'
+          });
+        });
 
-      // Pink background circle: spreads continuously and gradually from bottom entrance until touching header!
-      if (pinkImg) {
-        gsap.fromTo(pinkImg,
-          { clipPath: startClip },
-          {
-            clipPath: endClip,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: cardSec,
-              start: 'top bottom',
-              end: 'top top',
-              scrub: isMobile ? 0.3 : 0.4
-            }
+        var tl = gsap.timeline({
+          scrollTrigger: {
+            trigger: cardSec,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: 1.2
           }
-        );
-      }
+        });
 
-      // Initial card states
-      gsap.set(cardItems[0], {
-        yPercent: isMobile ? 55 : 45,
-        y: 0,
-        rotateX: 0,
-        opacity: 1,
-        visibility: 'visible',
-        scale: 1,
-        zIndex: 30,
-        transformPerspective: 1200,
-        transformOrigin: 'top center'
-      });
+        var stepDuration = 1.0;
+        var stepGap = 1.8;
 
-      gsap.set(cardItems[1], {
-        yPercent: 120,
-        y: 0,
-        rotateX: 0,
-        opacity: 0,
-        visibility: 'hidden',
-        scale: 0.96,
-        zIndex: 20,
-        transformPerspective: 1200,
-        transformOrigin: 'top center'
-      });
+        // Card 1 stays visible, then at 1.8 Card 1 flips back and Card 2 enters
+        // Then Card 2 flips back and Card 3 enters
+        for (var i = 0; i < cardItems.length; i++) {
+          var currentCard = cardItems[i];
+          var isLast = (i === cardItems.length - 1);
+          var flipStartTime = (i + 1) * stepGap;
 
-      gsap.set(cardItems[2], {
-        yPercent: 120,
-        y: 0,
-        rotateX: 0,
-        opacity: 0,
-        visibility: 'hidden',
-        scale: 0.96,
-        zIndex: 10,
-        transformPerspective: 1200,
-        transformOrigin: 'top center'
-      });
+          if (!isLast) {
+            tl.to(currentCard, {
+              rotateX: 78,
+              scale: 0.95,
+              y: -320,
+              ease: 'power2.inOut',
+              duration: stepDuration
+            }, flipStartTime);
 
-      // Shorter, fluid pin distance so scroll NEVER feels stuck
-      var pinDist = window.innerHeight * (isMobile ? 2.3 : 2.0);
-
-      var flipY = isMobile ? -320 : (isTablet ? -280 : -250);
-
-      var tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: cardSec,
-          start: 'top top',
-          end: '+=' + pinDist,
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-          scrub: isMobile ? 0.4 : 0.45,
-          onLeaveBack: function() {
-            // When scrolling up past card section into hero/header:
-            // Ensure cards NEVER linger or remain visible in the header!
-            gsap.set(cardItems[1], { opacity: 0, visibility: 'hidden' });
-            gsap.set(cardItems[2], { opacity: 0, visibility: 'hidden' });
-            if (cardItems[0]) {
-              gsap.set(cardItems[0], { yPercent: isMobile ? 55 : 45, y: 0, rotateX: 0, opacity: 1, visibility: 'visible' });
+            var nextCard = cardItems[i + 1];
+            if (nextCard) {
+              tl.to(nextCard, {
+                yPercent: 0,
+                y: 0,
+                rotateX: 0,
+                scale: 1,
+                ease: 'power2.out',
+                duration: stepDuration
+              }, flipStartTime + 0.35);
             }
-          },
-          onEnter: function() {
-            if (cardItems[0]) gsap.set(cardItems[0], { opacity: 1, visibility: 'visible' });
+          } else {
+            // LAST CARD: Tilts back into shelf perspective - DOES NOT DISAPPEAR OR FLY OFF!
+            tl.to(currentCard, {
+              rotateX: 72,
+              scale: 0.95,
+              yPercent: -20,
+              y: 0,
+              ease: 'power2.inOut',
+              duration: stepDuration
+            }, flipStartTime);
           }
         }
-      });
+      }
 
-      // ─── Phase 1 (t = 0.0 to 0.7): Card 1 glides up to center ───
-      tl.to(cardItems[0], {
-        yPercent: 0,
-        opacity: 1,
-        visibility: 'visible',
-        ease: 'power2.out',
-        duration: 0.7
-      }, 0);
-
-      // Brief comfortable reading pause for Card 1 (0.7 to 0.9)
-
-      // ─── Phase 2 (t = 0.9 to 1.9): Card 1 flips UP & vanishes; Card 2 enters ───
-      // Card 1 performs full 3D flip upward and vanishes into top without getting stuck!
-      tl.to(cardItems[0], {
-        rotateX: 82,
-        scale: 0.90,
-        y: flipY,
-        opacity: 0,
-        ease: 'power2.inOut',
-        duration: 1.0
-      }, 0.9);
-
-      // Card 2 enters smoothly from below (1.2 to 1.9)
-      tl.fromTo(cardItems[1],
-        { yPercent: 120, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
-        {
-          yPercent: 0,
-          y: 0,
-          rotateX: 0,
-          scale: 1,
-          opacity: 1,
-          visibility: 'visible',
-          ease: 'power2.out',
-          duration: 0.7
-        },
-        1.2
-      );
-
-      // Brief comfortable reading pause for Card 2 (1.9 to 2.1)
-
-      // ─── Phase 3 (t = 2.1 to 3.1): Card 2 flips UP & vanishes; Card 3 enters ───
-      // Card 2 performs full 3D flip upward and vanishes into top without getting stuck!
-      tl.to(cardItems[1], {
-        rotateX: 82,
-        scale: 0.90,
-        y: flipY,
-        opacity: 0,
-        ease: 'power2.inOut',
-        duration: 1.0
-      }, 2.1);
-
-      // Card 3 enters smoothly from below (2.4 to 3.1)
-      tl.fromTo(cardItems[2],
-        { yPercent: 120, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
-        {
-          yPercent: 0,
-          y: 0,
-          rotateX: 0,
-          scale: 1,
-          opacity: 1,
-          visibility: 'visible',
-          ease: 'power2.out',
-          duration: 0.7
-        },
-        2.4
-      );
-
-      // Brief comfortable reading pause for Card 3 (3.1 to 3.3)
-
-      // ─── Phase 4 (t = 3.3 to 4.1): Card 3 flips UP & vanishes into Section 7 ───
-      tl.to(cardItems[2], {
-        rotateX: 82,
-        scale: 0.90,
-        y: flipY,
-        opacity: 0,
-        ease: 'power2.inOut',
-        duration: 0.8
-      }, 3.3);
-
-      // Immediately after Card 3 flips, Section 7 appears seamlessly
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
         function adjustVideoMargin() {
@@ -3857,92 +3626,6 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         window.addEventListener('load', adjustVideoMargin);
         setTimeout(adjustVideoMargin, 800);
       }
-    }
-
-    // Ensure all autoplay videos (especially hero #comp-lwxgxhly_video) keep playing across scrolls
-    var pageVideos = document.querySelectorAll('video');
-    pageVideos.forEach(function(v) {
-      v.muted = true;
-      v.setAttribute('muted', '');
-      v.setAttribute('playsinline', '');
-      v.setAttribute('webkit-playsinline', '');
-      v.setAttribute('autoplay', '');
-      v.setAttribute('loop', '');
-
-      function handlePlaying() {
-        var box = v.closest('[id^="comp-"]') || v.parentElement;
-        if (box) box.classList.add('video-playing');
-        if (v.id === 'comp-lwxgxhly_video') {
-          document.body.classList.add('hero-video-playing');
-        }
-        var poster = (box && box.querySelector('wow-image, [id*="_img"]')) || document.getElementById(v.id.replace('_video', '_img'));
-        if (poster) {
-          poster.style.setProperty('opacity', '0', 'important');
-          poster.style.setProperty('display', 'none', 'important');
-          poster.style.setProperty('pointer-events', 'none', 'important');
-        }
-      }
-
-      function playVid() {
-        if (v.paused) {
-          var p = v.play();
-          if (p && typeof p.then === 'function') {
-            p.then(handlePlaying).catch(function() {});
-          }
-        } else {
-          handlePlaying();
-        }
-      }
-
-      playVid();
-      v.addEventListener('playing', handlePlaying);
-      v.addEventListener('timeupdate', function() {
-        if (v.currentTime > 0.1) handlePlaying();
-      });
-
-      if ('IntersectionObserver' in window) {
-        var io = new IntersectionObserver(function(entries) {
-          entries.forEach(function(entry) {
-            if (entry.isIntersecting) playVid();
-          });
-        }, { threshold: [0, 0.1, 0.5] });
-        io.observe(v);
-      }
-
-      window.addEventListener('scroll', function() {
-        var r = v.getBoundingClientRect();
-        if (r.top < window.innerHeight && r.bottom > 0) playVid();
-      }, { passive: true });
-      window.addEventListener('touchmove', function() {
-        var r = v.getBoundingClientRect();
-        if (r.top < window.innerHeight && r.bottom > 0) playVid();
-      }, { passive: true });
-      v.addEventListener('pause', function() {
-        var r = v.getBoundingClientRect();
-        if (r.top < window.innerHeight && r.bottom > 0) setTimeout(playVid, 60);
-      });
-      v.addEventListener('ended', function() {
-        v.currentTime = 0;
-        playVid();
-      });
-    });
-
-    // Rapid-scroll keep-alive for Hero Video on Mobile
-    var heroVid = document.getElementById('comp-lwxgxhly_video');
-    if (heroVid) {
-      var resumeHero = function() {
-        if (window.scrollY < 800 && heroVid.paused) {
-          heroVid.play().catch(function() {});
-        }
-      };
-      window.addEventListener('scroll', resumeHero, { passive: true });
-      window.addEventListener('touchmove', resumeHero, { passive: true });
-      window.addEventListener('touchend', resumeHero, { passive: true });
-      document.addEventListener('visibilitychange', function() {
-        if (!document.hidden && window.scrollY < 800 && heroVid.paused) {
-          heroVid.play().catch(function() {});
-        }
-      });
     }
 
     ScrollTrigger.refresh();

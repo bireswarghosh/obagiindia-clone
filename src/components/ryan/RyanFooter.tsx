@@ -15,12 +15,14 @@ export default function RyanFooter() {
           <div className="lg:col-span-1 space-y-4">
             <Link href="/" className="inline-block group">
               <div className="bg-white/95 rounded-xl p-3 shadow-md border border-white/20 transition-transform group-hover:scale-105">
-                <div className="relative h-11 w-44">
-                  <Image
+                <div className="relative h-11 w-44 flex items-center" style={{ width: '176px', height: '44px' }}>
+                  <img
                     src="/ryan/ryan-logo.png"
                     alt="Ryan Dermaceutics"
-                    fill
-                    className="object-contain"
+                    width="176"
+                    height="44"
+                    className="h-11 w-auto object-contain"
+                    style={{ height: '44px', width: 'auto', maxHeight: '44px', maxWidth: '176px', objectFit: 'contain' }}
                   />
                 </div>
               </div>

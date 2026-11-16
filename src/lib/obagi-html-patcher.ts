@@ -244,6 +244,15 @@ function removeDivByHook(html: string, hook: string): string {
 }
 
 /**
+ * Extracts a YouTube Video ID from standard YouTube URL formats.
+ */
+export function extractYouTubeId(url?: string): string | null {
+  if (!url) return null;
+  const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i);
+  return match ? match[1] : null;
+}
+
+/**
  * Swaps ONLY the src attribute of a <video> (or its <source>), preserving
  * autoplay/mute/loop/playsinline/preload and all inline sizing.
  */
@@ -932,8 +941,22 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
       result = patchImgByAlt(result, 'drop', data.hero.heroImage);
     }
     const heroVid = data.hero.heroVideoUrl || (data.hero as any).heroVideo;
-    if (heroVid) {
-      // Existing hero bg video only — playback attrs untouched.
+    const ytId = heroVid ? extractYouTubeId(heroVid) : null;
+    if (ytId) {
+      const ytIframe = `<iframe id="comp-lwxgxhly_youtube" src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1" title="Hero Background Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); border: none; pointer-events: none; z-index: 10;"></iframe>`;
+      if (result.includes('id="comp-lwxgxhly_youtube"')) {
+        result = result.replace(/<iframe\b[^>]*id="comp-lwxgxhly_youtube"[\s\S]*?<\/iframe>/i, ytIframe);
+      } else {
+        result = result.replace(
+          /(<wix-video\b[^>]*id="videoContainer_comp-lwxgxhly"[^>]*>)/i,
+          `$1${ytIframe}`
+        );
+      }
+      result = result.replace(
+        /(<video\b[^>]*id="comp-lwxgxhly_video"[^>]*style=")[^"]*(")/i,
+        (_m, head, tail) => `${head}display: none !important; opacity: 0;${tail}`
+      );
+    } else if (heroVid) {
       result = patchVideoSrc(result, 'comp-lwxgxhly_video', heroVid);
     }
     const heroPoster = data.hero.heroVideoPoster || data.hero.backgroundImage || 'https://static.wixstatic.com/media/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg/v1/fill/w_1265,h_585,al_c,q_85,usm_0.33_1.00_0.00,enc_avif,quality_auto/4833d7_49dc6fa64d1d4175a6c782c81c6b7a60f000.jpg';
@@ -2117,6 +2140,19 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
+  }
+  #comp-lwxgxhly_youtube {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    width: 100vw !important;
+    height: 56.25vw !important;
+    min-height: 100% !important;
+    min-width: 177.77vh !important;
+    transform: translate(-50%, -50%) !important;
+    border: none !important;
+    pointer-events: none !important;
+    z-index: 10 !important;
   }
 
   /* 1g. Completely remove / hide Chat with AI floating elements per Vibe Annotation 1 */

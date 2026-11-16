@@ -248,8 +248,8 @@ export default function AboutRyanPage() {
             {/* Right Graphic Banner */}
             <div className="lg:col-span-6 relative flex justify-center lg:justify-end">
               <div className="absolute -inset-4 bg-gradient-to-tr from-teal-300/30 to-cyan-200/20 rounded-full blur-3xl pointer-events-none" />
-              <div className="relative w-full max-w-xl rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/70 bg-gradient-to-tr from-cyan-100/40 to-teal-50/20 group">
-                <div className="relative h-72 sm:h-80 md:h-96 w-full">
+              <div className="relative w-full max-w-xl rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/70 bg-gradient-to-tr from-cyan-100/40 to-teal-50/20 group" style={{ position: 'relative', overflow: 'hidden' }}>
+                <div className="relative h-72 sm:h-80 md:h-96 w-full" style={{ position: 'relative', width: '100%', height: '380px' }}>
                   <Image
                     src={aboutContent.hero.heroImage || '/ryan/about/about_hero_collage.png'}
                     alt="Ryan Dermaceutics - Dermatology Excellence"
@@ -313,7 +313,7 @@ export default function AboutRyanPage() {
 
             {/* Left Graphic: Dart hitting target */}
             <div className="lg:col-span-3 flex justify-center">
-              <div className="relative w-full max-w-[280px] h-52 sm:h-60 rounded-3xl overflow-hidden shadow-xl ring-1 ring-teal-100 group bg-gradient-to-br from-slate-50 to-teal-50/40">
+              <div className="relative w-full max-w-[280px] h-52 sm:h-60 rounded-3xl overflow-hidden shadow-xl ring-1 ring-teal-100 group bg-gradient-to-br from-slate-50 to-teal-50/40" style={{ position: 'relative', overflow: 'hidden' }}>
                 <Image
                   src={aboutContent.vision.targetImage || '/ryan/about/about_vision_target.png'}
                   alt="Precision Target"
@@ -382,7 +382,7 @@ export default function AboutRyanPage() {
 
             {/* Left Graphic: Petri dish */}
             <div className="lg:col-span-3 flex justify-center">
-              <div className="relative w-full max-w-[280px] h-52 sm:h-60 rounded-3xl overflow-hidden shadow-xl ring-1 ring-teal-100 group bg-gradient-to-br from-slate-50 to-cyan-50/40">
+              <div className="relative w-full max-w-[280px] h-52 sm:h-60 rounded-3xl overflow-hidden shadow-xl ring-1 ring-teal-100 group bg-gradient-to-br from-slate-50 to-cyan-50/40" style={{ position: 'relative', overflow: 'hidden' }}>
                 <Image
                   src={aboutContent.approach.petriImage || '/ryan/about/about_approach_petri.png'}
                   alt="Scientific Formulation Approach"
@@ -526,7 +526,7 @@ export default function AboutRyanPage() {
 
             {/* Left Graphic: Scientist with Microscope */}
             <div className="lg:col-span-3 flex justify-center">
-              <div className="relative w-full max-w-[280px] h-52 sm:h-60 rounded-3xl overflow-hidden shadow-xl ring-1 ring-teal-100 group bg-gradient-to-br from-slate-50 to-teal-50/40">
+              <div className="relative w-full max-w-[280px] h-52 sm:h-60 rounded-3xl overflow-hidden shadow-xl ring-1 ring-teal-100 group bg-gradient-to-br from-slate-50 to-teal-50/40" style={{ position: 'relative', overflow: 'hidden' }}>
                 <Image
                   src={aboutContent.quality.labImage || '/ryan/about/quality_microscope.png'}
                   alt="Quality Laboratory Assurance"
@@ -660,7 +660,7 @@ export default function AboutRyanPage() {
 
             {/* Right: Corporate Headquarters Building Graphic */}
             <div className="lg:col-span-7 flex justify-center lg:justify-end">
-              <div className="relative w-full max-w-lg h-64 sm:h-72 lg:h-80 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/25 group">
+              <div className="relative w-full max-w-lg h-64 sm:h-72 lg:h-80 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/25 group" style={{ position: 'relative', overflow: 'hidden' }}>
                 <Image
                   src={aboutContent.ethicsMedinova.buildingImage || '/ryan/about/ethics_building.png'}
                   alt="Ethics Medinova Corporate Headquarters"

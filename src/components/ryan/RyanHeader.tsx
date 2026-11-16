@@ -101,16 +101,15 @@ export default function RyanHeader() {
         <div className="flex items-center justify-between h-20">
           
           {/* Official Brand Logo */}
-          <Link href="/" className="flex items-center gap-3 group py-1">
-            <div className="relative h-12 w-44 sm:h-14 sm:w-52 transition-transform duration-300 group-hover:scale-[1.02]">
-              <Image
-                src="/ryan/ryan-logo.png"
-                alt="Ryan Dermaceutics - Science That Understands Skin"
-                fill
-                priority
-                className="object-contain object-left"
-              />
-            </div>
+          <Link href="/" className="flex items-center gap-3 group py-1 shrink-0" style={{ height: '48px', display: 'inline-flex', alignItems: 'center' }}>
+            <img
+              src="/ryan/ryan-logo.png"
+              alt="Ryan Dermaceutics - Science That Understands Skin"
+              width="176"
+              height="48"
+              className="h-10 sm:h-12 w-auto object-contain object-left transition-transform duration-300 group-hover:scale-[1.02]"
+              style={{ height: '48px', width: 'auto', maxHeight: '48px', maxWidth: '200px', display: 'block', objectFit: 'contain' }}
+            />
           </Link>
 
 
