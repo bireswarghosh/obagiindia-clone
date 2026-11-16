@@ -3705,7 +3705,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       // so neither card can EVER peek from below until its predecessor has completely flipped away!
       if (cardItems[1]) {
         gsap.set(cardItems[1], {
-          yPercent: 160,
+          yPercent: 120,
           y: 0,
           rotateX: 0,
           opacity: 0,
@@ -3718,7 +3718,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       }
       if (cardItems[2]) {
         gsap.set(cardItems[2], {
-          yPercent: 160,
+          yPercent: 120,
           y: 0,
           rotateX: 0,
           opacity: 0,
@@ -3730,7 +3730,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         });
       }
 
-      var pinDist = window.innerHeight * (isMobile ? 3.6 : 3.2);
+      var pinDist = window.innerHeight * (isMobile ? 3.2 : 2.8);
 
       var tl = gsap.timeline({
         scrollTrigger: {
@@ -3740,11 +3740,11 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           pin: true,
           pinSpacing: true,
           anticipatePin: 1,
-          scrub: isMobile ? 0.7 : 0.8
+          scrub: isMobile ? 0.6 : 0.7
         }
       });
 
-      var flipY = isMobile ? -360 : -320;
+      var flipY = isMobile ? -350 : -300;
 
       // Phase 1 (t = 0 to 1.0): Card 1 glides up to center
       if (cardItems[0]) {
@@ -3757,25 +3757,28 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         }, 0);
       }
 
-      // Reading Hold for Card 1: t = 1.0 to 2.0 (user comfortably reads card 1)
+      // Reading Hold for Card 1: t = 1.0 to 1.8 (user comfortably reads Card 1 alone at center)
 
-      // Phase 2 (t = 2.0 to 3.1): Card 1 flips back into shelf
-      // Smooth, perceptible 3D flip!
+      // Phase 2 (t = 1.8 to 2.8): Card 1 flips back into shelf
+      // Smooth 3D flip up to shelf position (100% solid opacity)!
       if (cardItems[0]) {
         tl.to(cardItems[0], {
-          rotateX: 78,
+          rotateX: 76,
           scale: 0.94,
           y: flipY,
           opacity: 1,
           ease: 'power2.inOut',
-          duration: 1.1
-        }, 2.0);
+          duration: 1.0
+        }, 1.8);
       }
 
-      // Card 2 ONLY starts entering AFTER Card 1 has completely flipped! (t = 3.2 to 4.2)
+      // Card 2 ENTERS AS CARD 1 FLIPS UP! (t = 1.9 to 2.9)
+      // Card 2 rises from below into center while Card 1 is in the top shelf.
+      // There is a clean gap between them - they NEVER touch or overlap (Matches Obagi Official Screenshot 2)!
+      // ZERO BLANK SCREEN!
       if (cardItems[1]) {
         tl.fromTo(cardItems[1],
-          { yPercent: 160, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
+          { yPercent: 120, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
           {
             yPercent: 0,
             y: 0,
@@ -3786,29 +3789,38 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
             ease: 'power2.out',
             duration: 1.0
           },
-          3.2
+          1.9
         );
       }
 
-      // Reading Hold for Card 2: t = 4.2 to 5.2 (Card 3 is 100% invisible, cannot peek!)
+      // Reading Hold for Card 2: t = 2.9 to 4.0 (Card 2 at center, Card 1 in shelf above)
 
-      // Phase 3 (t = 5.2 to 6.3): Card 2 flips back into shelf
-      // Smooth, perceptible 3D flip!
+      // Phase 3 (t = 4.0 to 5.0): Card 1 fades out in shelf, Card 2 flips back into shelf
+      if (cardItems[0]) {
+        tl.to(cardItems[0], {
+          opacity: 0,
+          ease: 'power1.out',
+          duration: 0.4
+        }, 4.0);
+      }
       if (cardItems[1]) {
         tl.to(cardItems[1], {
-          rotateX: 78,
+          rotateX: 76,
           scale: 0.94,
           y: flipY,
           opacity: 1,
           ease: 'power2.inOut',
-          duration: 1.1
-        }, 5.2);
+          duration: 1.0
+        }, 4.0);
       }
 
-      // Card 3 ONLY starts entering AFTER Card 2 has completely flipped away! (t = 6.4 to 7.4)
+      // Card 3 ENTERS AS CARD 2 FLIPS UP! (t = 4.1 to 5.1)
+      // Card 3 rises from below into center while Card 2 is in the top shelf.
+      // Clean gap between them - they NEVER touch or overlap (Matches Obagi Official Screenshot 3)!
+      // ZERO BLANK SCREEN!
       if (cardItems[2]) {
         tl.fromTo(cardItems[2],
-          { yPercent: 160, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
+          { yPercent: 120, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
           {
             yPercent: 0,
             y: 0,
@@ -3819,30 +3831,30 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
             ease: 'power2.out',
             duration: 1.0
           },
-          6.4
+          4.1
         );
       }
 
-      // Reading Hold for Card 3: t = 7.4 to 8.4
+      // Reading Hold for Card 3: t = 5.1 to 6.2 (Card 3 at center, Card 2 in shelf above)
 
-      // Phase 4 (t = 8.4 to 9.5): Card 3 flips back into shelf and vanishes cleanly!
+      // Phase 4 (t = 6.2 to 7.2): Card 2 fades out in shelf, Card 3 flips back into shelf and vanishes cleanly into Section 7!
+      if (cardItems[1]) {
+        tl.to(cardItems[1], {
+          opacity: 0,
+          ease: 'power1.out',
+          duration: 0.4
+        }, 6.2);
+      }
       if (cardItems[2]) {
         tl.to(cardItems[2], {
-          rotateX: 78,
+          rotateX: 76,
           scale: 0.94,
           y: flipY,
           opacity: 0,
           ease: 'power2.inOut',
-          duration: 1.1
-        }, 8.4);
+          duration: 1.0
+        }, 6.2);
       }
-
-      // All shelf cards (Card 1, Card 2) also fade out smoothly so NO white line / shelf mark remains!
-      tl.to([cardItems[0], cardItems[1]], {
-        opacity: 0,
-        ease: 'power1.out',
-        duration: 0.7
-      }, 8.7);
 
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
