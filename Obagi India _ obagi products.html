@@ -3258,9 +3258,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   /* 2. Flagship Pinned Scroll Track & Sticky Viewport */
   #comp-lwrl9iel {
-    position: relative;
-    height: 52vh !important;
-    min-height: 52vh !important;
+    position: relative !important;
+    min-height: 250vh !important;
+    height: 250vh !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
@@ -3286,20 +3286,25 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     height: 100% !important;
     max-width: 100% !important;
     overflow: visible !important;
-    display: block !important;
+    display: grid !important;
+    grid-template-areas: "cardlayer" !important;
+    grid-template-rows: 1fr !important;
+    grid-template-columns: 1fr !important;
     padding: 0 !important;
     margin: 0 !important;
     z-index: 10 !important;
   }
 
-  /* 3. Pink Serum Background: Bounded upper band (~52vh on desktop, ~72vh on mobile matching official screenshots) */
+  /* 3. Pink Serum Background: Sticky layer inside 250vh runway */
   #comp-lwrmnb3j {
-    position: absolute !important;
-    top: 0 !important;
+    grid-area: cardlayer !important;
+    position: sticky !important;
+    top: 0px !important;
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: 100% !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
     z-index: 1 !important;
     pointer-events: none !important;
     margin: 0 !important;
@@ -3309,9 +3314,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   }
 
   #comp-lwrmnb3j > .comp-lwrmnb3j-container {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
+    position: relative !important;
     width: 100% !important;
     height: 100% !important;
     margin: 0 !important;
@@ -3338,14 +3341,11 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   @media (max-width: 768px) {
     #comp-lwrl9iel {
-      height: 72vh !important;
-      min-height: 72vh !important;
-    }
-    #comp-lwrl9iel > .comp-lwrl9iel-container {
-      height: 72vh !important;
+      min-height: 250vh !important;
+      height: 250vh !important;
     }
     #comp-lwrmnb3j {
-      height: 72vh !important;
+      height: 100vh !important;
     }
     #comp-lwrlbohf {
       height: 100% !important;
@@ -3365,13 +3365,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     display: block !important;
   }
 
-  /* 4. Cards Overlay Stage (Positioned below header with 3D perspective) */
+  /* 4. Cards Overlay Stage (Sticky layer inside 250vh runway with 3D perspective) */
   #comp-lwrmnbmd {
-    position: absolute !important;
+    grid-area: cardlayer !important;
+    position: sticky !important;
     top: 0px !important;
     left: 0 !important;
     width: 100% !important;
     height: 100vh !important;
+    min-height: 100vh !important;
     z-index: 10 !important;
     display: flex !important;
     align-items: center !important;
@@ -3379,7 +3381,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     pointer-events: none !important;
     margin: 0 !important;
     overflow: visible !important;
-    perspective: 1400px !important;
+    perspective: 1200px !important;
     perspective-origin: 50% 35% !important;
   }
 
@@ -3397,12 +3399,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   #comp-lwsw0td7 {
     width: 94% !important;
-    /* CLIPPING FIX: the old 1224px cap was narrower than the card's content
-       (~0.82 * viewport at desktop), so the absolute-positioned cards
-       (overflow:hidden parents) were cut off on BOTH sides. */
     max-width: none !important;
-    /* CLIPPING FIX: 324px was shorter than the card content (~0.233vw);
-       content was cut vertically too. clamp() tracks content growth. */
     height: clamp(300px, 28vw, 640px) !important;
     position: relative !important;
     display: block !important;
@@ -3412,33 +3409,31 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   @media (max-width: 768px) {
     #comp-lwsw0td7 {
-      width: 280px !important;
-      max-width: 280px !important;
-      height: 524px !important;
+      width: min(340px, 92vw) !important;
+      max-width: 340px !important;
+      height: min(520px, 75vh) !important;
       margin: 0 auto !important;
+      transform-style: preserve-3d !important;
     }
 
     #comp-lwsw0td7 [data-testid="imageX"] img,
     #comp-lwsw0td7 wow-image img,
     #comp-lwsw0td7 .comp-lwtcg9jk img {
-      max-width: 263px !important;
-      max-height: 165px !important;
+      max-width: 260px !important;
+      max-height: 160px !important;
       object-fit: contain !important;
       margin: 0 auto !important;
     }
   }
 
   #comp-lwsw0td7 > .comp-lwsw0td7-container {
-    position: relative !important;
     width: 100% !important;
     height: 100% !important;
-    display: block !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    position: relative !important;
     transform-style: preserve-3d !important;
   }
 
-  /* 5. 3D Flip Card Items (Official 1:1 Scale) */
+  /* 5. 3D Flip Card Items (Official 1:1 Scale & Stacking) */
   #comp-lwsw0td95__item1,
   #comp-lwsw0td95__item-j9ples3e,
   #comp-lwsw0td95__item-j9plerjk {
@@ -3463,21 +3458,6 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   }
 
   @media (max-width: 768px) {
-    #comp-lwsw0td7 {
-      width: min(340px, 92vw) !important;
-      max-width: 340px !important;
-      height: min(520px, 75vh) !important;
-      margin: 0 auto !important;
-      transform-style: preserve-3d !important;
-    }
-    #comp-lwsw0td7 [data-testid="imageX"] img,
-    #comp-lwsw0td7 wow-image img,
-    #comp-lwsw0td7 .comp-lwtcg9jk img {
-      max-width: 260px !important;
-      max-height: 160px !important;
-      object-fit: contain !important;
-      margin: 0 auto !important;
-    }
     #comp-lwsw0td95__item1,
     #comp-lwsw0td95__item-j9ples3e,
     #comp-lwsw0td95__item-j9plerjk {
@@ -3500,9 +3480,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
   }
 
-  #comp-lwsw0td95__item1 { z-index: 30 !important; }
+  #comp-lwsw0td95__item1 { z-index: 10 !important; }
   #comp-lwsw0td95__item-j9ples3e { z-index: 20 !important; }
-  #comp-lwsw0td95__item-j9plerjk { z-index: 10 !important; }
+  #comp-lwsw0td95__item-j9plerjk { z-index: 30 !important; }
 
   /* Completely remove / hide Chat with AI floating elements per Vibe Annotation 1 */
   [data-hook="minimizedChat"],
@@ -3647,17 +3627,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
     if (cardSec && cardItems.length > 0) {
       var isMobile = window.innerWidth <= 768;
-      // Banner height in document flow: Section 7 (#comp-mlau06ju) sits directly below by default!
-      var baseSecVh = isMobile ? 72 : 52;
-      cardSec.style.setProperty('height', baseSecVh + 'vh', 'important');
-      cardSec.style.setProperty('min-height', baseSecVh + 'vh', 'important');
+      cardSec.style.setProperty('min-height', '250vh', 'important');
+      cardSec.style.setProperty('height', '250vh', 'important');
 
       // Desktop: fit card box to tallest card content (live site sizes by content)
       var fitBox = document.querySelector('#comp-lwsw0td7');
       if (!isMobile && fitBox) {
         var doFit = function() {
           if (!fitBox || !cardItems.length) return;
-          var fitH = 324, i;
+          var fitH = 340, i;
           for (i = 0; i < cardItems.length; i++) fitH = Math.max(fitH, cardItems[i].scrollHeight);
           fitBox.style.setProperty('height', fitH + 'px', 'important');
         };
@@ -3678,189 +3656,169 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
             ease: 'none',
             scrollTrigger: {
               trigger: cardSec,
-              start: 'top bottom', // Starts the moment the section enters from the bottom of the viewport
-              end: 'top top',    // Gradually spreads with every scroll until touching the header/navbar
+              start: 'top bottom',
+              end: 'top top',
               scrub: isMobile ? 0.3 : 0.4
             }
           }
         );
       }
 
+      var peekYPercent = 115;
+
       // Initial card positions:
-      // Card 1 starts at slight peek and glides to center
+      // Card 1 starts at center
       if (cardItems[0]) {
         gsap.set(cardItems[0], {
-          yPercent: isMobile ? 65 : 55,
+          yPercent: 0,
           y: 0,
           rotateX: 0,
+          scale: 1,
           opacity: 1,
           visibility: 'visible',
-          scale: 1,
-          zIndex: 30,
-          transformPerspective: 1200,
-          transformOrigin: 'top center'
-        });
-      }
-      // Card 2 and Card 3: strictly hidden (visibility: hidden and far below at 160%)
-      // so neither card can EVER peek from below until its predecessor has completely flipped away!
-      if (cardItems[1]) {
-        gsap.set(cardItems[1], {
-          yPercent: 120,
-          y: 0,
-          rotateX: 0,
-          opacity: 0,
-          visibility: 'hidden',
-          scale: 0.96,
-          zIndex: 20,
-          transformPerspective: 1200,
-          transformOrigin: 'top center'
-        });
-      }
-      if (cardItems[2]) {
-        gsap.set(cardItems[2], {
-          yPercent: 120,
-          y: 0,
-          rotateX: 0,
-          opacity: 0,
-          visibility: 'hidden',
-          scale: 0.96,
           zIndex: 10,
           transformPerspective: 1200,
           transformOrigin: 'top center'
         });
       }
+      // Card 2 peeks below Card 1 with clean gap (zero overlap, matches official Obagi Screenshot 2)
+      if (cardItems[1]) {
+        gsap.set(cardItems[1], {
+          yPercent: peekYPercent,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
+          opacity: 1,
+          visibility: 'visible',
+          zIndex: 20,
+          transformPerspective: 1200,
+          transformOrigin: 'top center'
+        });
+      }
+      // Card 3 starts hidden further below
+      if (cardItems[2]) {
+        gsap.set(cardItems[2], {
+          yPercent: 160,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
+          opacity: 0,
+          visibility: 'hidden',
+          zIndex: 30,
+          transformPerspective: 1200,
+          transformOrigin: 'top center'
+        });
+      }
 
-      var pinDist = window.innerHeight * (isMobile ? 3.2 : 2.8);
-
+      // Native Sticky Scroll Scrubbing: zero pin-spacer, zero layout reflows, silky smooth on rapid scroll!
       var tl = gsap.timeline({
         scrollTrigger: {
           trigger: cardSec,
           start: 'top top',
-          end: '+=' + pinDist,
-          pin: true,
-          pinSpacing: true,
-          anticipatePin: 1,
-          scrub: isMobile ? 0.6 : 0.7
+          end: 'bottom bottom',
+          scrub: 0.5
         }
       });
 
-      var flipY = isMobile ? -350 : -300;
+      var flipY = isMobile ? -170 : -190;
+      var tiltAngle = 52;
 
-      // Phase 1 (t = 0 to 1.0): Card 1 glides up to center
+      // Phase 1 (t = 0.0 to 1.5): Reading hold for Card 1 (Card 1 at center, Card 2 peeking below)
+
+      // Phase 2 (t = 1.5 to 3.8): Card 1 tilts back into top shelf (Matches Obagi Official Screenshots 1, 3, 5)
       if (cardItems[0]) {
         tl.to(cardItems[0], {
+          rotateX: tiltAngle,
+          scale: 0.92,
+          y: flipY,
+          opacity: 1,
+          ease: 'power2.inOut',
+          duration: 2.3
+        }, 1.5);
+      }
+
+      // Card 2 glides up from bottom peeking position to center stage
+      if (cardItems[1]) {
+        tl.to(cardItems[1], {
           yPercent: 0,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
+          opacity: 1,
+          ease: 'power2.out',
+          duration: 2.1
+        }, 1.9);
+      }
+
+      // Card 3 glides into bottom peeking position behind Card 2
+      if (cardItems[2]) {
+        tl.to(cardItems[2], {
+          yPercent: peekYPercent,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
           opacity: 1,
           visibility: 'visible',
           ease: 'power2.out',
-          duration: 1.0
-        }, 0);
+          duration: 1.8
+        }, 2.4);
       }
 
-      // Reading Hold for Card 1: t = 1.0 to 1.8 (user comfortably reads Card 1 alone at center)
-
-      // Phase 2 (t = 1.8 to 2.8): Card 1 flips back into shelf
-      // Smooth 3D flip up to shelf position (100% solid opacity)!
-      if (cardItems[0]) {
-        tl.to(cardItems[0], {
-          rotateX: 76,
-          scale: 0.94,
-          y: flipY,
-          opacity: 1,
-          ease: 'power2.inOut',
-          duration: 1.0
-        }, 1.8);
-      }
-
-      // Card 2 ENTERS AS CARD 1 FLIPS UP! (t = 1.9 to 2.9)
-      // Card 2 rises from below into center while Card 1 is in the top shelf.
-      // There is a clean gap between them - they NEVER touch or overlap (Matches Obagi Official Screenshot 2)!
-      // ZERO BLANK SCREEN!
-      if (cardItems[1]) {
-        tl.fromTo(cardItems[1],
-          { yPercent: 120, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
-          {
-            yPercent: 0,
-            y: 0,
-            rotateX: 0,
-            scale: 1,
-            opacity: 1,
-            visibility: 'visible',
-            ease: 'power2.out',
-            duration: 1.0
-          },
-          1.9
-        );
-      }
-
-      // Reading Hold for Card 2: t = 2.9 to 4.0 (Card 2 at center, Card 1 in shelf above)
-
-      // Phase 3 (t = 4.0 to 5.0): Card 1 fades out in shelf, Card 2 flips back into shelf
+      // Phase 3 (t = 3.8 to 5.0): Card 2 at center, Card 1 in top shelf fades out cleanly (Screenshot 4)
       if (cardItems[0]) {
         tl.to(cardItems[0], {
           opacity: 0,
           ease: 'power1.out',
-          duration: 0.4
-        }, 4.0);
+          duration: 0.8
+        }, 3.8);
       }
+
+      // Phase 4 (t = 5.0 to 6.2): Reading hold for Card 2 at center stage, Card 3 peeking below
+
+      // Phase 5 (t = 6.2 to 8.5): Card 2 tilts back into top shelf
       if (cardItems[1]) {
         tl.to(cardItems[1], {
-          rotateX: 76,
-          scale: 0.94,
+          rotateX: tiltAngle,
+          scale: 0.92,
           y: flipY,
           opacity: 1,
           ease: 'power2.inOut',
-          duration: 1.0
-        }, 4.0);
-      }
-
-      // Card 3 ENTERS AS CARD 2 FLIPS UP! (t = 4.1 to 5.1)
-      // Card 3 rises from below into center while Card 2 is in the top shelf.
-      // Clean gap between them - they NEVER touch or overlap (Matches Obagi Official Screenshot 3)!
-      // ZERO BLANK SCREEN!
-      if (cardItems[2]) {
-        tl.fromTo(cardItems[2],
-          { yPercent: 120, opacity: 0, visibility: 'hidden', rotateX: 0, scale: 0.96 },
-          {
-            yPercent: 0,
-            y: 0,
-            rotateX: 0,
-            scale: 1,
-            opacity: 1,
-            visibility: 'visible',
-            ease: 'power2.out',
-            duration: 1.0
-          },
-          4.1
-        );
-      }
-
-      // Reading Hold for Card 3: t = 5.1 to 6.2 (Card 3 at center, Card 2 in shelf above)
-
-      // Phase 4 (t = 6.2 to 7.2): Card 2 fades out in shelf, Card 3 flips back into shelf and vanishes cleanly into Section 7!
-      if (cardItems[1]) {
-        tl.to(cardItems[1], {
-          opacity: 0,
-          ease: 'power1.out',
-          duration: 0.4
+          duration: 2.3
         }, 6.2);
       }
+
+      // Card 3 glides up from bottom peeking position to center stage
       if (cardItems[2]) {
         tl.to(cardItems[2], {
-          rotateX: 76,
-          scale: 0.94,
-          y: flipY,
-          opacity: 0,
-          ease: 'power2.inOut',
-          duration: 1.0
-        }, 6.2);
+          yPercent: 0,
+          y: 0,
+          rotateX: 0,
+          scale: 1,
+          opacity: 1,
+          ease: 'power2.out',
+          duration: 2.1
+        }, 6.6);
       }
+
+      // Phase 6 (t = 8.5 to 9.5): Card 3 at center, Card 2 in top shelf fades out cleanly
+      if (cardItems[1]) {
+        tl.to(cardItems[1], {
+          opacity: 0,
+          ease: 'power1.out',
+          duration: 0.8
+        }, 8.5);
+      }
+
+      // Phase 7 (t = 9.5 to 11.0): Card 3 rests at center stage.
+      // CRITICAL: Card 3 NEVER flips away into empty space!
+      // It stays visible and solid at center stage as the grand finale of Section 6.
+      // As the user scrolls past Section 6, the sticky runway ends and Section 7 rolls up underneath it naturally!
 
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
-        function adjustVideoMargin() {
+        var adjustVideoMargin = function() {
           videoSec.style.setProperty('margin-top', '0px', 'important');
-        }
+        };
         adjustVideoMargin();
         window.addEventListener('resize', adjustVideoMargin);
         window.addEventListener('load', adjustVideoMargin);

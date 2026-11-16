@@ -2260,13 +2260,13 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
 
   /* 1i. Section 6 Product Cards - 3D Perspective Flip Cards on Desktop & Mobile */
   #comp-lwsw0td95__item1 {
-    z-index: 30 !important;
+    z-index: 10 !important;
   }
   #comp-lwsw0td95__item-j9ples3e {
     z-index: 20 !important;
   }
   #comp-lwsw0td95__item-j9plerjk {
-    z-index: 10 !important;
+    z-index: 30 !important;
   }
   @media (max-width: 768px) {
     #comp-lwsw0td7 {
