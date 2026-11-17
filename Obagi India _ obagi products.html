@@ -3259,8 +3259,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
   /* 2. Flagship Pinned Scroll Track & Sticky Viewport */
   #comp-lwrl9iel {
     position: relative !important;
-    min-height: 250vh !important;
-    height: 250vh !important;
+    min-height: 300vh !important;
+    height: 300vh !important;
     margin: 0 !important;
     padding: 0 !important;
     display: block !important;
@@ -3295,7 +3295,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 10 !important;
   }
 
-  /* 3. Pink Serum Background: Sticky layer inside 250vh runway */
+  /* 3. Pink Serum Background: Sticky layer inside 300vh runway */
   #comp-lwrmnb3j {
     grid-area: cardlayer !important;
     position: sticky !important;
@@ -3341,8 +3341,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
   @media (max-width: 768px) {
     #comp-lwrl9iel {
-      min-height: 250vh !important;
-      height: 250vh !important;
+      min-height: 300vh !important;
+      height: 300vh !important;
     }
     #comp-lwrmnb3j {
       height: 100vh !important;
@@ -3365,7 +3365,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     display: block !important;
   }
 
-  /* 4. Cards Overlay Stage (Sticky layer inside 250vh runway with 3D perspective) */
+  /* 4. Cards Overlay Stage (Sticky layer inside 300vh runway with 3D perspective) */
   #comp-lwrmnbmd {
     grid-area: cardlayer !important;
     position: sticky !important;
@@ -3627,8 +3627,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
 
     if (cardSec && cardItems.length > 0) {
       var isMobile = window.innerWidth <= 768;
-      cardSec.style.setProperty('min-height', '250vh', 'important');
-      cardSec.style.setProperty('height', '250vh', 'important');
+      cardSec.style.setProperty('min-height', '300vh', 'important');
+      cardSec.style.setProperty('height', '300vh', 'important');
 
       // Desktop: fit card box to tallest card content (live site sizes by content)
       var fitBox = document.querySelector('#comp-lwsw0td7');
@@ -3664,28 +3664,31 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         );
       }
 
-      // Dynamic Card Metrics: calculate exact flipY for clean one-finger separation (25-30px) with 52deg tilt
-      var getCardMetrics = function() {
+      // Dynamic Card Metrics: calculate exact flipY for clean one-finger separation (28-36px) with 52deg tilt
+      var getCardMetrics = function(targetCard) {
         var mob = window.innerWidth <= 768;
-        var h = (cardItems[0] && cardItems[0].offsetHeight) || (fitBox && fitBox.offsetHeight) || (mob ? 520 : 380);
+        var card = targetCard || cardItems[0];
+        var h = (card && card.offsetHeight) || (fitBox && fitBox.offsetHeight) || (mob ? 520 : 380);
         var angle = 52;
-        var gap = mob ? 25 : 30; // One-finger gap (~25-30px)
+        var gap = mob ? 28 : 36; // Exact one-finger gap
         var proj = h * Math.cos(angle * Math.PI / 180) * 0.92;
+        var step = ((h + gap) / h) * 100;
         return {
           isMob: mob,
+          h: h,
           tiltAngle: angle,
           flipY: -(proj + gap),
-          shelfGap: gap,
-          peekYPercent: 115
+          stepPercent: step
         };
       };
 
-      var metrics = getCardMetrics();
-      var peekYPercent = metrics.peekYPercent;
+      var metrics = getCardMetrics(cardItems[0]);
+      var step = metrics.stepPercent;
       var tiltAngle = metrics.tiltAngle;
 
       // Initial card positions:
-      // Card 1 starts at center
+      // Cards form a continuous vertical conveyor ribbon spaced by stepPercent.
+      // Card 1 at center stage (0%)
       if (cardItems[0]) {
         gsap.set(cardItems[0], {
           yPercent: 0,
@@ -3699,10 +3702,10 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           transformOrigin: 'top center'
         });
       }
-      // Card 2 peeks below Card 1 with clean gap (zero overlap, matches official Obagi Screenshot 2)
+      // Card 2 pre-exists peeking below Card 1 (stepPercent)
       if (cardItems[1]) {
         gsap.set(cardItems[1], {
-          yPercent: peekYPercent,
+          yPercent: step,
           y: 0,
           rotateX: 0,
           scale: 1,
@@ -3713,15 +3716,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           transformOrigin: 'top center'
         });
       }
-      // Card 3 starts hidden further below
+      // Card 3 pre-exists below Card 2 (stepPercent * 2)
       if (cardItems[2]) {
         gsap.set(cardItems[2], {
-          yPercent: 160,
+          yPercent: step * 2,
           y: 0,
           rotateX: 0,
           scale: 1,
-          opacity: 0,
-          visibility: 'hidden',
+          opacity: 1,
+          visibility: 'visible',
           zIndex: 30,
           transformPerspective: 1200,
           transformOrigin: 'top center'
@@ -3739,99 +3742,104 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         }
       });
 
-      // Phase 1 (t = 0.0 to 1.5): Reading hold for Card 1 (Card 1 at center, Card 2 peeking below)
+      // =========================================================================
+      // EXACT OBAGI INDIA 1:1 REPLICATION CHOREOGRAPHY
+      // =========================================================================
 
-      // Phase 2 (t = 1.5 to 3.8): Card 1 tilts back into top shelf (52deg tilt, exact scale 0.92)
+      // Milestone 1 & 2 (t = 0.0 to 1.0): Reading hold for Card 1 (Card 1 at center, Card 2 peeking below)
+
+      // Milestone 3 (t = 1.0 to 3.4): Unified Lockstep Transition 1
+      // Card 1 tilts back into top shelf (52deg tilt, exact scale 0.92)
       if (cardItems[0]) {
         tl.to(cardItems[0], {
           rotateX: tiltAngle,
           scale: 0.92,
-          y: function() { return getCardMetrics().flipY; },
-          opacity: 1,
+          y: function() { return getCardMetrics(cardItems[0]).flipY; },
           ease: 'power2.inOut',
-          duration: 2.3
-        }, 1.5);
-      }
+          duration: 2.2
+        }, 1.0);
 
-      // Card 2 glides up smoothly to center stage with clean one-finger separation maintained at all times
-      if (cardItems[1]) {
-        tl.to(cardItems[1], {
-          yPercent: 0,
-          y: 0,
-          rotateX: 0,
-          scale: 1,
-          opacity: 1,
-          ease: 'power2.inOut',
-          duration: 1.8
+        // Card 1 fades out as it ascends into the shelf
+        tl.to(cardItems[0], {
+          opacity: 0,
+          ease: 'power1.out',
+          duration: 0.8
         }, 2.4);
+        tl.set(cardItems[0], { visibility: 'hidden' }, 3.2);
       }
 
-      // Card 3 glides into bottom peeking position behind Card 2 as Card 2 arrives at center stage
+      // Card 2 glides up in LOCKSTEP with Card 1 tilt (0.2s micro-offset guarantees zero overlap at all times)
+      if (cardItems[1]) {
+        tl.to(cardItems[1], {
+          yPercent: 0,
+          ease: 'power2.inOut',
+          duration: 2.2
+        }, 1.2);
+      }
+
+      // Card 3 glides up in LOCKSTEP ribbon motion from (step*2) to step (peeking position)
       if (cardItems[2]) {
         tl.to(cardItems[2], {
-          yPercent: peekYPercent,
-          y: 0,
-          rotateX: 0,
-          scale: 1,
-          opacity: 1,
-          visibility: 'visible',
-          ease: 'power2.out',
-          duration: 1.6
-        }, 3.6);
+          yPercent: step,
+          ease: 'power2.inOut',
+          duration: 2.2
+        }, 1.2);
       }
 
-      // Phase 3 (t = 3.8 to 5.0): Card 2 at center, Card 1 in top shelf fades out cleanly
-      if (cardItems[0]) {
-        tl.to(cardItems[0], {
-          opacity: 0,
-          ease: 'power1.out',
-          duration: 0.8
-        }, 3.8);
-        tl.set(cardItems[0], { visibility: 'hidden' }, 4.6);
-      }
+      // Milestone 4 (t = 3.4 to 4.8): Reading hold for Card 2 at center stage, Card 3 peeking below
 
-      // Phase 4 (t = 5.0 to 6.2): Reading hold for Card 2 at center stage, Card 3 peeking below
-
-      // Phase 5 (t = 6.2 to 8.5): Card 2 tilts back into top shelf
+      // Milestone 5 (t = 4.8 to 7.2): Unified Lockstep Transition 2
+      // Card 2 tilts back into top shelf (52deg tilt, exact scale 0.92)
       if (cardItems[1]) {
         tl.to(cardItems[1], {
           rotateX: tiltAngle,
           scale: 0.92,
-          y: function() { return getCardMetrics().flipY; },
-          opacity: 1,
+          y: function() { return getCardMetrics(cardItems[1]).flipY; },
           ease: 'power2.inOut',
-          duration: 2.3
-        }, 6.2);
-      }
+          duration: 2.2
+        }, 4.8);
 
-      // Card 3 glides up to center stage with clean one-finger separation maintained at all times
-      if (cardItems[2]) {
-        tl.to(cardItems[2], {
-          yPercent: 0,
-          y: 0,
-          rotateX: 0,
-          scale: 1,
-          opacity: 1,
-          ease: 'power2.inOut',
-          duration: 1.8
-        }, 7.1);
-      }
-
-      // Phase 6 (t = 8.5 to 9.5): Card 3 at center, Card 2 in top shelf fades out cleanly
-      if (cardItems[1]) {
+        // Card 2 fades out as it ascends into the shelf
         tl.to(cardItems[1], {
           opacity: 0,
           ease: 'power1.out',
           duration: 0.8
-        }, 8.5);
-        tl.set(cardItems[1], { visibility: 'hidden' }, 9.3);
+        }, 6.2);
+        tl.set(cardItems[1], { visibility: 'hidden' }, 7.0);
       }
 
-      // Phase 7 (t = 9.5 to 11.0): Card 3 rests at center stage.
-      // CRITICAL: Card 3 NEVER flips away into empty space!
-      // It stays visible and solid at center stage as the grand finale of Section 6.
-      // As the user scrolls past Section 6, the sticky runway ends and Section 7 rolls up underneath it naturally!
-      tl.to({}, { duration: 1.7 }, 9.3);
+      // Card 3 glides up in LOCKSTEP with Card 2 tilt to center stage
+      if (cardItems[2]) {
+        tl.to(cardItems[2], {
+          yPercent: 0,
+          ease: 'power2.inOut',
+          duration: 2.2
+        }, 5.0);
+      }
+
+      // Milestone 6 (t = 7.2 to 8.6): Reading hold for Card 3 at center stage (Images 7, 8, 9)
+
+      // Milestone 7 & 8 (t = 8.6 to 10.8): Card 3 3D Tilt into Top Shelf (Images 10 & 11)
+      if (cardItems[2]) {
+        tl.to(cardItems[2], {
+          rotateX: tiltAngle,
+          scale: 0.92,
+          y: function() { return getCardMetrics(cardItems[2]).flipY; },
+          ease: 'power2.inOut',
+          duration: 2.2
+        }, 8.6);
+
+        // Card 3 fades out as it ascends into the shelf (Image 11)
+        tl.to(cardItems[2], {
+          opacity: 0,
+          ease: 'power1.out',
+          duration: 0.8
+        }, 10.0);
+        tl.set(cardItems[2], { visibility: 'hidden' }, 10.8);
+      }
+
+      // Buffer for seamless Section 7 roll-up
+      tl.to({}, { duration: 0.8 }, 10.8);
 
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
