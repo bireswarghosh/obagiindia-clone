@@ -3641,7 +3641,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         };
         doFit();
         window.addEventListener('load', function() { doFit(); if (window.ScrollTrigger) ScrollTrigger.refresh(); });
-        window.addEventListener('resize', doFit);
+        window.addEventListener('resize', function() { doFit(); if (window.ScrollTrigger) ScrollTrigger.refresh(); });
       }
 
       var startClip = isMobile ? 'circle(18% at 50% 50%)' : 'circle(14% at 50% 50%)';
@@ -3664,7 +3664,25 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         );
       }
 
-      var peekYPercent = 115;
+      // Dynamic Card Metrics: calculate exact flipY for clean one-finger separation (25-30px) with 52deg tilt
+      var getCardMetrics = function() {
+        var mob = window.innerWidth <= 768;
+        var h = (cardItems[0] && cardItems[0].offsetHeight) || (fitBox && fitBox.offsetHeight) || (mob ? 520 : 380);
+        var angle = 52;
+        var gap = mob ? 25 : 30; // One-finger gap (~25-30px)
+        var proj = h * Math.cos(angle * Math.PI / 180) * 0.92;
+        return {
+          isMob: mob,
+          tiltAngle: angle,
+          flipY: -(proj + gap),
+          shelfGap: gap,
+          peekYPercent: 115
+        };
+      };
+
+      var metrics = getCardMetrics();
+      var peekYPercent = metrics.peekYPercent;
+      var tiltAngle = metrics.tiltAngle;
 
       // Initial card positions:
       // Card 1 starts at center
@@ -3716,28 +3734,26 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           trigger: cardSec,
           start: 'top top',
           end: 'bottom bottom',
-          scrub: 0.5
+          scrub: 0.5,
+          invalidateOnRefresh: true
         }
       });
 
-      var flipY = isMobile ? -170 : -190;
-      var tiltAngle = 52;
-
       // Phase 1 (t = 0.0 to 1.5): Reading hold for Card 1 (Card 1 at center, Card 2 peeking below)
 
-      // Phase 2 (t = 1.5 to 3.8): Card 1 tilts back into top shelf (Matches Obagi Official Screenshots 1, 3, 5)
+      // Phase 2 (t = 1.5 to 3.8): Card 1 tilts back into top shelf (52deg tilt, exact scale 0.92)
       if (cardItems[0]) {
         tl.to(cardItems[0], {
           rotateX: tiltAngle,
           scale: 0.92,
-          y: flipY,
+          y: function() { return getCardMetrics().flipY; },
           opacity: 1,
           ease: 'power2.inOut',
           duration: 2.3
         }, 1.5);
       }
 
-      // Card 2 glides up from bottom peeking position to center stage
+      // Card 2 glides up smoothly to center stage with clean one-finger separation maintained at all times
       if (cardItems[1]) {
         tl.to(cardItems[1], {
           yPercent: 0,
@@ -3745,12 +3761,12 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           rotateX: 0,
           scale: 1,
           opacity: 1,
-          ease: 'power2.out',
-          duration: 2.1
-        }, 1.9);
+          ease: 'power2.inOut',
+          duration: 1.8
+        }, 2.4);
       }
 
-      // Card 3 glides into bottom peeking position behind Card 2
+      // Card 3 glides into bottom peeking position behind Card 2 as Card 2 arrives at center stage
       if (cardItems[2]) {
         tl.to(cardItems[2], {
           yPercent: peekYPercent,
@@ -3760,17 +3776,18 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           opacity: 1,
           visibility: 'visible',
           ease: 'power2.out',
-          duration: 1.8
-        }, 2.4);
+          duration: 1.6
+        }, 3.6);
       }
 
-      // Phase 3 (t = 3.8 to 5.0): Card 2 at center, Card 1 in top shelf fades out cleanly (Screenshot 4)
+      // Phase 3 (t = 3.8 to 5.0): Card 2 at center, Card 1 in top shelf fades out cleanly
       if (cardItems[0]) {
         tl.to(cardItems[0], {
           opacity: 0,
           ease: 'power1.out',
           duration: 0.8
         }, 3.8);
+        tl.set(cardItems[0], { visibility: 'hidden' }, 4.6);
       }
 
       // Phase 4 (t = 5.0 to 6.2): Reading hold for Card 2 at center stage, Card 3 peeking below
@@ -3780,14 +3797,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         tl.to(cardItems[1], {
           rotateX: tiltAngle,
           scale: 0.92,
-          y: flipY,
+          y: function() { return getCardMetrics().flipY; },
           opacity: 1,
           ease: 'power2.inOut',
           duration: 2.3
         }, 6.2);
       }
 
-      // Card 3 glides up from bottom peeking position to center stage
+      // Card 3 glides up to center stage with clean one-finger separation maintained at all times
       if (cardItems[2]) {
         tl.to(cardItems[2], {
           yPercent: 0,
@@ -3795,9 +3812,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           rotateX: 0,
           scale: 1,
           opacity: 1,
-          ease: 'power2.out',
-          duration: 2.1
-        }, 6.6);
+          ease: 'power2.inOut',
+          duration: 1.8
+        }, 7.1);
       }
 
       // Phase 6 (t = 8.5 to 9.5): Card 3 at center, Card 2 in top shelf fades out cleanly
@@ -3807,12 +3824,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
           ease: 'power1.out',
           duration: 0.8
         }, 8.5);
+        tl.set(cardItems[1], { visibility: 'hidden' }, 9.3);
       }
 
       // Phase 7 (t = 9.5 to 11.0): Card 3 rests at center stage.
       // CRITICAL: Card 3 NEVER flips away into empty space!
       // It stays visible and solid at center stage as the grand finale of Section 6.
       // As the user scrolls past Section 6, the sticky runway ends and Section 7 rolls up underneath it naturally!
+      tl.to({}, { duration: 1.7 }, 9.3);
 
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
