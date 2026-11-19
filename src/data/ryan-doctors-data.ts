@@ -147,7 +147,7 @@ export const DEFAULT_DOCTORS_PAGE_CONTENT: RyanDoctorsPageContent = {
         description:
           'Download detailed product monographs with composition, dosage and key information.',
         linkText: 'VIEW MONOGRAPHS',
-        linkUrl: '/for-doctors/prescribing-information',
+        linkUrl: '/for-doctors/product-monographs',
         image: '/ryan/doctors/qa-monographs.png'
       },
       {

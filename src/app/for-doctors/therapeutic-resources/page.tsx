@@ -389,11 +389,188 @@ const CLINICAL_INSIGHTS: InsightArticle[] = [
   }
 ];
 
+interface DownloadDocument {
+  id: string;
+  title: string;
+  category: 'Product Monographs' | 'Visual Aids' | 'Prescribing Protocols' | 'Patient Leaflets';
+  filename: string;
+  format: string;
+  size: string;
+  date: string;
+  description: string;
+  details: string;
+}
+
+const DOWNLOAD_DOCUMENTS: DownloadDocument[] = [
+  {
+    id: 'doc-compendium',
+    title: 'Ryan Dermaceutics - Master Product Monographs Compendium 2026',
+    category: 'Product Monographs',
+    filename: 'Ryan-Dermaceutics-Monographs-Compendium-2026.pdf',
+    format: 'PDF',
+    size: '8.4 MB',
+    date: 'Nov 2026',
+    description: 'Complete 53-product clinical monographs catalog with indications, active mechanisms, dosing regimens, contraindications, and clinical trial citations.',
+    details: 'Covers Acne vulgaris, Superficial fungal infections, Corticosteroid therapies, Trichology, Immunomodulators, and Antihistamines.'
+  },
+  {
+    id: 'doc-clixodin',
+    title: 'Clixodin-AD Gel (Clindamycin Phosphate 1% + Adapalene 0.1%) Monograph',
+    category: 'Product Monographs',
+    filename: 'Clixodin-AD-Clinical-Monograph.pdf',
+    format: 'PDF',
+    size: '1.2 MB',
+    date: 'Nov 2026',
+    description: 'Comprehensive pharmacological monograph on microcomedolytic adapalene paired with topical antibacterial clindamycin.',
+    details: 'Includes Phase III trial efficacy tables, barrier preservation protocols, and retinoid step-up regimens.'
+  },
+  {
+    id: 'doc-kefin',
+    title: 'Kefin 1% (Ketoconazole) Antifungal Cream & Shampoo Monograph',
+    category: 'Product Monographs',
+    filename: 'Kefin-Ketoconazole-Monograph.pdf',
+    format: 'PDF',
+    size: '950 KB',
+    date: 'Nov 2026',
+    description: 'Broad-spectrum imidazole antifungal profile covering dermatophyte inhibition, Malassezia suppression, and seborrheic dermatitis regimens.',
+    details: 'Comparative MIC90 tables against Trichophyton rubrum and Malassezia furfur.'
+  },
+  {
+    id: 'doc-tenorium',
+    title: 'Tenorium (Clobetasol Propionate 0.05%) Potency & Stewardship Guide',
+    category: 'Prescribing Protocols',
+    filename: 'Tenorium-Clobetasol-Stewardship-Guide.pdf',
+    format: 'PDF',
+    size: '1.4 MB',
+    date: 'Nov 2026',
+    description: 'Super-potent Class I topical corticosteroid protocol: strict 2-week intermittent dosing, anatomical restrictions, and tapering schedules.',
+    details: 'Includes adverse event mitigation (atrophy, telangiectasia) and steroid-sparing transition plans with Tacrolimus.'
+  },
+  {
+    id: 'doc-tressicle',
+    title: 'Tressicle-F (Minoxidil 5% + Finasteride 0.1%) Trichology Protocol',
+    category: 'Product Monographs',
+    filename: 'Tressicle-F-Trichology-Monograph.pdf',
+    format: 'PDF',
+    size: '1.8 MB',
+    date: 'Nov 2026',
+    description: 'Dual-action topical formulation for androgenetic alopecia: local 5-alpha reductase type II inhibition paired with follicular vasodilation.',
+    details: 'Trichogram evaluation criteria, shedding phase timeline, and safety monitoring.'
+  },
+  {
+    id: 'doc-blismin',
+    title: 'Blismin 20 (Bilastine 20mg Tablets) Prescribing Monograph',
+    category: 'Product Monographs',
+    filename: 'Blismin-20-Bilastine-Monograph.pdf',
+    format: 'PDF',
+    size: '880 KB',
+    date: 'Nov 2026',
+    description: 'Second-generation non-sedating H1 receptor antagonist for chronic spontaneous urticaria and allergic rhinoconjunctivitis.',
+    details: 'No hepatic CYP metabolism, negligible CNS H1 receptor occupancy, and rapid 1-hour onset of action.'
+  },
+  {
+    id: 'doc-corticosteroid-ladder',
+    title: 'Topical Corticosteroid Potency Ladder & Finger Tip Unit (FTU) Wallchart',
+    category: 'Visual Aids',
+    filename: 'Topical-Corticosteroid-Potency-Ladder-FTU.pdf',
+    format: 'PDF',
+    size: '2.1 MB',
+    date: 'Nov 2026',
+    description: 'High-resolution printable clinic wallchart classifying Class I to Class VII corticosteroids with precise FTU body area dosing guidelines.',
+    details: 'Anatomical area risk zones: Face & Intertriginous (Class V-VII only), Trunk (Class II-IV), Palms & Soles (Class I-II).'
+  },
+  {
+    id: 'doc-fungal-flowchart',
+    title: 'Superficial Fungal Differentiation Flowchart (Tinea vs Eczema vs Psoriasis)',
+    category: 'Visual Aids',
+    filename: 'Superficial-Fungal-Differential-Flowchart.pdf',
+    format: 'PDF',
+    size: '1.6 MB',
+    date: 'Nov 2026',
+    description: 'Diagnostic algorithm for distinguishing recalcitrant dermatophytosis, Tinea Incognito, nummular eczema, and annular psoriasis.',
+    details: 'KOH mount preparation tips, Wood lamp evaluation, and systemic escalation checkpoints.'
+  },
+  {
+    id: 'doc-isotretinoin',
+    title: 'Oral Isotretinoin Safety & Cumulative Dosing Protocol Guide',
+    category: 'Prescribing Protocols',
+    filename: 'Oral-Isotretinoin-Safety-Dosing-Protocol.pdf',
+    format: 'PDF',
+    size: '1.1 MB',
+    date: 'Nov 2026',
+    description: 'Clinical safety framework: baseline liver & lipid profiles, 120-150 mg/kg cumulative target dosing, teratogenicity contraception protocols.',
+    details: 'Includes monthly monitoring schedules, mucocutaneous toxicity management, and flare mitigation.'
+  },
+  {
+    id: 'doc-pil-retinoid',
+    title: 'Patient Leaflet: Topical Retinoid Acclimatization & Skin Barrier Rules',
+    category: 'Patient Leaflets',
+    filename: 'Patient-Leaflet-Retinoid-Acclimatization.pdf',
+    format: 'PDF',
+    size: '650 KB',
+    date: 'Nov 2026',
+    description: 'Doctor-prescribed patient instruction sheet: alternate-night sandwich application, pea-sized rule, and broad-spectrum SPF adherence.',
+    details: 'Easy to print and hand to patients during consultation.'
+  },
+  {
+    id: 'doc-pil-scalp',
+    title: 'Patient Leaflet: Proper Scalp Application Technique for Hair Solutions',
+    category: 'Patient Leaflets',
+    filename: 'Patient-Leaflet-Scalp-Application-Technique.pdf',
+    format: 'PDF',
+    size: '580 KB',
+    date: 'Nov 2026',
+    description: 'Clear, illustrated step-by-step patient guide for applying topical Minoxidil/Finasteride directly to dry scalp without wasting solution on hair shafts.',
+    details: 'Printable clinic handout.'
+  }
+];
+
 export default function TherapeuticResourcesPage() {
   const [guidesList, setGuidesList] = useState<GuideItem[]>(THERAPEUTIC_GUIDES);
   const [insightsList, setInsightsList] = useState<InsightArticle[]>(CLINICAL_INSIGHTS);
   const [activeGuideModal, setActiveGuideModal] = useState<GuideItem | null>(null);
   const [activeArticleModal, setActiveArticleModal] = useState<InsightArticle | null>(null);
+  const [downloadCentreOpen, setDownloadCentreOpen] = useState(false);
+  const [downloadSearch, setDownloadSearch] = useState('');
+  const [downloadCategory, setDownloadCategory] = useState<string>('All');
+  const [downloadToast, setDownloadToast] = useState<string | null>(null);
+
+  const handleDownloadFile = (doc: DownloadDocument) => {
+    setDownloadToast(`Preparing download for: ${doc.title}...`);
+    const textContent = `RYAN DERMACEUTICS - CLINICAL PRACTICE DOCUMENT
+======================================================
+Title: ${doc.title}
+Category: ${doc.category}
+File Ref: ${doc.filename}
+Format: ${doc.format} | Size: ${doc.size}
+Date Issued: ${doc.date}
+Regulatory Standard: WHO-GMP Certified Formulation Protocols
+Intended Audience: Registered Medical Practitioners Only
+
+DOCUMENT OVERVIEW:
+${doc.description}
+
+CLINICAL SPECIFICATIONS & PROTOCOL:
+${doc.details}
+
+Ryan Dermaceutics Medical Affairs Division
+Contact: medical@ryandermaceutics.com
+======================================================`;
+
+    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = doc.filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    setTimeout(() => {
+      setDownloadToast(`✓ Downloaded ${doc.filename}`);
+      setTimeout(() => setDownloadToast(null), 3500);
+    }, 400);
+  };
 
   React.useEffect(() => {
     fetch('/api/db/guides')
@@ -557,13 +734,18 @@ export default function TherapeuticResourcesPage() {
               <Library className="w-4 h-4 text-[#00768a]" />
               Reference Library
             </a>
-            <a
-              href="#download"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-[#006070] whitespace-nowrap transition"
+            <button
+              type="button"
+              onClick={() => {
+                const el = document.getElementById('download-centre');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+                else setDownloadCentreOpen(true);
+              }}
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-[#006070] whitespace-nowrap transition cursor-pointer"
             >
               <Download className="w-4 h-4 text-[#00768a]" />
               Download Centre
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -813,14 +995,114 @@ export default function TherapeuticResourcesPage() {
               </p>
             </div>
             <div className="pt-4 mt-4 border-t border-slate-100">
-              <a
-                href="#download"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00768a] hover:text-[#004f5e]"
+              <button
+                type="button"
+                onClick={() => setDownloadCentreOpen(true)}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00768a] hover:text-[#004f5e] cursor-pointer"
               >
                 VISIT DOWNLOAD CENTRE
                 <ArrowRight className="w-3.5 h-3.5" />
-              </a>
+              </button>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ========================================================= */}
+      {/* 6.5 DEDICATED DOWNLOAD CENTRE & CLINICAL MATERIALS SECTION */}
+      {/* ========================================================= */}
+      <section id="download-centre" className="py-14 lg:py-18 bg-gradient-to-b from-[#f0f9fa] via-white to-[#f8fafc] border-t border-b border-teal-100/90">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase tracking-wider mb-2">
+                <Download className="w-3.5 h-3.5 text-emerald-600" />
+                CLINICAL PRACTICE DOWNLOAD CENTRE
+              </div>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-[#003d4d] tracking-tight uppercase">
+                Download Centre & Practice Materials
+              </h2>
+              <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
+                Immediate access to peer-reviewed product monographs, visual diagnostic charts, prescribing algorithms, and patient education sheets.
+              </p>
+            </div>
+
+            {/* Quick Search */}
+            <div className="w-full md:w-72 relative">
+              <input
+                type="text"
+                placeholder="Search downloads..."
+                value={downloadSearch}
+                onChange={(e) => setDownloadSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-teal-200 text-xs text-slate-800 placeholder-slate-400 bg-white shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#00768a]"
+              />
+              <Search className="w-4 h-4 text-teal-600 absolute left-3 top-1/2 -translate-y-1/2" />
+            </div>
+          </div>
+
+          {/* Category Filter Pills */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 text-xs font-semibold no-scrollbar">
+            {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets'].map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setDownloadCategory(cat)}
+                className={`px-3.5 py-1.5 rounded-full border transition whitespace-nowrap cursor-pointer ${
+                  downloadCategory === cat
+                    ? 'bg-[#00768a] text-white border-[#00768a] shadow-xs font-bold'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300 hover:text-[#00768a]'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Documents Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {DOWNLOAD_DOCUMENTS.filter(d => {
+              const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
+              const matchesQ = !downloadSearch.trim() ||
+                d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                d.description.toLowerCase().includes(downloadSearch.toLowerCase());
+              return matchesCat && matchesQ;
+            }).map((doc) => (
+              <div
+                key={doc.id}
+                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs hover:shadow-lg hover:border-teal-300 transition-all flex flex-col justify-between group"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-50 text-[#006070] border border-teal-100">
+                      {doc.category}
+                    </span>
+                    <span className="text-[10px] font-semibold text-slate-400">
+                      {doc.format} • {doc.size}
+                    </span>
+                  </div>
+                  <h3 className="font-bold text-sm text-[#003d4d] group-hover:text-[#00768a] transition-colors leading-snug">
+                    {doc.title}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-2 leading-relaxed line-clamp-3">
+                    {doc.description}
+                  </p>
+                </div>
+
+                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                  <span className="text-[10px] text-slate-400 font-medium">
+                    Updated {doc.date}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadFile(doc)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs active:scale-95 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Download PDF
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -1051,6 +1333,132 @@ export default function TherapeuticResourcesPage() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* C. DOWNLOAD CENTRE MODAL */}
+      {downloadCentreOpen && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-fade-in border border-teal-100">
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 bg-gradient-to-r from-[#003d4d] via-[#006070] to-[#00768a] text-white flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold tracking-widest text-teal-200 uppercase">
+                  HEALTHCARE PROFESSIONAL DOWNLOAD CENTRE
+                </span>
+                <h3 className="text-xl sm:text-2xl font-extrabold">Clinical Practice Downloads</h3>
+                <p className="text-xs text-teal-100/90 max-w-2xl">
+                  Official product monographs, prescribing protocols, and clinical visual aids for daily consultation.
+                </p>
+              </div>
+              <button
+                onClick={() => setDownloadCentreOpen(false)}
+                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
+                aria-label="Close Download Centre"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-5 overflow-y-auto space-y-5">
+              {/* Search & Category Filter */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    placeholder="Search documents by name or condition..."
+                    value={downloadSearch}
+                    onChange={(e) => setDownloadSearch(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-teal-200 text-xs text-slate-800 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00768a]"
+                  />
+                  <Search className="w-4 h-4 text-teal-600 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
+              </div>
+
+              {/* Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-2 text-xs font-semibold no-scrollbar">
+                {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets'].map((cat) => (
+                  <button
+                    key={cat}
+                    type="button"
+                    onClick={() => setDownloadCategory(cat)}
+                    className={`px-3 py-1 rounded-full border text-[11px] transition whitespace-nowrap cursor-pointer ${
+                      downloadCategory === cat
+                        ? 'bg-[#00768a] text-white border-[#00768a] font-bold shadow-xs'
+                        : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+
+              {/* Document List */}
+              <div className="space-y-3">
+                {DOWNLOAD_DOCUMENTS.filter(d => {
+                  const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
+                  const matchesQ = !downloadSearch.trim() ||
+                    d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                    d.description.toLowerCase().includes(downloadSearch.toLowerCase());
+                  return matchesCat && matchesQ;
+                }).map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="p-4 rounded-xl border border-slate-200 hover:border-teal-300 bg-white hover:bg-teal-50/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs"
+                  >
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-teal-100 text-[#006070]">
+                          {doc.category}
+                        </span>
+                        <span className="text-[10px] font-semibold text-slate-400">
+                          {doc.format} • {doc.size}
+                        </span>
+                      </div>
+                      <h4 className="font-bold text-sm text-[#003d4d] leading-snug">
+                        {doc.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 line-clamp-2">
+                        {doc.description}
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadFile(doc)}
+                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs active:scale-95 shrink-0 cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download PDF
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span className="text-slate-500 font-medium text-[11px]">
+                WHO-GMP Validated Clinical Documentation
+              </span>
+              <button
+                type="button"
+                onClick={() => setDownloadCentreOpen(false)}
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DOWNLOAD TOAST NOTIFICATION */}
+      {downloadToast && (
+        <div className="fixed bottom-6 right-6 z-[99999] bg-[#003d4d] text-white px-5 py-3 rounded-2xl shadow-2xl border border-teal-400 flex items-center gap-3 animate-fade-in">
+          <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="text-xs font-bold">{downloadToast}</span>
         </div>
       )}
 

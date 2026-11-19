@@ -39,8 +39,8 @@ export default function RyanHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-teal-100/80 shadow-xs transition-all">
-      {/* Top Slogan Ticker & Doctor Portal Quick Bar (Matching Content_Home.docx) */}
-      <div className="bg-gradient-to-r from-[#0e4f63] via-[#006070] to-[#0e4f63] text-white text-xs py-1.5 px-4 shadow-inner">
+      {/* Top Slogan Ticker & Doctor Portal Quick Bar - Hidden on Mobile per mobile-first specification */}
+      <div className="hidden md:block bg-gradient-to-r from-[#0e4f63] via-[#006070] to-[#0e4f63] text-white text-xs py-1.5 px-4 shadow-inner">
         <div className="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-2">
           <div className="flex items-center gap-2.5">
             <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -58,6 +58,17 @@ export default function RyanHeader() {
               }`}
             >
               Therapeutic Resources
+            </Link>
+            <span className="text-teal-300/40 hidden sm:inline">|</span>
+            <Link
+              href="/for-doctors/product-monographs"
+              className={`px-2 py-0.5 rounded transition text-[11px] sm:text-xs ${
+                pathname === '/for-doctors/product-monographs'
+                  ? 'bg-white text-[#0e4f63] font-bold shadow-xs'
+                  : 'text-teal-100 hover:text-white hover:bg-white/10'
+              }`}
+            >
+              Product Monographs
             </Link>
             <span className="text-teal-300/40 hidden sm:inline">|</span>
             <Link
@@ -188,13 +199,13 @@ export default function RyanHeader() {
                   
                   <div className="py-1">
                     <Link
-                      href="/products"
+                      href="/for-doctors/product-monographs"
                       className={`block px-4 py-2.5 text-xs transition ${
-                        isProducts ? 'bg-teal-50 text-[#00768a] font-bold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#00768a]'
+                        pathname === '/for-doctors/product-monographs' ? 'bg-teal-50 text-[#00768a] font-bold' : 'text-slate-700 hover:bg-slate-50 hover:text-[#00768a]'
                       }`}
                     >
-                      <div className="font-bold text-sm text-[#004f5e]">Product Monographs Directory</div>
-                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">53 formulations with full 19-section clinical data</div>
+                      <div className="font-bold text-sm text-[#004f5e]">Product Monographs</div>
+                      <div className="text-[11px] text-slate-500 font-normal mt-0.5">Official clinical monographs & downloadable dossiers</div>
                     </Link>
 
                     <Link
@@ -314,11 +325,11 @@ export default function RyanHeader() {
                   Therapeutic Resources Hub
                 </Link>
                 <Link
-                  href="/products"
+                  href="/for-doctors/product-monographs"
                   onClick={() => setMobileMenuOpen(false)}
                   className="block p-2 rounded-lg bg-white text-xs font-semibold text-[#004f5e] shadow-2xs"
                 >
-                  Product Monographs (53 Products)
+                  Product Monographs (Official Clinical Dossiers)
                 </Link>
                 <Link
                   href="/for-doctors/prescribing-information"

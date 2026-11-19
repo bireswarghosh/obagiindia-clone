@@ -25,8 +25,6 @@ import {
 
 export default function ReferenceLibraryLandingPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedBrowseMode, setSelectedBrowseMode] = useState<'condition' | 'therapeutic' | 'ingredient' | 'anatomy'>('condition');
-
   const [categories, setCategories] = useState<LibraryCategory[]>(Object.values(REFERENCE_LIBRARY_CATEGORIES));
 
   React.useEffect(() => {
@@ -190,102 +188,6 @@ export default function ReferenceLibraryLandingPage() {
               </div>
             </a>
           ))}
-        </div>
-      </section>
-
-      {/* ========================================================= */}
-      {/* 3. BROWSE BY (4 Cards with Icons)                         */}
-      {/* ========================================================= */}
-      <section className="py-12 bg-white border-t border-teal-100/80">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="mb-6">
-            <h2 className="text-xl sm:text-2xl font-extrabold text-[#003d4d] tracking-tight uppercase">
-              Browse by
-            </h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Alternate clinical entry points for targeted dermatology research.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <button
-              onClick={() => setSelectedBrowseMode('condition')}
-              className={`p-5 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-2.5 ${
-                selectedBrowseMode === 'condition'
-                  ? 'bg-teal-50 border-[#00768a] shadow-xs'
-                  : 'bg-white border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <div className="w-12 h-12 rounded-xl bg-teal-100/70 text-[#00768a] flex items-center justify-center">
-                <FileText className="w-6 h-6" />
-              </div>
-              <span className="font-bold text-xs uppercase tracking-wider text-slate-800">Condition</span>
-            </button>
-
-            <button
-              onClick={() => setSelectedBrowseMode('therapeutic')}
-              className={`p-5 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-2.5 ${
-                selectedBrowseMode === 'therapeutic'
-                  ? 'bg-teal-50 border-[#00768a] shadow-xs'
-                  : 'bg-white border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <div className="w-12 h-12 rounded-xl bg-cyan-100/70 text-[#00768a] flex items-center justify-center">
-                <Pill className="w-6 h-6" />
-              </div>
-              <span className="font-bold text-xs uppercase tracking-wider text-slate-800">Therapeutic Class</span>
-            </button>
-
-            <button
-              onClick={() => setSelectedBrowseMode('ingredient')}
-              className={`p-5 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-2.5 ${
-                selectedBrowseMode === 'ingredient'
-                  ? 'bg-teal-50 border-[#00768a] shadow-xs'
-                  : 'bg-white border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <div className="w-12 h-12 rounded-xl bg-emerald-100/70 text-emerald-700 flex items-center justify-center">
-                <GitFork className="w-6 h-6" />
-              </div>
-              <span className="font-bold text-xs uppercase tracking-wider text-slate-800">Active Ingredient</span>
-            </button>
-
-            <button
-              onClick={() => setSelectedBrowseMode('anatomy')}
-              className={`p-5 rounded-2xl border text-center transition flex flex-col items-center justify-center gap-2.5 ${
-                selectedBrowseMode === 'anatomy'
-                  ? 'bg-teal-50 border-[#00768a] shadow-xs'
-                  : 'bg-white border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <div className="w-12 h-12 rounded-xl bg-purple-100/70 text-purple-700 flex items-center justify-center">
-                <User className="w-6 h-6" />
-              </div>
-              <span className="font-bold text-xs uppercase tracking-wider text-slate-800">Anatomical Area</span>
-            </button>
-          </div>
-
-          {/* Quick Cross-Reference Matrix */}
-          <div className="mt-8 p-6 rounded-2xl bg-slate-50 border border-slate-200/80">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
-              <div>
-                <span className="font-bold text-[#004f5e] uppercase tracking-wider block mb-1">Common Conditions</span>
-                <p className="text-slate-500 leading-relaxed text-[11.5px]">Acne, Tinea, Psoriasis, Eczema, Melasma, Alopecia, Scabies, Urticaria</p>
-              </div>
-              <div>
-                <span className="font-bold text-[#004f5e] uppercase tracking-wider block mb-1">Therapeutic Classes</span>
-                <p className="text-slate-500 leading-relaxed text-[11.5px]">Antifungals, Retinoids, Corticosteroids, Calcineurin Inhibitors, Antihistamines</p>
-              </div>
-              <div>
-                <span className="font-bold text-[#004f5e] uppercase tracking-wider block mb-1">Active Molecules</span>
-                <p className="text-slate-500 leading-relaxed text-[11.5px]">Luliconazole, Clobetasol, Adapalene, Tacrolimus, Minoxidil, Itraconazole</p>
-              </div>
-              <div>
-                <span className="font-bold text-[#004f5e] uppercase tracking-wider block mb-1">Anatomical Zones</span>
-                <p className="text-slate-500 leading-relaxed text-[11.5px]">Facial, Scalp, Trunk, Acral/Nail, Intertriginous Folds</p>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 

@@ -826,8 +826,8 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center relative z-10">
           <div className="lg:col-span-8 space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[11px] font-bold uppercase tracking-widest text-teal-200">
-              <span className={`w-2 h-2 rounded-full ${product.hasFullMonograph ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`}></span>
-              {product.hasFullMonograph ? 'OFFICIAL CLINICAL MONOGRAPH • PART 1 RELEASE' : 'PRESCRIBING SUMMARY • PART 2 EDITORIAL REVIEW'}
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              OFFICIAL CLINICAL MONOGRAPH • RYAN DERMACEUTICS
             </div>
             <p className="text-[11px] font-black tracking-widest text-teal-200/80 uppercase">Product Monograph</p>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white uppercase">
@@ -887,20 +887,6 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
           </div>
         </div>
       </section>
-
-      {!product.hasFullMonograph && (
-        <section className="mt-6 bg-amber-50/80 border border-amber-200 rounded-2xl p-4 sm:p-5 text-amber-900 flex items-start gap-3.5 text-xs">
-          <Info className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
-          <div className="space-y-1">
-            <h4 className="font-bold text-amber-950">
-              Standard Prescribing Summary Active • Full Clinical Monograph Coming in Part 2 Release
-            </h4>
-            <p className="text-amber-800 leading-relaxed">
-              This summary is compiled from registered prescribing data. The comprehensive multi-section monograph containing differential diagnostic accordions, stewardship algorithms, and extended pearls will be activated upon receipt of Part 2 clinical documentation.
-            </p>
-          </div>
-        </section>
-      )}
 
       {/* Rows: rail pill beside its card number */}
       <div className="mono-sync mt-6">
