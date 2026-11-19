@@ -3295,7 +3295,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 10 !important;
   }
 
-  /* 3. Pink Serum Background: Sticky layer inside 300vh runway */
+  /* 3. Pink Serum Background: Sticky layer covering top half screen (~56vh desktop, 48vh mobile) */
   #comp-lwrmnb3j {
     grid-area: cardlayer !important;
     position: sticky !important;
@@ -3303,8 +3303,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: 100vh !important;
-    min-height: 100vh !important;
+    height: 56vh !important;
+    min-height: 56vh !important;
+    max-height: 56vh !important;
     z-index: 1 !important;
     pointer-events: none !important;
     margin: 0 !important;
@@ -3336,7 +3337,8 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 1 !important;
     transform: none !important;
     will-change: clip-path !important;
-    clip-path: circle(14% at 50% 50%);
+    clip-path: circle(12% at 50% 95%);
+    -webkit-clip-path: circle(12% at 50% 95%);
   }
 
   @media (max-width: 768px) {
@@ -3345,11 +3347,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       height: 300vh !important;
     }
     #comp-lwrmnb3j {
-      height: 100vh !important;
+      height: 48vh !important;
+      min-height: 48vh !important;
+      max-height: 48vh !important;
     }
     #comp-lwrlbohf {
       height: 100% !important;
-      clip-path: circle(18% at 50% 50%);
+      clip-path: circle(14% at 50% 95%);
+      -webkit-clip-path: circle(14% at 50% 95%);
     }
   }
 
@@ -3644,21 +3649,22 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
         window.addEventListener('resize', function() { doFit(); if (window.ScrollTrigger) ScrollTrigger.refresh(); });
       }
 
-      var startClip = isMobile ? 'circle(18% at 50% 50%)' : 'circle(14% at 50% 50%)';
-      var endClip = isMobile ? 'circle(95% at 50% 50%)' : 'circle(90% at 50% 50%)';
-
-      // Pink background circle: spreads continuously and gradually from bottom entrance until touching header!
+      // Pink background circle: rises & expands upwards from bottom into top half (~56vh) as section enters!
       if (pinkImg) {
+        var startClip = isMobile ? 'circle(14% at 50% 95%)' : 'circle(12% at 50% 95%)';
+        var endClip = isMobile ? 'circle(115% at 50% 50%)' : 'circle(105% at 50% 50%)';
+
         gsap.fromTo(pinkImg,
-          { clipPath: startClip },
+          { clipPath: startClip, webkitClipPath: startClip },
           {
             clipPath: endClip,
-            ease: 'none',
+            webkitClipPath: endClip,
+            ease: 'power1.out',
             scrollTrigger: {
               trigger: cardSec,
-              start: 'top bottom',
+              start: isMobile ? 'top 90%' : 'top 75%',
               end: 'top top',
-              scrub: isMobile ? 0.3 : 0.4
+              scrub: 0.6
             }
           }
         );
