@@ -265,6 +265,12 @@ function patchVideoSrc(html: string, videoId: string, newSrc?: string): string {
   const re = new RegExp(`(<video\\b[^>]*id="${videoId}"[^>]*)(>)`, 'i');
   let out = html.replace(re, (_m, open, close) => {
     let tag = open.replace(/\ssrc="[^"]*"/i, '');
+    // Progressive chunk streaming: ensure preload="metadata" for HTTP 206 byte-range chunk requests
+    if (tag.includes('preload=')) {
+      tag = tag.replace(/\spreload="[^"]*"/i, ' preload="metadata"');
+    } else {
+      tag += ' preload="metadata"';
+    }
     tag += ` src="${newSrc}"`;
     return tag + close;
   });
@@ -943,7 +949,7 @@ export function patchHtmlWithCms(html: string, data: ObagiHomeContent): string {
     const heroVid = data.hero.heroVideoUrl || (data.hero as any).heroVideo;
     const ytId = heroVid ? extractYouTubeId(heroVid) : null;
     if (ytId) {
-      const ytIframe = `<iframe id="comp-lwxgxhly_youtube" src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1" title="Hero Background Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position: absolute; top: 50%; left: 50%; width: 100vw; height: 56.25vw; min-height: 100%; min-width: 177.77vh; transform: translate(-50%, -50%); border: none; pointer-events: none; z-index: 10;"></iframe>`;
+      const ytIframe = `<iframe id="comp-lwxgxhly_youtube" src="https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${ytId}&playsinline=1&enablejsapi=1&rel=0&modestbranding=1" loading="lazy" title="Hero Background Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; pointer-events: none; z-index: 1;"></iframe>`;
       if (result.includes('id="comp-lwxgxhly_youtube"')) {
         result = result.replace(/<iframe\b[^>]*id="comp-lwxgxhly_youtube"[\s\S]*?<\/iframe>/i, ytIframe);
       } else {
