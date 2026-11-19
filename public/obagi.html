@@ -3296,7 +3296,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     z-index: 10 !important;
   }
 
-  /* 3. Pink Serum Background: Sticky layer covering top half screen (~56vh desktop, 48vh mobile) */
+  /* 3. Pink Serum Background: Sticky layer extending 100vh so it releases synchronously when Section 7 docks at bottom edge */
   #comp-lwrmnb3j {
     grid-area: cardlayer !important;
     position: sticky !important;
@@ -3304,14 +3304,14 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: 56vh !important;
-    min-height: 56vh !important;
-    max-height: 56vh !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
     z-index: 1 !important;
     pointer-events: none !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
     background: transparent !important;
   }
 
@@ -3321,7 +3321,7 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   #comp-lwrlbohf {
@@ -3329,7 +3329,9 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     top: 0 !important;
     left: 0 !important;
     width: 100% !important;
-    height: 100% !important;
+    height: 56vh !important;
+    min-height: 56vh !important;
+    max-height: 56vh !important;
     border-radius: 0px !important;
     overflow: hidden !important;
     margin: 0 !important;
@@ -3348,12 +3350,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       height: 195vh !important;
     }
     #comp-lwrmnb3j {
+      height: 100vh !important;
+      min-height: 100vh !important;
+      max-height: 100vh !important;
+      overflow: visible !important;
+    }
+    #comp-lwrlbohf {
       height: 48vh !important;
       min-height: 48vh !important;
       max-height: 48vh !important;
-    }
-    #comp-lwrlbohf {
-      height: 100% !important;
       clip-path: circle(14% at 50% 95%);
       -webkit-clip-path: circle(14% at 50% 95%);
     }
