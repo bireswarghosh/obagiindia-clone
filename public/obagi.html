@@ -3518,13 +3518,19 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
     }
   }
 
-  /* 6. Seamless Next Section: 1-2 Finger Gap, Natural Video Height, No Overlap */
+  /* 6. Seamless Next Section: Dock directly under pink dome on Card 3 flip - ZERO white void */
   #comp-mlau06ju {
     position: relative !important;
     z-index: 20 !important;
-    margin-top: 0 !important;
+    margin-top: -44vh !important;
     overflow: hidden !important;
     will-change: transform !important;
+  }
+
+  @media (max-width: 768px) {
+    #comp-mlau06ju {
+      margin-top: -52vh !important;
+    }
   }
 
   /* 7. Section 5 4-Image Mosaic Gallery Panel: Full Visibility */
@@ -3848,12 +3854,15 @@ button.btn{display:inline-block;font-weight:300;line-height:1.25;text-align:cent
       var videoSec = document.querySelector('#comp-mlau06ju');
       if (videoSec) {
         var adjustVideoMargin = function() {
-          videoSec.style.setProperty('margin-top', '0px', 'important');
+          var isMob = window.innerWidth <= 768;
+          videoSec.style.setProperty('margin-top', isMob ? '-52vh' : '-44vh', 'important');
+          videoSec.style.setProperty('position', 'relative', 'important');
+          videoSec.style.setProperty('z-index', '20', 'important');
         };
         adjustVideoMargin();
         window.addEventListener('resize', adjustVideoMargin);
         window.addEventListener('load', adjustVideoMargin);
-        setTimeout(adjustVideoMargin, 800);
+        setTimeout(adjustVideoMargin, 300);
       }
     }
 
