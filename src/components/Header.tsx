@@ -75,31 +75,6 @@ export default function Header({ header, theme }: HeaderProps) {
           borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)'
         }}
       >
-        {/* Top Mini Bar: Official Ryan Subtitle */}
-        <div
-          className="w-full py-1.5 px-4 text-center text-xs tracking-wider flex items-center justify-between sm:justify-center gap-3 border-b text-slate-100"
-          style={{
-            backgroundColor: theme?.deepNavy || '#002530',
-            borderColor: 'rgba(255,255,255,0.1)'
-          }}
-        >
-          <div className="flex items-center gap-2 mx-auto text-[11px] sm:text-xs">
-            <ShieldCheck className="w-3.5 h-3.5 text-teal-300 shrink-0" />
-            <span className="font-medium">
-              {header?.broughtByText || 'A Specialized Dermatology Division • Ryan Dermaceutics'}
-            </span>
-            <span className="hidden md:inline opacity-40">|</span>
-            <a
-              href="https://www.ryandermaceutics.com"
-              target="_blank"
-              rel="noreferrer"
-              className="hidden md:inline text-teal-300 hover:text-white transition-colors"
-            >
-              www.ryandermaceutics.com
-            </a>
-          </div>
-        </div>
-
         {/* Main Navbar */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
           {/* Logo */}
