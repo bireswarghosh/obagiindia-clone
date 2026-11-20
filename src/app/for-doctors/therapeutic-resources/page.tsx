@@ -1064,7 +1064,7 @@ export default function TherapeuticResourcesPage() {
                   <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
                   <div>
                     <h4 className="font-bold text-xs sm:text-sm text-[#003d4d]">Batch-wise Certificate of Analysis (COA)</h4>
-                    <p className="text-[11px] text-slate-600">Search and download official WHO-GMP analytical release certificates like Ethics Medinova.</p>
+                    <p className="text-[11px] text-slate-600">Search and download official WHO-GMP analytical release certificates for Ryan Dermaceutics formulations.</p>
                   </div>
                 </div>
                 <Link
@@ -1719,7 +1719,7 @@ export default function TherapeuticResourcesPage() {
 
             <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
               <span className="text-[11px] text-slate-400 font-medium">
-                Ethics Medinova Analytical Quality Laboratory
+                Ryan Dermaceutics Analytical Quality Laboratory
               </span>
               <div className="flex items-center gap-2">
                 <button

@@ -12,8 +12,8 @@ interface FooterProps {
 
 export default function Footer({ footer, theme }: FooterProps) {
   const brandName = footer?.brandName || footer?.logoText || 'RYAN DERMACEUTICS';
-  const tagline = footer?.tagline || 'A Specialized Division of Ethics Medinova Private Limited';
-  const copyright = footer?.copyrightText || footer?.copyright || '© 2026 Ryan Dermaceutics (Ethics Medinova Pvt. Ltd.). All Rights Reserved.';
+  const tagline = footer?.tagline || 'A Specialized Dermatology Healthcare Division';
+  const copyright = footer?.copyrightText || footer?.copyright || '© 2026 Ryan Dermaceutics Private Limited. All Rights Reserved.';
 
   const quickLinks = (footer?.quickLinks && footer.quickLinks.length > 0) ? footer.quickLinks : [
     { title: 'Home', href: '/' },
@@ -101,7 +101,7 @@ export default function Footer({ footer, theme }: FooterProps) {
         <div className="text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>{copyright}</p>
           <p className="text-[11px] text-slate-600">
-            A Specialized Division of Ethics Medinova Private Limited
+            A Specialized Dermatology Division • Ryan Dermaceutics
           </p>
         </div>
       </div>

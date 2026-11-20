@@ -37,7 +37,7 @@ const DEFAULT_CARDS = [
 
 export default async function ContactPage() {
   let heroTitle = 'Contact Us';
-  let heroSubtitle = 'Ryan Dermaceutics · A Specialized Division of Ethics Medinova Pvt. Ltd.';
+  let heroSubtitle = 'Ryan Dermaceutics · A Specialized Dermatology Healthcare Division';
   let eyebrow = 'Get in touch';
   let cards = DEFAULT_CARDS;
 

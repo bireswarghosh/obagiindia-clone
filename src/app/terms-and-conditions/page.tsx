@@ -13,7 +13,7 @@ export const metadata = {
 const DEFAULT_SECTIONS = [
   {
     h: 'Use of this website',
-    p: 'This website provides general information about Ryan Dermaceutics, a specialized dermatology division of Ethics Medinova Pvt. Ltd., and its product portfolio. Content here is intended for healthcare professionals and general visitors in India and does not replace professional medical advice, diagnosis or treatment.',
+    p: 'This website provides general information about Ryan Dermaceutics, a specialized dermatology division of Ryan Dermaceutics Pvt. Ltd., and its product portfolio. Content here is intended for healthcare professionals and general visitors in India and does not replace professional medical advice, diagnosis or treatment.',
   },
   {
     h: 'Product information',
@@ -21,7 +21,7 @@ const DEFAULT_SECTIONS = [
   },
   {
     h: 'Intellectual property',
-    p: 'All text, graphics, logos, images and data compilations on this site are the property of Ryan Dermaceutics / Ethics Medinova Pvt. Ltd. or its licensors. Reproduction without prior written permission is prohibited.',
+    p: 'All text, graphics, logos, images and data compilations on this site are the property of Ryan Dermaceutics Private Limited or its licensors. Reproduction without prior written permission is prohibited.',
   },
   {
     h: 'External links',

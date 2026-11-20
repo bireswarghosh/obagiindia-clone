@@ -116,7 +116,7 @@ export default function RyanFooter() {
               </a>
             </div>
             <div className="pt-1 text-[11px] text-slate-400">
-              A Specialized Division of <strong>Ethics Medinova Pvt. Ltd.</strong>
+              A Specialized Division of <strong>Ryan Dermaceutics Pvt. Ltd.</strong>
             </div>
           </div>
         </div>

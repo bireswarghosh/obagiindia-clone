@@ -27,15 +27,15 @@ export interface MultiPageSeo {
 export const defaultMultiPageSeo: MultiPageSeo = {
   home: {
     metaTitle: 'Ryan Dermaceutics | Science That Understands Skin | Dermatology Division',
-    metaDescription: 'Ryan Dermaceutics is a specialized dermatology division of Ethics Medinova dedicated to advanced topical, oral, and supportive formulations backed by WHO-GMP standards.',
-    keywords: 'Ryan Dermaceutics, Dermatology India, Ethics Medinova, topical dermatology, oral dermatology, acne, psoriasis, minoxidil',
+    metaDescription: 'Ryan Dermaceutics is a specialized dermatology division dedicated to advanced topical, oral, and supportive formulations backed by WHO-GMP standards.',
+    keywords: 'Ryan Dermaceutics, Dermatology India, Raya, topical dermatology, oral dermatology, acne, psoriasis, minoxidil',
     ogImage: '/ryan/ryan-logo-card.jpg',
     canonicalUrl: 'https://obagiindia.vercel.app/'
   },
   about: {
     metaTitle: 'About Ryan Dermaceutics | A Specialized Dermatology Division',
     metaDescription: 'Ryan Dermaceutics is dedicated to building a comprehensive portfolio of topical, oral, and supportive dermatological solutions backed by WHO-GMP manufacturing.',
-    keywords: 'Ryan Dermaceutics, dermatology division, Ethics Medinova, topical dermatology, oral dermatology, WHO-GMP, skin health, scalp care',
+    keywords: 'Ryan Dermaceutics, dermatology division, Raya, topical dermatology, oral dermatology, WHO-GMP, skin health, scalp care',
     ogImage: '/ryan/about/about_hero_collage.png',
     canonicalUrl: 'https://obagiindia.vercel.app/about'
   },

@@ -153,7 +153,7 @@ export default function AboutRyanPage() {
             "name": "Ryan Dermaceutics",
             "parentOrganization": {
               "@type": "Organization",
-              "name": "Ethics Medinova Private Limited"
+              "name": "Ryan Dermaceutics Private Limited"
             },
             "url": "https://ryandarma.com/about",
             "logo": "https://ryandarma.com/ryan/ryan-logo.png",
@@ -588,9 +588,9 @@ export default function AboutRyanPage() {
       </section>
 
       {/* ========================================================= */}
-      {/* 6. PART OF ETHICS MEDINOVA (A STRONG FOUNDATION)          */}
+      {/* 6. RYAN DERMACEUTICS (A STRONG FOUNDATION)                 */}
       {/* ========================================================= */}
-      <section id="ethics" className="relative scroll-mt-28 overflow-hidden py-14 lg:py-20 bg-gradient-to-br from-[#003d4d] via-[#005a6e] to-[#00768a]">
+      <section id="ryan-heritage" className="relative scroll-mt-28 overflow-hidden py-14 lg:py-20 bg-gradient-to-br from-[#003d4d] via-[#005a6e] to-[#00768a]">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.10),transparent)] pointer-events-none" />
         <div className="absolute -bottom-20 right-0 w-80 h-80 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none" />
 
@@ -600,7 +600,7 @@ export default function AboutRyanPage() {
             {/* Left Content */}
             <div className="lg:col-span-5 space-y-4">
               <span className="text-[11px] font-black tracking-[0.2em] uppercase text-teal-200 block">
-                {aboutContent.ethicsMedinova.subtitle || 'PART OF ETHICS MEDINOVA'}
+                {aboutContent.ethicsMedinova.subtitle || 'RYAN DERMACEUTICS HEALTHCARE'}
               </span>
               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight uppercase">
                 {aboutContent.ethicsMedinova.title || 'A STRONG FOUNDATION'}
@@ -614,19 +614,19 @@ export default function AboutRyanPage() {
                   type="button"
                   onClick={() => {
                     setActiveModal({
-                      title: 'Ethics Medinova Private Limited',
-                      badge: 'PARENT COMPANY',
+                      title: 'Ryan Dermaceutics Private Limited',
+                      badge: 'HEALTHCARE DIVISION',
                       desc: aboutContent.ethicsMedinova.description,
                       points: [
-                        'A growing pharmaceutical marketing company committed to quality, integrity, and long-term healthcare value.',
-                        'Strong corporate governance and adherence to national and international compliance standards.',
-                        'Parent support empowering Ryan Dermaceutics with state-of-the-art logistics, WHO-GMP manufacturing alliances, and ethical medical promotion.'
+                        'A dedicated dermatology pharmaceutical division committed to therapeutic efficacy, bioequivalence, and long-term clinical healthcare value.',
+                        'Strong corporate governance, regulatory transparency, and strict adherence to national and international compliance standards.',
+                        'Comprehensive portfolio backed by WHO-GMP certified manufacturing facilities, advanced testing protocols, and ethical medical promotion.'
                       ]
                     });
                   }}
                   className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-teal-50 text-[#004f5e] text-xs font-bold uppercase tracking-wider shadow-lg active:scale-95 transition-all cursor-pointer"
                 >
-                  {aboutContent.ethicsMedinova.ctaText || 'ABOUT ETHICS MEDINOVA'}
+                  {aboutContent.ethicsMedinova.ctaText || 'ABOUT RYAN DERMACEUTICS'}
                   <ArrowRight className="w-4 h-4 text-[#00768a]" />
                 </button>
               </div>
@@ -663,7 +663,7 @@ export default function AboutRyanPage() {
               <div className="relative w-full max-w-lg h-64 sm:h-72 lg:h-80 rounded-3xl overflow-hidden shadow-2xl ring-1 ring-white/25 group" style={{ position: 'relative', overflow: 'hidden' }}>
                 <Image
                   src={aboutContent.ethicsMedinova.buildingImage || '/ryan/about/ethics_building.png'}
-                  alt="Ethics Medinova Corporate Headquarters"
+                  alt="Ryan Dermaceutics Corporate Headquarters"
                   fill
                   unoptimized
                   className="object-cover object-center group-hover:scale-105 transition-transform duration-700"
@@ -674,7 +674,7 @@ export default function AboutRyanPage() {
                       CORPORATE HEADQUARTERS
                     </div>
                     <div className="text-base font-bold text-white">
-                      Ethics Medinova Private Limited
+                      Ryan Dermaceutics Private Limited
                     </div>
                   </div>
                 </div>

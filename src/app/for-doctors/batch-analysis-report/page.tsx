@@ -89,7 +89,7 @@ export default function BatchAnalysisReportPage() {
             </div>
             <div className="flex items-center gap-1.5">
               <Building2 className="w-4 h-4 text-cyan-300" />
-              <span>Ethics Medinova Analytical QA Lab</span>
+              <span>Ryan Dermaceutics Analytical QA Lab</span>
             </div>
             <div className="flex items-center gap-1.5">
               <FlaskConical className="w-4 h-4 text-amber-300" />
@@ -102,7 +102,7 @@ export default function BatchAnalysisReportPage() {
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         
-        {/* Search Box - Matches Ethics Medinova design */}
+        {/* Search Box - Batch Analytical QA */}
         <div className="bg-white rounded-2xl border border-slate-200 p-6 sm:p-8 shadow-xs">
           <div className="max-w-3xl">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">
@@ -363,7 +363,7 @@ export default function BatchAnalysisReportPage() {
             {/* Modal Footer */}
             <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
               <span className="text-[11px] text-slate-400 font-medium">
-                Ethics Medinova Analytical Quality Laboratory
+                Ryan Dermaceutics Analytical Quality Laboratory
               </span>
               <div className="flex items-center gap-2">
                 <button

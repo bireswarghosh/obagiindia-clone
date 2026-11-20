@@ -27,7 +27,7 @@ export default function Header({ header, theme }: HeaderProps) {
         { title: 'About Ryan Dermaceutics', href: '/about' },
         { title: 'Our Heritage & Division', href: '/about#vision' },
         { title: 'Quality & Standards', href: '/about#quality' },
-        { title: 'Ethics Medinova', href: '/about#parent' }
+        { title: 'Quality Assurance', href: '/about#quality' }
       ]
     },
     {
@@ -75,7 +75,7 @@ export default function Header({ header, theme }: HeaderProps) {
           borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)'
         }}
       >
-        {/* Top Mini Bar: Official Ryan / Ethics Medinova Subtitle */}
+        {/* Top Mini Bar: Official Ryan Subtitle */}
         <div
           className="w-full py-1.5 px-4 text-center text-xs tracking-wider flex items-center justify-between sm:justify-center gap-3 border-b text-slate-100"
           style={{
@@ -86,7 +86,7 @@ export default function Header({ header, theme }: HeaderProps) {
           <div className="flex items-center gap-2 mx-auto text-[11px] sm:text-xs">
             <ShieldCheck className="w-3.5 h-3.5 text-teal-300 shrink-0" />
             <span className="font-medium">
-              {header?.broughtByText || 'A Specialized Division of Ethics Medinova Pvt. Ltd.'}
+              {header?.broughtByText || 'A Specialized Dermatology Division • Ryan Dermaceutics'}
             </span>
             <span className="hidden md:inline opacity-40">|</span>
             <a

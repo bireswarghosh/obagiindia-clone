@@ -31,7 +31,7 @@ export const defaultSiteData: FullSiteData = {
   seo: {
     metaTitle: 'Ryan Dermaceutics | Ryan Products',
     metaDescription: 'Explore Ryan Dermaceutics official site for transformative Products',
-    keywords: 'Ryan Dermaceutics, Ethics Medinova, Dermatology India, Tressicle, Tenorium, Blismin, Flutirium, topical dermatology, oral dermatology',
+    keywords: 'Ryan Dermaceutics, Raya, Dermatology India, Tressicle, Tenorium, Blismin, Flutirium, topical dermatology, oral dermatology',
     ogImage: '/ryan/ryan-logo-full.jpg',
     canonicalUrl: 'https://ryandarma.com/'
   },
@@ -40,9 +40,9 @@ export const defaultSiteData: FullSiteData = {
     logoImageUrl: '/ryan/ryan-logo.png',
     logoColor: '#ffffff',
     logoPosition: 'left',
-    broughtByText: 'A Specialized Division of Ethics Medinova Pvt. Ltd.',
+    broughtByText: 'A Specialized Dermatology Healthcare Division',
     broughtByLogoUrl: '',
-    broughtByLinkUrl: 'https://ethicsmedinova.com/',
+    broughtByLinkUrl: 'https://www.ryandermaceutics.com/',
     searchEnabled: true,
     searchPlaceholder: 'Search formulations, monographs, guides...',
     navItems: [
@@ -289,7 +289,7 @@ export const defaultSiteData: FullSiteData = {
   quote: {
     quoteText: '“Ryan Dermaceutics delivers the formulation consistency, bioavailability, and scientific transparency that clinicians need to practice with confidence.”',
     quoteAuthor: 'Clinical Advisory Panel',
-    quoteRole: 'Ethics Medinova Private Limited',
+    quoteRole: 'Ryan Dermaceutics Private Limited',
     quoteImage: '/ryan/about/ethics_building.png',
     textColor: '#003d4d',
     backgroundColor: '#FFFFFF'
@@ -309,11 +309,11 @@ export const defaultSiteData: FullSiteData = {
   },
   footer: {
     logoText: 'RYAN DERMACEUTICS',
-    companyName: 'Ethics Medinova Private Limited',
+    companyName: 'Ryan Dermaceutics Private Limited',
     address: 'Kolkata & Mumbai, India',
     email: 'medinfo@ryandermaceutics.com',
     phone: '+91 33 2400 0000',
-    copyright: '© 2026 Ryan Dermaceutics. A Specialized Division of Ethics Medinova Pvt. Ltd. All rights reserved.',
+    copyright: '© 2026 Ryan Dermaceutics Private Limited. All rights reserved.',
     askAiEnabled: true,
     quickLinks: [
       { title: 'Home', href: '/' },

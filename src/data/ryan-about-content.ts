@@ -290,11 +290,11 @@ export const defaultRyanAboutContent: RyanAboutContent = {
     ]
   },
   ethicsMedinova: {
-    subtitle: 'PART OF ETHICS MEDINOVA',
+    subtitle: 'RYAN DERMACEUTICS HEALTHCARE',
     title: 'A STRONG FOUNDATION',
-    description: 'Ryan Dermaceutics is a specialized dermatology division of Ethics Medinova Private Limited, a growing pharmaceutical marketing company committed to quality, integrity and long-term value creation in healthcare.',
-    ctaText: 'ABOUT ETHICS MEDINOVA',
-    ctaLink: '#ethics-details',
+    description: 'Ryan Dermaceutics Private Limited is a specialized dermatology pharmaceutical company committed to therapeutic consistency, bioavailability, and clinical trust across healthcare practice.',
+    ctaText: 'ABOUT RYAN DERMACEUTICS',
+    ctaLink: '#quality-standards',
     buildingImage: '/ryan/about/ethics_building.png',
     badges: [
       {
@@ -436,7 +436,7 @@ export const defaultRyanAboutContent: RyanAboutContent = {
   seo: {
     metaTitle: 'About Ryan Dermaceutics | A Specialized Dermatology Division',
     metaDescription: 'Ryan Dermaceutics is dedicated to building a comprehensive portfolio of topical, oral and supportive dermatological solutions backed by WHO-GMP manufacturing.',
-    keywords: 'Ryan Dermaceutics, dermatology division, Ethics Medinova, topical dermatology, oral dermatology, WHO-GMP, skin health, scalp care',
+    keywords: 'Ryan Dermaceutics, dermatology division, Raya, topical dermatology, oral dermatology, WHO-GMP, skin health, scalp care',
     ogImage: '/ryan/about/about_hero_collage.png',
     canonicalUrl: 'https://obagiindia.vercel.app/about'
   }

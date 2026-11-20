@@ -103,7 +103,7 @@ export default function ProductsPage() {
       .catch(() => {});
   }, []);
 
-  // Main category tab selection matching Ethics Medinova website structure
+  // Main category tab selection matching 3-category portfolio structure
   const [activeMainCategory, setActiveMainCategory] = useState<'therapeutic' | 'route' | 'dosage'>('therapeutic');
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
 
@@ -554,7 +554,7 @@ export default function ProductsPage() {
           {/* ======================================================= */}
           <main className="min-w-0 space-y-6">
             {/* ======================================================= */}
-            {/* ETHICS MEDINOVA 3 MAIN CATEGORIES PRIMARY SELECTOR      */}
+            {/* 3 MAIN CATEGORIES PRIMARY SELECTOR                      */}
             {/* Structurally divided into 3 categories + sub-categories */}
             {/* ======================================================= */}
             <div className="bg-white rounded-2xl border border-teal-200/90 p-4 sm:p-5 shadow-xs space-y-4">
@@ -562,7 +562,7 @@ export default function ProductsPage() {
                 <div className="flex items-center gap-2">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
                   <h2 className="text-xs font-black uppercase tracking-wider text-[#003d4d]">
-                    3 Categories Portfolio Navigation (Ethics Medinova Structure)
+                    3 Categories Portfolio Navigation (Therapeutic • Route • Form)
                   </h2>
                 </div>
                 <span className="text-[11px] text-slate-500 font-medium">

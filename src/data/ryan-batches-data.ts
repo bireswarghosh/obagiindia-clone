@@ -1,5 +1,5 @@
 // Batch Analysis and Certificate of Analysis (COA) Records
-// Official Quality Assurance data for Ryan Dermaceutics / Ethics Medinova Pvt. Ltd.
+// Official Quality Assurance data for Ryan Dermaceutics Private Limited
 import { BatchCOA } from '@/lib/pdf-generator';
 
 export const RYAN_BATCH_RECORDS: BatchCOA[] = [

@@ -15,7 +15,7 @@ export default function InfoLegalCms({ onNotify }: InfoLegalCmsProps) {
   const [contactData, setContactData] = useState({
     eyebrow: 'Get in touch',
     title: 'Contact Us',
-    subtitle: 'Ryan Dermaceutics · A Specialized Division of Ethics Medinova Pvt. Ltd.',
+    subtitle: 'Ryan Dermaceutics · A Specialized Dermatology Healthcare Division',
     medinfoEmail: 'medinfo@ryandermaceutics.com',
     phone: '+91 33 2400 0000',
     offices: 'Kolkata & Mumbai, India.',
@@ -40,7 +40,7 @@ export default function InfoLegalCms({ onNotify }: InfoLegalCmsProps) {
   // Terms & Conditions state
   const [termsTitle, setTermsTitle] = useState('Terms & Conditions');
   const [termsText, setTermsText] = useState(
-    'This website provides general information about Ryan Dermaceutics, a specialized dermatology division of Ethics Medinova Pvt. Ltd., and its product portfolio. Content here is intended for healthcare professionals and general visitors in India and does not replace professional medical advice, diagnosis or treatment.'
+    'This website provides general information about Ryan Dermaceutics, a specialized dermatology division of Ryan Dermaceutics Pvt. Ltd., and its product portfolio. Content here is intended for healthcare professionals and general visitors in India and does not replace professional medical advice, diagnosis or treatment.'
   );
 
   // Accessibility state
