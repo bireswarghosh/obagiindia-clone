@@ -141,13 +141,6 @@ export default function RyanHeader() {
             </Link>
 
             <Link 
-              href="/#therapeutic-areas" 
-              className="hover:text-[#00768a] transition-colors py-1"
-            >
-              Therapeutic Areas
-            </Link>
-
-            <Link 
               href="/products" 
               className={`transition-colors py-1 ${isProducts ? 'text-[#00768a] font-bold' : 'hover:text-[#00768a]'}`}
             >
@@ -363,9 +356,6 @@ export default function RyanHeader() {
                 </Link>
                 <Link href="/products" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
                   Products
-                </Link>
-                <Link href="/#therapeutic-areas" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
-                  Therapeutic Areas
                 </Link>
                 <Link href="/#contact" onClick={() => setMobileMenuOpen(false)} className="block py-2.5 px-3 rounded-lg hover:bg-slate-50">
                   Contact

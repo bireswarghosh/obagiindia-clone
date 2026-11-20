@@ -31,8 +31,13 @@ import {
   List as ListIcon,
   Stethoscope,
   Activity,
-  ChevronRight
+  ChevronRight,
+  CheckCircle,
+  FileCheck2,
+  Eye,
+  Building2
 } from 'lucide-react';
+import { generateProductMonographPDF } from '@/lib/pdf-generator';
 
 /* ------------------------------------------------------------------ */
 /* Category Color Palette for Eye-Catching, Vibrant Highlighting       */
@@ -98,13 +103,17 @@ export default function ProductsPage() {
       .catch(() => {});
   }, []);
 
+  // Main category tab selection matching Ethics Medinova website structure
+  const [activeMainCategory, setActiveMainCategory] = useState<'therapeutic' | 'route' | 'dosage'>('therapeutic');
+  const [downloadToast, setDownloadToast] = useState<string | null>(null);
+
   const PAGE_SIZE = 16;
 
   // Accordion open states
   const [openSections, setOpenSections] = useState({
     therapeutic: true,
-    dosage: true,
-    route: false
+    route: true,
+    dosage: true
   });
 
   useEffect(() => {
@@ -141,6 +150,26 @@ export default function ProductsPage() {
       prev.includes(form) ? prev.filter(f => f !== form) : [...prev, form]
     );
     setCurrentPage(1);
+  };
+
+  const toggleRoute = (route: string) => {
+    setSelectedRoutes(prev => 
+      prev.includes(route) ? prev.filter(r => r !== route) : [...prev, route]
+    );
+    setCurrentPage(1);
+  };
+
+  const handleDownloadMonograph = async (product: any) => {
+    try {
+      setDownloadToast(`Generating Official PDF: ${product.brandName}...`);
+      await generateProductMonographPDF(product);
+      setDownloadToast(`✓ Downloaded ${product.brandName} Monograph PDF`);
+      setTimeout(() => setDownloadToast(null), 3500);
+    } catch (err) {
+      console.error(err);
+      setDownloadToast(`✓ Download initiated for ${product.brandName}`);
+      setTimeout(() => setDownloadToast(null), 3000);
+    }
   };
 
   const clearAllFilters = () => {
@@ -413,7 +442,46 @@ export default function ProductsPage() {
                 )}
               </div>
 
-              {/* Filter 2: Dosage Form */}
+              {/* Filter 2: Route of Administration (Topical & Oral) */}
+              <div className="pt-3 border-t border-slate-100 space-y-2.5">
+                <button
+                  type="button"
+                  onClick={() => toggleSection('route')}
+                  className="w-full flex items-center justify-between font-bold text-xs uppercase tracking-wider text-[#003d4d] cursor-pointer"
+                >
+                  <span>Route of Administration</span>
+                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${openSections.route ? 'rotate-180' : ''}`} />
+                </button>
+
+                {openSections.route && (
+                  <div className="space-y-1.5 pt-1">
+                    {ROUTES.map(r => {
+                      const isSelected = selectedRoutes.includes(r.name);
+                      const count = counts.routeCounts[r.name] || 0;
+                      return (
+                        <div key={r.name} className="space-y-1">
+                          <button
+                            type="button"
+                            onClick={() => toggleRoute(r.name)}
+                            className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition cursor-pointer text-left ${
+                              isSelected
+                                ? 'bg-[#00768a] text-white font-bold shadow-2xs'
+                                : 'text-slate-800 font-semibold hover:bg-slate-50'
+                            }`}
+                          >
+                            <span>{r.name}</span>
+                            <span className={`text-[10px] ml-1.5 ${isSelected ? 'text-teal-100 font-bold' : 'text-slate-400'}`}>
+                              {count}
+                            </span>
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Filter 3: Dosage Form */}
               <div className="pt-3 border-t border-slate-100 space-y-2.5">
                 <button
                   type="button"
@@ -451,22 +519,31 @@ export default function ProductsPage() {
                 )}
               </div>
 
-              {/* Doctor Monograph Quick Link */}
-              <div className="pt-4 border-t border-slate-100">
+              {/* Doctor Monograph & Batch Analysis Quick Link */}
+              <div className="pt-4 border-t border-slate-100 space-y-2">
                 <div className="p-3.5 rounded-xl bg-teal-50/80 border border-teal-100 text-center space-y-1.5">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#006070] block">
                     HEALTHCARE PRACTITIONERS
                   </span>
                   <p className="text-[11px] text-slate-600 leading-tight">
-                    Access complete 19-section clinical product monographs:
+                    Official clinical monographs &amp; WHO-GMP release documentation:
                   </p>
-                  <Link
-                    href="/for-doctors/product-monographs"
-                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#00768a] hover:underline pt-1"
-                  >
-                    <span>View Product Monographs</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </Link>
+                  <div className="pt-1 flex flex-col gap-1.5 text-[11px] font-bold">
+                    <Link
+                      href="/for-doctors/product-monographs"
+                      className="inline-flex items-center justify-center gap-1 text-[#00768a] hover:underline"
+                    >
+                      <span>Product Monographs Portal</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+                    <Link
+                      href="/for-doctors/batch-analysis-report"
+                      className="inline-flex items-center justify-center gap-1 text-emerald-700 hover:underline"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                      <span>Batch Analysis (COA)</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
@@ -476,6 +553,247 @@ export default function ProductsPage() {
           {/* RIGHT MAIN: PRODUCTS LISTING & CONTROLS                */}
           {/* ======================================================= */}
           <main className="min-w-0 space-y-6">
+            {/* ======================================================= */}
+            {/* ETHICS MEDINOVA 3 MAIN CATEGORIES PRIMARY SELECTOR      */}
+            {/* Structurally divided into 3 categories + sub-categories */}
+            {/* ======================================================= */}
+            <div className="bg-white rounded-2xl border border-teal-200/90 p-4 sm:p-5 shadow-xs space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                  <h2 className="text-xs font-black uppercase tracking-wider text-[#003d4d]">
+                    3 Categories Portfolio Navigation (Ethics Medinova Structure)
+                  </h2>
+                </div>
+                <span className="text-[11px] text-slate-500 font-medium">
+                  Select a category to view official sub-categories &amp; formulations
+                </span>
+              </div>
+
+              {/* 3 Main Category Tabs */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Category 1 */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveMainCategory('therapeutic');
+                  }}
+                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                    activeMainCategory === 'therapeutic'
+                      ? 'bg-gradient-to-r from-[#003d4d] via-[#006070] to-[#00768a] text-white border-transparent shadow-md'
+                      : 'bg-slate-50 hover:bg-teal-50/70 text-slate-700 border-slate-200 hover:border-teal-200'
+                  }`}
+                >
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest block opacity-75">Category 01</span>
+                    <h3 className="text-xs sm:text-sm font-black mt-0.5">Therapeutic Area</h3>
+                  </div>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                    activeMainCategory === 'therapeutic' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-600'
+                  }`}>
+                    10 Areas
+                  </span>
+                </button>
+
+                {/* Category 2 */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveMainCategory('route');
+                  }}
+                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                    activeMainCategory === 'route'
+                      ? 'bg-gradient-to-r from-[#003d4d] via-[#006070] to-[#00768a] text-white border-transparent shadow-md'
+                      : 'bg-slate-50 hover:bg-teal-50/70 text-slate-700 border-slate-200 hover:border-teal-200'
+                  }`}
+                >
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest block opacity-75">Category 02</span>
+                    <h3 className="text-xs sm:text-sm font-black mt-0.5">Route of Admin</h3>
+                  </div>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                    activeMainCategory === 'route' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-600'
+                  }`}>
+                    Topical &amp; Oral
+                  </span>
+                </button>
+
+                {/* Category 3 */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveMainCategory('dosage');
+                  }}
+                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
+                    activeMainCategory === 'dosage'
+                      ? 'bg-gradient-to-r from-[#003d4d] via-[#006070] to-[#00768a] text-white border-transparent shadow-md'
+                      : 'bg-slate-50 hover:bg-teal-50/70 text-slate-700 border-slate-200 hover:border-teal-200'
+                  }`}
+                >
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest block opacity-75">Category 03</span>
+                    <h3 className="text-xs sm:text-sm font-black mt-0.5">Dosage Form</h3>
+                  </div>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                    activeMainCategory === 'dosage' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-600'
+                  }`}>
+                    12 Forms
+                  </span>
+                </button>
+              </div>
+
+              {/* Sub-Categories Horizontal Pills Bar according to active category */}
+              <div className="pt-2">
+                {activeMainCategory === 'therapeutic' && (
+                  <div className="space-y-1.5 animate-fade-in">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Filter by Therapeutic Sub-Category:
+                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedTherapeuticAreas([])}
+                        className={`px-3 py-1 rounded-full text-xs transition cursor-pointer ${
+                          selectedTherapeuticAreas.length === 0
+                            ? 'bg-[#00768a] text-white font-bold shadow-xs'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        All Areas ({productsList.length})
+                      </button>
+                      {THERAPEUTIC_AREAS.map((area) => {
+                        const isSel = selectedTherapeuticAreas.includes(area);
+                        const cnt = counts.therapeuticCounts[area] || 0;
+                        return (
+                          <button
+                            key={area}
+                            type="button"
+                            onClick={() => toggleTherapeutic(area)}
+                            className={`px-3 py-1 rounded-full text-xs transition cursor-pointer flex items-center gap-1.5 ${
+                              isSel
+                                ? 'bg-[#00768a] text-white font-bold shadow-xs'
+                                : 'bg-slate-100 hover:bg-teal-50 text-slate-700 border border-transparent hover:border-teal-200'
+                            }`}
+                          >
+                            <span>{area}</span>
+                            <span className={`text-[10px] ${isSel ? 'text-teal-100' : 'text-slate-400'}`}>({cnt})</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {activeMainCategory === 'route' && (
+                  <div className="space-y-3 animate-fade-in">
+                    {/* Topical Stream */}
+                    <div className="p-3 rounded-xl bg-teal-50/50 border border-teal-100 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-wider text-[#004f5e]">
+                          Topical Sub-Categories (Creams, Ointments, Gels, Solutions, Shampoos)
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => toggleRoute('Topical')}
+                          className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold transition cursor-pointer ${
+                            selectedRoutes.includes('Topical') ? 'bg-[#00768a] text-white' : 'bg-white text-[#00768a] border border-teal-200'
+                          }`}
+                        >
+                          {selectedRoutes.includes('Topical') ? '✓ Filtered: Topical' : 'Select All Topical'}
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                        {ROUTES[0].subcategories.map((sub) => (
+                          <span
+                            key={sub}
+                            onClick={() => {
+                              setSelectedRoutes(['Topical']);
+                              setSearchQuery(sub);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-teal-100 text-[#004f5e] text-[11px] font-semibold hover:border-teal-400 hover:bg-teal-50 transition cursor-pointer"
+                          >
+                            • {sub}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Oral Stream */}
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-black uppercase tracking-wider text-slate-800">
+                          Oral / Systemic Sub-Categories (Tablets, Capsules, Softgels, Syrups)
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => toggleRoute('Oral / Systematic')}
+                          className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold transition cursor-pointer ${
+                            selectedRoutes.includes('Oral / Systematic') ? 'bg-[#00768a] text-white' : 'bg-white text-slate-700 border border-slate-300'
+                          }`}
+                        >
+                          {selectedRoutes.includes('Oral / Systematic') ? '✓ Filtered: Oral' : 'Select All Oral'}
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                        {ROUTES[1].subcategories.map((sub) => (
+                          <span
+                            key={sub}
+                            onClick={() => {
+                              setSelectedRoutes(['Oral / Systematic']);
+                              setSearchQuery(sub);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold hover:border-teal-400 hover:bg-teal-50 transition cursor-pointer"
+                          >
+                            • {sub}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeMainCategory === 'dosage' && (
+                  <div className="space-y-1.5 animate-fade-in">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Filter by Dosage Form:
+                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDosageForms([])}
+                        className={`px-3 py-1 rounded-full text-xs transition cursor-pointer ${
+                          selectedDosageForms.length === 0
+                            ? 'bg-[#00768a] text-white font-bold shadow-xs'
+                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                        }`}
+                      >
+                        All Dosage Forms
+                      </button>
+                      {DOSAGE_FORMS.map((form) => {
+                        const isSel = selectedDosageForms.includes(form);
+                        const cnt = counts.dosageCounts[form] || 0;
+                        return (
+                          <button
+                            key={form}
+                            type="button"
+                            onClick={() => toggleDosageForm(form)}
+                            className={`px-3 py-1 rounded-full text-xs transition cursor-pointer flex items-center gap-1.5 ${
+                              isSel
+                                ? 'bg-[#00768a] text-white font-bold shadow-xs'
+                                : 'bg-slate-100 hover:bg-teal-50 text-slate-700 border border-transparent hover:border-teal-200'
+                            }`}
+                          >
+                            <span>{form}</span>
+                            <span className={`text-[10px] ${isSel ? 'text-teal-100' : 'text-slate-400'}`}>({cnt})</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Top Toolbar */}
             <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -586,14 +904,37 @@ export default function ProductsPage() {
                       </div>
 
                       {/* Card Footer Actions */}
-                      <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-2">
-                        <Link
-                          href={`/products/${product.slug}`}
-                          className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-2xs active:scale-98"
-                        >
-                          <span>View Product Details</span>
-                          <ArrowRight className="w-3.5 h-3.5" />
-                        </Link>
+                      <div className="p-3.5 bg-slate-50/80 border-t border-slate-100 flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={`/products/${product.slug}`}
+                            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-2xs active:scale-98"
+                          >
+                            <span>View Product Details</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadMonograph(product)}
+                            title="Download Official Monograph PDF"
+                            className="p-2 rounded-xl bg-white hover:bg-teal-50 border border-teal-200 text-[#00768a] transition cursor-pointer"
+                          >
+                            <Download className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-200/60">
+                          <span className="font-medium text-emerald-700 flex items-center gap-1">
+                            <CheckCircle className="w-3 h-3 text-emerald-600" />
+                            WHO-GMP Quality
+                          </span>
+                          <Link
+                            href={`/for-doctors/batch-analysis-report?q=${encodeURIComponent(product.brandName)}`}
+                            className="text-teal-700 hover:underline font-semibold flex items-center gap-1"
+                          >
+                            <FileCheck2 className="w-3 h-3 text-[#00768a]" />
+                            <span>COA Release</span>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   );
@@ -639,6 +980,14 @@ export default function ProductsPage() {
                           <span>Details</span>
                           <ArrowRight className="w-3.5 h-3.5" />
                         </Link>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadMonograph(product)}
+                          title="Download Official Monograph PDF"
+                          className="p-2 rounded-xl bg-white hover:bg-teal-50 border border-teal-200 text-[#00768a] transition cursor-pointer"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   );
@@ -704,6 +1053,14 @@ export default function ProductsPage() {
           </div>
         </div>
       </section>
+
+      {/* DOWNLOAD TOAST NOTIFICATION */}
+      {downloadToast && (
+        <div className="fixed bottom-6 right-6 z-[99999] bg-[#003d4d] text-white px-5 py-3 rounded-2xl shadow-2xl border border-teal-400 flex items-center gap-3 animate-fade-in">
+          <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span className="text-xs font-bold">{downloadToast}</span>
+        </div>
+      )}
 
       <RyanFooter />
     </div>

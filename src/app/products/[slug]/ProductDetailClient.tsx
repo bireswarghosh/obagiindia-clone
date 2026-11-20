@@ -38,6 +38,7 @@ import {
   Package,
   Gauge
 } from 'lucide-react';
+import { generateProductMonographPDF } from '@/lib/pdf-generator';
 
 interface ProductDetailClientProps {
   product: RyanProduct;
@@ -156,6 +157,18 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
   const railGo = (e: React.MouseEvent, anchor: string) => {
     e.preventDefault();
     document.getElementById(anchor)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const [downloading, setDownloading] = useState(false);
+  const handleDownloadPDF = async () => {
+    try {
+      setDownloading(true);
+      await generateProductMonographPDF(product);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDownloading(false);
+    }
   };
 
   const handlePrint = () => window.print();
@@ -860,11 +873,12 @@ export default function ProductDetailClient({ product }: ProductDetailClientProp
             </div>
             <div id="monograph-pdf" className="w-full max-w-xs flex flex-col gap-2.5 scroll-mt-28">
               <button
-                onClick={handlePrint}
-                className="w-full py-2.5 px-4 rounded-xl bg-white text-[#004f5e] hover:bg-teal-50 text-xs font-bold transition flex items-center justify-center gap-2 shadow-md active:scale-95"
+                onClick={handleDownloadPDF}
+                disabled={downloading}
+                className="w-full py-2.5 px-4 rounded-xl bg-white text-[#004f5e] hover:bg-teal-50 text-xs font-bold transition flex items-center justify-center gap-2 shadow-md active:scale-95 cursor-pointer disabled:opacity-60"
               >
                 <Download className="w-4 h-4" />
-                Download Monograph PDF
+                {downloading ? 'Generating Official PDF...' : 'Download Monograph PDF'}
               </button>
               <Link
                 href="/for-doctors/prescribing-information"

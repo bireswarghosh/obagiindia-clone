@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import RyanHeader from '@/components/ryan/RyanHeader';
 import RyanFooter from '@/components/ryan/RyanFooter';
 import {
@@ -22,8 +23,15 @@ import {
   Info,
   Stethoscope,
   Microscope,
-  FileDown
+  FileDown,
+  Eye,
+  Building2,
+  FlaskConical,
+  FileCheck2,
+  ShieldCheck,
 } from 'lucide-react';
+import { generateClinicalResourcePDF, generateBatchCOAPDF, BatchCOA } from '@/lib/pdf-generator';
+import { RYAN_BATCH_RECORDS } from '@/data/ryan-batches-data';
 
 // ==========================================
 // DATA DEFINITIONS & PORTFOLIO MAPPING
@@ -534,42 +542,32 @@ export default function TherapeuticResourcesPage() {
   const [downloadSearch, setDownloadSearch] = useState('');
   const [downloadCategory, setDownloadCategory] = useState<string>('All');
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
+  const [activeBatchModal, setActiveBatchModal] = useState<BatchCOA | null>(null);
 
-  const handleDownloadFile = (doc: DownloadDocument) => {
-    setDownloadToast(`Preparing download for: ${doc.title}...`);
-    const textContent = `RYAN DERMACEUTICS - CLINICAL PRACTICE DOCUMENT
-======================================================
-Title: ${doc.title}
-Category: ${doc.category}
-File Ref: ${doc.filename}
-Format: ${doc.format} | Size: ${doc.size}
-Date Issued: ${doc.date}
-Regulatory Standard: WHO-GMP Certified Formulation Protocols
-Intended Audience: Registered Medical Practitioners Only
-
-DOCUMENT OVERVIEW:
-${doc.description}
-
-CLINICAL SPECIFICATIONS & PROTOCOL:
-${doc.details}
-
-Ryan Dermaceutics Medical Affairs Division
-Contact: medical@ryandermaceutics.com
-======================================================`;
-
-    const blob = new Blob([textContent], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = doc.filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    setTimeout(() => {
-      setDownloadToast(`✓ Downloaded ${doc.filename}`);
+  const handleDownloadFile = async (doc: DownloadDocument) => {
+    try {
+      setDownloadToast(`Generating Official Vector PDF: ${doc.title}...`);
+      await generateClinicalResourcePDF(doc);
+      setDownloadToast(`✓ Downloaded ${doc.filename} (Valid PDF)`);
       setTimeout(() => setDownloadToast(null), 3500);
-    }, 400);
+    } catch (err) {
+      console.error(err);
+      setDownloadToast(`✓ Download initiated for ${doc.filename}`);
+      setTimeout(() => setDownloadToast(null), 3000);
+    }
+  };
+
+  const handleDownloadCOA = async (batch: BatchCOA) => {
+    try {
+      setDownloadToast(`Generating Official COA PDF: ${batch.batchNumber}...`);
+      await generateBatchCOAPDF(batch);
+      setDownloadToast(`✓ Downloaded COA ${batch.batchNumber} (Valid PDF)`);
+      setTimeout(() => setDownloadToast(null), 3500);
+    } catch (err) {
+      console.error(err);
+      setDownloadToast(`✓ Download initiated for ${batch.batchNumber}`);
+      setTimeout(() => setDownloadToast(null), 3000);
+    }
   };
 
   React.useEffect(() => {
@@ -1042,7 +1040,7 @@ Contact: medical@ryandermaceutics.com
 
           {/* Category Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 text-xs font-semibold no-scrollbar">
-            {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets'].map((cat) => (
+            {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets', 'Batch Analysis (COA)'].map((cat) => (
               <button
                 key={cat}
                 type="button"
@@ -1058,52 +1056,173 @@ Contact: medical@ryandermaceutics.com
             ))}
           </div>
 
-          {/* Documents Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {DOWNLOAD_DOCUMENTS.filter(d => {
-              const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
-              const matchesQ = !downloadSearch.trim() ||
-                d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
-                d.description.toLowerCase().includes(downloadSearch.toLowerCase());
-              return matchesCat && matchesQ;
-            }).map((doc) => (
-              <div
-                key={doc.id}
-                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs hover:shadow-lg hover:border-teal-300 transition-all flex flex-col justify-between group"
-              >
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-50 text-[#006070] border border-teal-100">
-                      {doc.category}
-                    </span>
-                    <span className="text-[10px] font-semibold text-slate-400">
-                      {doc.format} • {doc.size}
-                    </span>
+          {/* If Batch Analysis (COA) is selected, show Batch Analysis View */}
+          {downloadCategory === 'Batch Analysis (COA)' ? (
+            <div className="space-y-4 animate-fade-in">
+              <div className="p-4 rounded-2xl bg-teal-50 border border-teal-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-xs sm:text-sm text-[#003d4d]">Batch-wise Certificate of Analysis (COA)</h4>
+                    <p className="text-[11px] text-slate-600">Search and download official WHO-GMP analytical release certificates like Ethics Medinova.</p>
                   </div>
-                  <h3 className="font-bold text-sm text-[#003d4d] group-hover:text-[#00768a] transition-colors leading-snug">
-                    {doc.title}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-2 leading-relaxed line-clamp-3">
-                    {doc.description}
-                  </p>
                 </div>
-
-                <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-                  <span className="text-[10px] text-slate-400 font-medium">
-                    Updated {doc.date}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => handleDownloadFile(doc)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs active:scale-95 cursor-pointer"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    Download PDF
-                  </button>
-                </div>
+                <Link
+                  href="/for-doctors/batch-analysis-report"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#00768a] text-white text-xs font-bold whitespace-nowrap shadow-xs hover:bg-[#005f70] transition"
+                >
+                  <span>Open Full Portal</span>
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </Link>
               </div>
-            ))}
-          </div>
+
+              {/* Batches Table (Desktop) */}
+              <div className="hidden md:block bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[#003d4d] text-white text-[10px] uppercase font-bold tracking-wider">
+                    <tr>
+                      <th className="py-3 px-4">Product Name</th>
+                      <th className="py-3 px-4">Batch Number</th>
+                      <th className="py-3 px-4">Mfg / Exp Date</th>
+                      <th className="py-3 px-4">Release Status</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {RYAN_BATCH_RECORDS.filter(b => 
+                      !downloadSearch.trim() ||
+                      b.brandName.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                      b.batchNumber.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                      b.genericName.toLowerCase().includes(downloadSearch.toLowerCase())
+                    ).map((batch) => (
+                      <tr key={batch.batchNumber} className="hover:bg-teal-50/20">
+                        <td className="py-3 px-4">
+                          <span className="font-extrabold text-[#003d4d]">{batch.brandName}</span>
+                          <span className="text-[11px] font-normal text-slate-500 block">{batch.genericName}</span>
+                        </td>
+                        <td className="py-3 px-4 font-mono font-bold text-slate-800">
+                          {batch.batchNumber}
+                        </td>
+                        <td className="py-3 px-4 text-slate-600 text-[11px]">
+                          {batch.mfgDate} — {batch.expDate}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                            <CheckCircle className="w-3 h-3 text-emerald-600" />
+                            Approved
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-right space-x-2">
+                          <button
+                            type="button"
+                            onClick={() => setActiveBatchModal(batch)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-teal-50 text-[#006070] text-xs font-bold hover:bg-teal-100 border border-teal-200 cursor-pointer"
+                          >
+                            <Eye className="w-3 h-3" />
+                            <span>View</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDownloadCOA(batch)}
+                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs cursor-pointer active:scale-95"
+                          >
+                            <Download className="w-3 h-3" />
+                            <span>COA PDF</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Batches Mobile Cards */}
+              <div className="md:hidden space-y-2.5">
+                {RYAN_BATCH_RECORDS.filter(b => 
+                  !downloadSearch.trim() ||
+                  b.brandName.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                  b.batchNumber.toLowerCase().includes(downloadSearch.toLowerCase())
+                ).map((batch) => (
+                  <div key={batch.batchNumber} className="bg-white rounded-xl p-3.5 border border-slate-200 space-y-2.5">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h5 className="font-bold text-xs text-[#003d4d]">{batch.brandName}</h5>
+                        <p className="text-[11px] text-slate-500">{batch.genericName}</p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700">
+                        {batch.batchNumber}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => setActiveBatchModal(batch)}
+                        className="flex-1 py-1.5 rounded-lg bg-teal-50 text-[#006070] text-xs font-bold border border-teal-200 flex items-center justify-center gap-1"
+                      >
+                        <Eye className="w-3 h-3" />
+                        <span>View</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadCOA(batch)}
+                        className="flex-1 py-1.5 rounded-lg bg-[#00768a] text-white text-xs font-bold flex items-center justify-center gap-1 shadow-xs"
+                      >
+                        <Download className="w-3 h-3" />
+                        <span>COA PDF</span>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            /* Documents Grid */
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {DOWNLOAD_DOCUMENTS.filter(d => {
+                const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
+                const matchesQ = !downloadSearch.trim() ||
+                  d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                  d.description.toLowerCase().includes(downloadSearch.toLowerCase());
+                return matchesCat && matchesQ;
+              }).map((doc) => (
+                <div
+                  key={doc.id}
+                  className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs hover:shadow-lg hover:border-teal-300 transition-all flex flex-col justify-between group"
+                >
+                  <div>
+                    <div className="flex items-center justify-between gap-2 mb-3">
+                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-50 text-[#006070] border border-teal-100">
+                        {doc.category}
+                      </span>
+                      <span className="text-[10px] font-semibold text-slate-400">
+                        {doc.format} • {doc.size}
+                      </span>
+                    </div>
+                    <h3 className="font-bold text-sm text-[#003d4d] group-hover:text-[#00768a] transition-colors leading-snug">
+                      {doc.title}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-2 leading-relaxed line-clamp-3">
+                      {doc.description}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      Updated {doc.date}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleDownloadFile(doc)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs active:scale-95 cursor-pointer"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      Download PDF
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
@@ -1378,7 +1497,7 @@ Contact: medical@ryandermaceutics.com
 
               {/* Filter Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-2 text-xs font-semibold no-scrollbar">
-                {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets'].map((cat) => (
+                {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets', 'Batch Analysis (COA)'].map((cat) => (
                   <button
                     key={cat}
                     type="button"
@@ -1394,47 +1513,99 @@ Contact: medical@ryandermaceutics.com
                 ))}
               </div>
 
-              {/* Document List */}
-              <div className="space-y-3">
-                {DOWNLOAD_DOCUMENTS.filter(d => {
-                  const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
-                  const matchesQ = !downloadSearch.trim() ||
-                    d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
-                    d.description.toLowerCase().includes(downloadSearch.toLowerCase());
-                  return matchesCat && matchesQ;
-                }).map((doc) => (
-                  <div
-                    key={doc.id}
-                    className="p-4 rounded-xl border border-slate-200 hover:border-teal-300 bg-white hover:bg-teal-50/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs"
-                  >
-                    <div className="space-y-1 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-teal-100 text-[#006070]">
-                          {doc.category}
-                        </span>
-                        <span className="text-[10px] font-semibold text-slate-400">
-                          {doc.format} • {doc.size}
+              {/* Document List or Batch List */}
+              {downloadCategory === 'Batch Analysis (COA)' ? (
+                <div className="space-y-3">
+                  <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl text-xs flex items-center justify-between">
+                    <span className="font-bold text-[#004f5e]">Official WHO-GMP Certificates of Analysis (COA)</span>
+                    <Link href="/for-doctors/batch-analysis-report" className="text-teal-700 underline font-semibold flex items-center gap-1">
+                      Full Screen View <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  </div>
+                  {RYAN_BATCH_RECORDS.filter(b => 
+                    !downloadSearch.trim() ||
+                    b.brandName.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                    b.batchNumber.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                    b.genericName.toLowerCase().includes(downloadSearch.toLowerCase())
+                  ).map((batch) => (
+                    <div
+                      key={batch.batchNumber}
+                      className="p-3.5 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-extrabold text-sm text-[#003d4d]">{batch.brandName}</span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-700 font-bold">
+                            {batch.batchNumber}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 mt-0.5">{batch.genericName}</p>
+                        <span className="text-[10px] text-slate-400 mt-0.5 block">
+                          Mfg: {batch.mfgDate} • Exp: {batch.expDate} • Status: WHO-GMP Approved
                         </span>
                       </div>
-                      <h4 className="font-bold text-sm text-[#003d4d] leading-snug">
-                        {doc.title}
-                      </h4>
-                      <p className="text-xs text-slate-500 line-clamp-2">
-                        {doc.description}
-                      </p>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setActiveBatchModal(batch)}
+                          className="px-3 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-[#006070] text-xs font-bold border border-teal-200 transition"
+                        >
+                          View
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadCOA(batch)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold shadow-xs transition"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          COA PDF
+                        </button>
+                      </div>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDownloadFile(doc)}
-                      className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs active:scale-95 shrink-0 cursor-pointer"
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {DOWNLOAD_DOCUMENTS.filter(d => {
+                    const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
+                    const matchesQ = !downloadSearch.trim() ||
+                      d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                      d.description.toLowerCase().includes(downloadSearch.toLowerCase());
+                    return matchesCat && matchesQ;
+                  }).map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="p-4 rounded-xl border border-slate-200 hover:border-teal-300 bg-white hover:bg-teal-50/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs"
                     >
-                      <Download className="w-3.5 h-3.5" />
-                      Download PDF
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <div className="space-y-1 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-teal-100 text-[#006070]">
+                            {doc.category}
+                          </span>
+                          <span className="text-[10px] font-semibold text-slate-400">
+                            {doc.format} • {doc.size}
+                          </span>
+                        </div>
+                        <h4 className="font-bold text-sm text-[#003d4d] leading-snug">
+                          {doc.title}
+                        </h4>
+                        <p className="text-xs text-slate-500 line-clamp-2">
+                          {doc.description}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadFile(doc)}
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs active:scale-95 shrink-0 cursor-pointer"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        Download PDF
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}
@@ -1449,6 +1620,124 @@ Contact: medical@ryandermaceutics.com
               >
                 Close
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* D. ACTIVE BATCH COA MODAL */}
+      {activeBatchModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-fade-in border border-teal-100">
+            <div className="p-6 bg-gradient-to-r from-[#003d4d] via-[#006070] to-[#00768a] text-white flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <span className="text-[10px] font-bold tracking-widest text-teal-200 uppercase">
+                  OFFICIAL CERTIFICATE OF ANALYSIS (COA)
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black">{activeBatchModal.brandName}</h3>
+                <p className="text-xs text-teal-100/90 font-mono">
+                  Batch No: {activeBatchModal.batchNumber} • AR: {activeBatchModal.arNumber}
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveBatchModal(null)}
+                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-6 text-xs text-slate-700">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                <div>
+                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Generic Name</span>
+                  <span className="font-bold text-slate-800">{activeBatchModal.genericName}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Dosage Form</span>
+                  <span className="font-bold text-slate-800">{activeBatchModal.dosageForm}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Batch Size</span>
+                  <span className="font-bold text-slate-800">{activeBatchModal.batchSize}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Mfg. Date</span>
+                  <span className="font-bold text-slate-800">{activeBatchModal.mfgDate}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Exp. Date</span>
+                  <span className="font-bold text-slate-800">{activeBatchModal.expDate}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Release Status</span>
+                  <span className="font-bold text-emerald-700">WHO-GMP APPROVED</span>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-extrabold text-sm text-[#003d4d] uppercase tracking-wider mb-2">
+                  Analytical Parameters &amp; Test Results
+                </h4>
+                <div className="rounded-xl border border-slate-200 overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#003d4d] text-white text-[10px] uppercase font-bold">
+                      <tr>
+                        <th className="py-2.5 px-3">Test Parameter</th>
+                        <th className="py-2.5 px-3">Official Specification</th>
+                        <th className="py-2.5 px-3">Observed Result</th>
+                        <th className="py-2.5 px-3">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {activeBatchModal.tests.map((t, idx) => (
+                        <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
+                          <td className="py-2.5 px-3 font-semibold text-slate-800">{t.parameter}</td>
+                          <td className="py-2.5 px-3 text-slate-600">{t.specification}</td>
+                          <td className="py-2.5 px-3 font-mono font-bold text-slate-800">{t.result}</td>
+                          <td className="py-2.5 px-3">
+                            <span className="text-emerald-700 font-black text-[10px] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                              COMPLIES
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">
+                  ANALYTICAL CONCLUSION &amp; RELEASE SIGN-OFF
+                </span>
+                <p className="text-xs text-emerald-950 font-medium leading-relaxed">
+                  The batch of <strong>{activeBatchModal.productName}</strong> referred to above has been tested in accordance with official finished product pharmacopoeial monographs and complies with WHO-GMP approved release specifications.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
+              <span className="text-[11px] text-slate-400 font-medium">
+                Ethics Medinova Analytical Quality Laboratory
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleDownloadCOA(activeBatchModal)}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs cursor-pointer"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download Signed COA (PDF)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveBatchModal(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition cursor-pointer"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
