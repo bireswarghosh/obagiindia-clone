@@ -106,12 +106,16 @@ export default function ClinicalInsightArticlePage() {
       {/* ========================================================= */}
       {/* 1. HERO & METADATA BANNER (Vibrant Eye-Catching Header)   */}
       {/* ========================================================= */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#0e4f63] via-[#006070] to-[#003d4d] text-white pt-8 pb-14 sm:pb-16 border-b border-teal-500/30">
+      <section className="relative overflow-hidden text-white pt-8 pb-14 sm:pb-16 border-b border-teal-500/30 bg-[linear-gradient(135deg,#04202b_0%,#0e4f63_35%,#312e81_75%,#6d28d9_100%)]">
+        <div className="h-1.5 w-full absolute top-0 left-0 bg-gradient-to-r from-rose-400 via-amber-300 to-emerald-400" />
         {/* Abstract glowing accents */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-400/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-80 h-80 bg-teal-300/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-400/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-10 w-80 h-80 bg-teal-300/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-10 right-1/3 w-64 h-64 rounded-full bg-rose-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-20 right-10 w-72 h-72 bg-indigo-500/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute inset-0 opacity-[0.07] pointer-events-none [background-image:linear-gradient(rgba(255,255,255,0.6)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.6)_1px,transparent_1px)] [background-size:44px_44px]" />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[64px] relative z-10">
           {/* Breadcrumbs */}
           <nav className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-teal-200/80 mb-6 flex-wrap">
             <Link href="/" className="hover:text-white transition">Home</Link>
@@ -135,7 +139,7 @@ export default function ClinicalInsightArticlePage() {
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight leading-[1.15] text-white max-w-4xl">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-black tracking-tight leading-[1.15] max-w-4xl bg-gradient-to-r from-white via-cyan-100 to-emerald-200 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]">
             {article.title}
           </h1>
 
@@ -199,16 +203,17 @@ export default function ClinicalInsightArticlePage() {
       {/* ========================================================= */}
       {/* 2. MAIN CLINICAL EDITORIAL BODY                           */}
       {/* ========================================================= */}
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
+      <main className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[64px] py-10 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
 
           {/* Left Column: Clinical Article Content */}
           <div className="lg:col-span-8 space-y-8">
 
             {/* High-Yield Executive Pearl Callout */}
-            <div className="relative rounded-2xl p-6 bg-gradient-to-br from-teal-50 via-cyan-50/60 to-white border-2 border-teal-300 shadow-sm">
+            <div className="relative overflow-hidden rounded-2xl p-6 bg-gradient-to-br from-teal-50 via-cyan-50/60 to-indigo-50/50 border-2 border-teal-300 shadow-[0_16px_36px_-18px_rgba(0,118,138,0.5)] hover:shadow-[0_22px_44px_-18px_rgba(79,70,229,0.55)] hover:-translate-y-1 transition-all duration-300">
+              <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-500" />
               <div className="flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#00768a] to-cyan-500 text-white flex items-center justify-center shrink-0 shadow-md shadow-teal-500/20">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-500 via-cyan-500 to-indigo-500 text-white flex items-center justify-center shrink-0 shadow-md">
                   <Stethoscope className="w-5 h-5" />
                 </div>
                 <div className="space-y-1">
@@ -223,9 +228,10 @@ export default function ClinicalInsightArticlePage() {
             </div>
 
             {/* Section 01: Overview & Pathophysiology */}
-            <section className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-2xs space-y-4">
+            <section className="relative overflow-hidden bg-white rounded-2xl p-6 sm:p-7 border border-teal-200/80 shadow-[0_10px_28px_-18px_rgba(0,118,138,0.45)] hover:shadow-[0_20px_42px_-18px_rgba(0,118,138,0.5)] hover:-translate-y-1 transition-all duration-300 space-y-4">
+              <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-teal-400 to-cyan-500" />
               <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-                <span className="w-7 h-7 rounded-lg bg-teal-100 text-[#00768a] font-black text-xs flex items-center justify-center">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 text-white font-black text-xs flex items-center justify-center shadow-sm">
                   01
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-[#003d4d] tracking-tight uppercase">
@@ -238,9 +244,10 @@ export default function ClinicalInsightArticlePage() {
             </section>
 
             {/* Section 02: Clinical Presentation */}
-            <section className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-2xs space-y-4">
+            <section className="relative overflow-hidden bg-white rounded-2xl p-6 sm:p-7 border border-cyan-200/80 shadow-[0_10px_28px_-18px_rgba(6,182,212,0.45)] hover:shadow-[0_20px_42px_-18px_rgba(6,182,212,0.5)] hover:-translate-y-1 transition-all duration-300 space-y-4">
+              <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-cyan-400 to-sky-500" />
               <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-                <span className="w-7 h-7 rounded-lg bg-cyan-100 text-cyan-800 font-black text-xs flex items-center justify-center">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-sky-500 text-white font-black text-xs flex items-center justify-center shadow-sm">
                   02
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-[#003d4d] tracking-tight uppercase">
@@ -283,9 +290,10 @@ export default function ClinicalInsightArticlePage() {
             </section>
 
             {/* Section 03: Differential Diagnosis Matrix */}
-            <section className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-2xs space-y-4">
+            <section className="relative overflow-hidden bg-white rounded-2xl p-6 sm:p-7 border border-indigo-200/80 shadow-[0_10px_28px_-18px_rgba(99,102,241,0.45)] hover:shadow-[0_20px_42px_-18px_rgba(99,102,241,0.5)] hover:-translate-y-1 transition-all duration-300 space-y-4">
+              <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-indigo-400 to-violet-500" />
               <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-                <span className="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-800 font-black text-xs flex items-center justify-center">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 text-white font-black text-xs flex items-center justify-center shadow-sm">
                   03
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-[#003d4d] tracking-tight uppercase">
@@ -297,27 +305,37 @@ export default function ClinicalInsightArticlePage() {
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
-                {article.differentialDiagnosis.map((diff, i) => (
+                {article.differentialDiagnosis.map((diff, i) => {
+                  const accents = [
+                    { card: 'from-indigo-50 to-white border-indigo-200/80 hover:shadow-[0_18px_36px_-16px_rgba(99,102,241,0.5)] hover:border-indigo-300', dot: 'bg-indigo-500' },
+                    { card: 'from-rose-50 to-white border-rose-200/80 hover:shadow-[0_18px_36px_-16px_rgba(244,63,94,0.5)] hover:border-rose-300', dot: 'bg-rose-500' },
+                    { card: 'from-amber-50 to-white border-amber-200/80 hover:shadow-[0_18px_36px_-16px_rgba(245,158,11,0.5)] hover:border-amber-300', dot: 'bg-amber-500' },
+                    { card: 'from-emerald-50 to-white border-emerald-200/80 hover:shadow-[0_18px_36px_-16px_rgba(16,185,129,0.5)] hover:border-emerald-300', dot: 'bg-emerald-500' },
+                  ];
+                  const a = accents[i % accents.length];
+                  return (
                   <div
                     key={i}
-                    className="p-4 rounded-xl border border-indigo-100 bg-gradient-to-b from-indigo-50/40 to-white hover:border-indigo-300 transition-all shadow-2xs"
+                    className={`p-4 rounded-xl border bg-gradient-to-b ${a.card} transition-all duration-300 shadow-sm hover:-translate-y-1`}
                   >
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
-                      <h4 className="font-bold text-xs text-[#003d4d]">{diff.condition}</h4>
+                      <span className={`w-2 h-2 rounded-full ${a.dot}`}></span>
+                      <h4 className="font-black text-xs text-[#003d4d]">{diff.condition}</h4>
                     </div>
-                    <p className="text-[11.5px] text-slate-600 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
                       {diff.differentiatingFeatures}
                     </p>
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
             {/* Section 04: Evidence-Based Management Principles */}
-            <section className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-2xs space-y-4">
+            <section className="relative overflow-hidden bg-white rounded-2xl p-6 sm:p-7 border border-emerald-200/80 shadow-[0_10px_28px_-18px_rgba(16,185,129,0.45)] hover:shadow-[0_20px_42px_-18px_rgba(16,185,129,0.5)] hover:-translate-y-1 transition-all duration-300 space-y-4">
+              <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-emerald-400 to-teal-500" />
               <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-                <span className="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-800 font-black text-xs flex items-center justify-center">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white font-black text-xs flex items-center justify-center shadow-sm">
                   04
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-[#003d4d] tracking-tight uppercase">
@@ -346,9 +364,10 @@ export default function ClinicalInsightArticlePage() {
             </section>
 
             {/* Section 05: Clinical Considerations & Safety Red Flags */}
-            <section className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-2xs space-y-4">
+            <section className="relative overflow-hidden bg-white rounded-2xl p-6 sm:p-7 border border-amber-200/80 shadow-[0_10px_28px_-18px_rgba(245,158,11,0.45)] hover:shadow-[0_20px_42px_-18px_rgba(245,158,11,0.5)] hover:-translate-y-1 transition-all duration-300 space-y-4">
+              <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-amber-400 to-orange-500" />
               <div className="flex items-center gap-2.5 pb-3 border-b border-slate-100">
-                <span className="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 font-black text-xs flex items-center justify-center">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500 text-white font-black text-xs flex items-center justify-center shadow-sm">
                   05
                 </span>
                 <h2 className="text-lg sm:text-xl font-black text-[#003d4d] tracking-tight uppercase">
@@ -377,7 +396,8 @@ export default function ClinicalInsightArticlePage() {
             </section>
 
             {/* Section 06: References & Guidelines */}
-            <section className="bg-slate-100/80 rounded-2xl p-6 border border-slate-200 space-y-3">
+            <section className="relative overflow-hidden rounded-2xl p-6 border border-fuchsia-200/80 bg-gradient-to-br from-fuchsia-50 via-white to-pink-50 shadow-[0_10px_28px_-18px_rgba(217,70,239,0.45)] space-y-3">
+              <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-fuchsia-400 to-pink-500" />
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-[#00768a]" />
                 <h3 className="font-extrabold text-xs text-[#003d4d] uppercase tracking-wider">
@@ -399,7 +419,8 @@ export default function ClinicalInsightArticlePage() {
           <aside className="lg:col-span-4 space-y-6">
 
             {/* Related Ryan Formulations Card */}
-            <div className="bg-white rounded-2xl p-5 border border-teal-200 shadow-sm sticky top-28 space-y-4">
+            <div className="bg-white rounded-2xl p-5 border border-indigo-200/80 shadow-[0_14px_32px_-20px_rgba(99,102,241,0.5)] hover:shadow-[0_20px_42px_-20px_rgba(99,102,241,0.55)] transition-all duration-300 sticky top-28 space-y-4 overflow-hidden relative">
+              <div className="absolute top-0 left-0 h-1.5 w-full bg-gradient-to-r from-indigo-400 via-violet-400 to-fuchsia-400" />
               <div className="flex items-center gap-2 pb-3 border-b border-slate-100">
                 <Pill className="w-4 h-4 text-[#00768a]" />
                 <h3 className="font-bold text-xs uppercase tracking-wider text-[#004f5e]">
@@ -412,30 +433,38 @@ export default function ClinicalInsightArticlePage() {
               </p>
 
               <div className="space-y-3">
-                {relatedProducts.map((prod, i) => (
+                {relatedProducts.map((prod, i) => {
+                  const accents = [
+                    { chip: 'text-rose-700 bg-rose-100 border-rose-200', title: 'group-hover:text-rose-600', arrow: 'group-hover:text-rose-500' },
+                    { chip: 'text-indigo-700 bg-indigo-100 border-indigo-200', title: 'group-hover:text-indigo-600', arrow: 'group-hover:text-indigo-500' },
+                    { chip: 'text-emerald-700 bg-emerald-100 border-emerald-200', title: 'group-hover:text-emerald-600', arrow: 'group-hover:text-emerald-500' },
+                  ];
+                  const a = accents[i % accents.length];
+                  return (
                   <Link
                     key={i}
                     href={`/products/${prod.slug}`}
-                    className="p-3 rounded-xl border border-slate-100 hover:border-teal-300 bg-slate-50/60 hover:bg-teal-50/30 transition flex items-center justify-between group block"
+                    className="group block p-3 rounded-xl border border-slate-200 bg-gradient-to-br from-white to-slate-50 hover:border-indigo-300 hover:shadow-[0_14px_30px_-16px_rgba(99,102,241,0.5)] hover:-translate-y-0.5 transition-all duration-300"
                   >
                     <div>
-                      <span className="text-[9.5px] font-bold uppercase tracking-wider text-teal-700 bg-teal-100/70 px-1.5 py-0.5 rounded">
+                      <span className={`text-[9.5px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${a.chip}`}>
                         {prod.cat}
                       </span>
-                      <h4 className="font-bold text-xs text-slate-900 group-hover:text-[#00768a] transition-colors mt-1">
+                      <h4 className={`font-black text-sm text-slate-900 ${a.title} transition-colors mt-1`}>
                         {prod.name}
                       </h4>
-                      <p className="text-[10.5px] text-slate-500 mt-0.5">{prod.form}</p>
+                      <p className="text-xs text-slate-600 font-semibold mt-0.5">{prod.form}</p>
                     </div>
-                    <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#00768a] group-hover:translate-x-1 transition-transform shrink-0" />
+                    <ArrowRight className={`w-3.5 h-3.5 text-slate-400 ${a.arrow} group-hover:translate-x-1 transition-all shrink-0 mt-2`} />
                   </Link>
-                ))}
+                  );
+                })}
               </div>
 
               <div className="pt-2">
                 <Link
                   href="/products"
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold uppercase tracking-wider transition shadow-sm active:scale-95"
+                  className="btn-fx w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 hover:brightness-110 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md active:scale-95"
                 >
                   <span>Browse Product Catalog</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -474,7 +503,7 @@ export default function ClinicalInsightArticlePage() {
 
           <Link
             href="/for-doctors/prescribing-information"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#00768a] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#005f70] transition shadow-xs"
+            className="btn-fx inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:brightness-110 text-white text-xs font-black uppercase tracking-wider transition-all shadow-md"
           >
             <span>Open Prescribing Directory</span>
             <ArrowRight className="w-3.5 h-3.5" />
