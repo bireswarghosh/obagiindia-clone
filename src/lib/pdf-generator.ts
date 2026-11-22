@@ -182,12 +182,30 @@ export async function generateProductMonographPDF(product: any) {
 
   y += boxHeight + 8;
 
-  // Section Adder with page overflow protection
-  const addSection = (title: string, bodyText: string | string[]) => {
-    if (y > pageHeight - margin - 30) {
+  // Running Header Helper for Multi-page Documents
+  const checkPageOverflow = (neededHeight: number) => {
+    if (y + neededHeight > pageHeight - margin - 15) {
       doc.addPage();
       y = margin + 4;
+      // Running mini-header for multi-page documents
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.5);
+      doc.setTextColor(0, 96, 112);
+      doc.text(`RYAN DERMACEUTICS • CLINICAL MONOGRAPH: ${(product.brandName || '').toUpperCase()}`, margin, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(148, 163, 184);
+      doc.text('FOR HEALTHCARE PROFESSIONALS ONLY', margin + contentWidth, y, { align: 'right' });
+      y += 2.5;
+      doc.setDrawColor(226, 232, 240);
+      doc.setLineWidth(0.3);
+      doc.line(margin, y, margin + contentWidth, y);
+      y += 6;
     }
+  };
+
+  // Section Adder with page overflow protection
+  const addSection = (title: string, bodyText: string | string[]) => {
+    checkPageOverflow(18);
 
     doc.setFillColor(241, 245, 249);
     doc.rect(margin, y, contentWidth, 6, 'F');
@@ -207,10 +225,7 @@ export async function generateProductMonographPDF(product: any) {
       bodyText.forEach((item) => {
         const lines = doc.splitTextToSize(`• ${item}`, safeTextWidth);
         lines.forEach((line: string) => {
-          if (y > pageHeight - margin - 15) {
-            doc.addPage();
-            y = margin + 4;
-          }
+          checkPageOverflow(6);
           doc.text(line, margin + 4, y);
           y += 4.5;
         });
@@ -219,10 +234,7 @@ export async function generateProductMonographPDF(product: any) {
     } else {
       const lines = doc.splitTextToSize(bodyText, safeTextWidth);
       lines.forEach((line: string) => {
-        if (y > pageHeight - margin - 15) {
-          doc.addPage();
-          y = margin + 4;
-        }
+        checkPageOverflow(6);
         doc.text(line, margin + 2, y);
         y += 4.5;
       });
@@ -230,30 +242,86 @@ export async function generateProductMonographPDF(product: any) {
     }
   };
 
-  // Section 1: Pharmacology
-  const pharmacology = product.clinicalPharmacology ||
-    `${product.brandName} combines high-purity active pharmaceutical ingredients formulated within an optimized dermatological vehicle. It is engineered for controlled epidermal penetration, sustained localized therapeutic concentration, and reduced cutaneous adverse event profiles.`;
-  addSection('1. Clinical Pharmacology & Composition', pharmacology);
+  // Section 1: Pharmacology & Mechanism of Action
+  if (product.mechanismOfAction && Array.isArray(product.mechanismOfAction) && product.mechanismOfAction.length > 0) {
+    const moaItems = product.mechanismOfAction.map((m: any) => `${m.title || m.step}: ${m.description}`);
+    addSection('1. Mechanism of Action & Clinical Pharmacology', moaItems);
+  } else {
+    const pharmacology = product.clinicalPharmacology ||
+      `${product.brandName} combines high-purity active pharmaceutical ingredients formulated within an optimized dermatological vehicle. It is engineered for controlled epidermal penetration, sustained localized therapeutic concentration, and reduced cutaneous adverse event profiles.`;
+    addSection('1. Clinical Pharmacology & Composition', pharmacology);
+  }
 
-  // Section 2: Indications
+  // Section 2: Approved Indications
   const indications = Array.isArray(product.indications) && product.indications.length > 0
     ? product.indications
     : ['Indicated for targeted clinical dermatological conditions according to physician prescription.'];
   addSection('2. Approved Indications & Dermatological Uses', indications);
 
-  // Section 3: Posology
-  const dosage = product.dosageInstructions ||
-    `Apply as specifically advised by a registered medical practitioner. For topical formulations, adhere to the standard Fingertip Unit (FTU) rules over cleansed, pat-dried skin. Do not occlude unless explicitly directed.`;
-  addSection('3. Posology & Administration Guidelines', dosage);
+  // Section 3: Posology & Administration
+  if (product.dosageAdministration && typeof product.dosageAdministration === 'object') {
+    const d = product.dosageAdministration;
+    const dosageItems = [
+      d.recommended ? `Recommended Posology: ${d.recommended}` : null,
+      d.howToApply ? `Application Technique: ${d.howToApply}` : null,
+      d.duration ? `Duration of Treatment: ${d.duration}` : null,
+      d.missedApplication ? `Missed Application Advice: ${d.missedApplication}` : null,
+    ].filter(Boolean) as string[];
+    addSection('3. Posology & Administration Guidelines', dosageItems.length > 0 ? dosageItems : [product.dosageInstructions || 'Adhere strictly to dermatologist guidance.']);
+  } else {
+    const dosage = product.dosageInstructions ||
+      `Apply as specifically advised by a registered medical practitioner. For topical formulations, adhere to the standard Fingertip Unit (FTU) rules over cleansed, pat-dried skin. Do not occlude unless explicitly directed.`;
+    addSection('3. Posology & Administration Guidelines', dosage);
+  }
 
-  // Section 4: Safety & Precautions
-  const warnings = [
-    'Hypersensitivity to the active substance or to any formulation excipients.',
-    'For external dermatological or prescribed oral use only as per packaging instructions.',
-    'Avoid contact with conjunctiva and mucous membranes.',
-    'Keep out of reach of children. Store below 25°C in a dry place protected from direct sunlight.'
-  ];
-  addSection('4. Contraindications, Precautions & Safety', warnings);
+  // Section 4: Special Patient Populations (if present)
+  if (product.specialPopulations && typeof product.specialPopulations === 'object') {
+    const sp = product.specialPopulations;
+    const spItems = [
+      sp.pregnancy ? `Pregnancy: ${sp.pregnancy}` : null,
+      sp.lactation ? `Lactation: ${sp.lactation}` : null,
+      sp.paediatric ? `Paediatric Considerations: ${sp.paediatric}` : null,
+      sp.geriatric ? `Geriatric Patients: ${sp.geriatric}` : null,
+      sp.specialSites ? `Sensitive Anatomical Sites: ${sp.specialSites}` : null,
+    ].filter(Boolean) as string[];
+    if (spItems.length > 0) {
+      addSection('4. Use in Specific Patient Populations', spItems);
+    }
+  }
+
+  // Section 5: Contraindications & Warnings
+  const warnings = Array.isArray(product.contraindications) && product.contraindications.length > 0
+    ? product.contraindications
+    : [
+        'Hypersensitivity to the active substance or to any formulation excipients.',
+        'For external dermatological or prescribed oral use only as per packaging instructions.',
+        'Avoid contact with conjunctiva and mucous membranes.',
+        'Keep out of reach of children. Store below 25°C in a dry place protected from direct sunlight.'
+      ];
+  addSection('5. Contraindications & Safety Warnings', warnings);
+
+  // Section 6: Adverse Effects & Tolerance (if present)
+  if (product.adverseEffects && typeof product.adverseEffects === 'object') {
+    const ae = product.adverseEffects;
+    const aeItems: string[] = [];
+    if (Array.isArray(ae.common) && ae.common.length > 0) aeItems.push(`Common: ${ae.common.join(', ')}`);
+    if (Array.isArray(ae.lessCommon) && ae.lessCommon.length > 0) aeItems.push(`Less Common: ${ae.lessCommon.join(', ')}`);
+    if (Array.isArray(ae.rare) && ae.rare.length > 0) aeItems.push(`Rare / Post-Marketing: ${ae.rare.join(', ')}`);
+    if (aeItems.length > 0) {
+      addSection('6. Adverse Reactions & Cutaneous Tolerance', aeItems);
+    }
+  }
+
+  // Section 7: Clinical Practice Pearl (if present)
+  if (product.clinicalPearl) {
+    addSection('7. Clinical Practice Pearl', product.clinicalPearl);
+  }
+
+  // Section 8: Storage & Handling
+  const storage = Array.isArray(product.storageHandling) && product.storageHandling.length > 0
+    ? product.storageHandling
+    : ['Store below 25°C in a cool, dry place protected from direct light.', 'Keep container tightly closed when not in use.'];
+  addSection('8. Storage, Stability & Handling', storage);
 
   // Footer on all pages
   const totalPages = doc.getNumberOfPages();
