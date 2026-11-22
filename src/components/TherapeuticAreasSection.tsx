@@ -62,8 +62,8 @@ export default function TherapeuticAreasSection({ theme }: TherapeuticProps) {
   ];
 
   return (
-    <section id="therapeutic-areas" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-slate-50/60 border-b" style={{ borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)' }}>
-      <div className="max-w-7xl mx-auto space-y-20 sm:space-y-24">
+    <section id="therapeutic-areas" className="py-16 sm:py-24 px-5 sm:px-8 lg:px-[164px] bg-slate-50/60 border-b" style={{ borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)' }}>
+      <div className="max-w-[1440px] mx-auto space-y-20 sm:space-y-24">
         
         {/* 1. Explore Our Therapeutic Areas (from home_client_image_4.png) */}
         <div className="space-y-12">

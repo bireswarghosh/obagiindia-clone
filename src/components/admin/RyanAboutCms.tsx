@@ -141,7 +141,7 @@ export default function RyanAboutCms({ data, onChange, onSave }: RyanAboutCmsPro
             About Ryan Dermaceutics Visual CMS
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Manage all 6 sections (Hero Collage, Vision, Approach, 4-Card Portfolio, Quality & Compliance, Ethics Medinova), plus 8 Quality Framework pillars and 6 Core Values with interactive pop-ups.
+            Manage all 6 sections (Hero Collage, Vision, Approach, 4-Card Portfolio, Quality & Compliance, Ryan Dermaceutics Foundation), plus 8 Quality Framework pillars and 6 Core Values with interactive pop-ups.
           </p>
         </div>
 
@@ -172,7 +172,7 @@ export default function RyanAboutCms({ data, onChange, onSave }: RyanAboutCmsPro
           { id: 'approach', label: '3. Our Approach & Culture', icon: FlaskConical },
           { id: 'portfolio', label: '4. Comprehensive Portfolio', icon: Layers },
           { id: 'quality', label: '5. Quality & Manufacturing', icon: ShieldCheck },
-          { id: 'ethics', label: '6. Ethics Medinova Foundation', icon: Building },
+          { id: 'ethics', label: '6. Ryan Dermaceutics Foundation', icon: Building },
           { id: 'framework', label: '7. 8-Pillar Quality Framework', icon: Award },
           { id: 'values', label: '8. 6 Core Values & Promises', icon: Heart }
         ].map((st) => {
@@ -651,14 +651,14 @@ export default function RyanAboutCms({ data, onChange, onSave }: RyanAboutCmsPro
       )}
 
       {/* ========================================================= */}
-      {/* 6. ETHICS MEDINOVA FOUNDATION CMS                         */}
+      {/* 6. RYAN DERMACEUTICS FOUNDATION CMS                       */}
       {/* ========================================================= */}
       {activeSubTab === 'ethics' && (
         <div className="space-y-6">
           <div className="bg-[#132247] p-6 rounded-2xl border border-slate-800 shadow-xl space-y-5">
             <h3 className="text-sm font-bold text-teal-300 uppercase tracking-wider flex items-center gap-2">
               <Building className="w-4 h-4" />
-              <span>Ethics Medinova Private Limited (Parent Foundation)</span>
+              <span>Ryan Dermaceutics Private Limited (Corporate Foundation)</span>
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

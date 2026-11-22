@@ -11,8 +11,8 @@ interface PartnerProps {
 
 export default function PartnerSection({ theme }: PartnerProps) {
   return (
-    <section id="partner" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white border-b" style={{ borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)' }}>
-      <div className="max-w-7xl mx-auto space-y-20 sm:space-y-24">
+    <section id="partner" className="py-16 sm:py-24 px-5 sm:px-8 lg:px-[164px] bg-white border-b" style={{ borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)' }}>
+      <div className="max-w-[1440px] mx-auto space-y-20 sm:space-y-24">
         
         {/* 1. Supporting Dermatology Practice, Every Day (from home_client_image_8.png) */}
         <div className="space-y-12">
@@ -161,7 +161,7 @@ export default function PartnerSection({ theme }: PartnerProps) {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* 4 Feature Pillars */}
-            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-4 rounded-xl bg-white/10 backdrop-blur-xs border border-white/15 space-y-1.5">
                 <div className="flex items-center gap-2 text-teal-300 font-bold text-xs uppercase">
                   <TrendingUp className="w-4 h-4" />
@@ -204,7 +204,7 @@ export default function PartnerSection({ theme }: PartnerProps) {
             </div>
 
             {/* 4 Interactive Action Cards */}
-            <div className="lg:col-span-5 space-y-2.5 text-xs font-bold">
+            <div className="lg:col-span-6 space-y-2.5 text-xs font-bold">
               <Link
                 href="#contact"
                 className="p-3.5 rounded-xl bg-white hover:bg-teal-50 text-slate-900 transition-all flex items-center justify-between group shadow-sm"

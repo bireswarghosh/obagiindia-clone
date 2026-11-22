@@ -86,8 +86,8 @@ export default function TrustedBrandsSection({ theme }: TrustedBrandsProps) {
   ];
 
   return (
-    <section id="trusted-brands" className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white border-b" style={{ borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)' }}>
-      <div className="max-w-7xl mx-auto space-y-16 sm:space-y-20">
+    <section id="trusted-brands" className="py-16 sm:py-24 px-5 sm:px-8 lg:px-[164px] bg-white border-b" style={{ borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)' }}>
+      <div className="max-w-[1440px] mx-auto space-y-16 sm:space-y-20">
         
         {/* Section Top Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">

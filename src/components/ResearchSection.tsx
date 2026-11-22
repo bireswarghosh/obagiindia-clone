@@ -42,13 +42,13 @@ export default function ResearchSection({ research, theme }: ResearchProps) {
   return (
     <section
       id="research"
-      className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 border-b"
+      className="py-20 sm:py-24 px-5 sm:px-8 lg:px-[164px] border-b"
       style={{
         backgroundColor: theme?.canvasBg || '#f8fafc',
         borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)'
       }}
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1440px] mx-auto">
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 space-y-3">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-teal-50 text-[#00768a] border border-teal-200">

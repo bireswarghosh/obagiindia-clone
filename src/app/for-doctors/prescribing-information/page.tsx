@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import RyanHeader from '@/components/ryan/RyanHeader';
 import RyanFooter from '@/components/ryan/RyanFooter';
+import { generatePrescribingInfoPDF } from '@/lib/pdf-generator';
 import {
   PRESCRIBING_INFO_PRODUCTS,
   PrescribingInfoProduct
@@ -27,10 +28,8 @@ import {
   Dna,
   Syringe,
   Bug,
-  CheckCircle,
   type LucideIcon
 } from 'lucide-react';
-import { generatePrescribingInfoPDF } from '@/lib/pdf-generator';
 
 /* ------------------------------------------------------------------ */
 /* Colour system — every therapeutic class gets its own palette so the */
@@ -42,6 +41,7 @@ type CategoryStyle = {
   pill: string;
   chip: string;
   bar: string;
+  solid: string;
   tile: string;
   soft: string;
   ring: string;
@@ -52,7 +52,8 @@ const CATEGORY_META: Record<string, CategoryStyle> = {
   'All': {
     icon: Sparkles,
     dot: 'bg-[#00768a]',
-    pill: 'bg-gradient-to-r from-[#00768a] to-cyan-500 text-white border-transparent shadow-md shadow-teal-300/50',
+    pill: 'bg-teal-700 hover:bg-teal-800 text-white border-transparent shadow-md shadow-teal-300/50' , 
+    solid: 'bg-teal-700 hover:bg-teal-800',
     chip: 'bg-teal-50 text-teal-700 border-teal-200',
     bar: 'from-[#00768a] via-teal-400 to-cyan-400',
     tile: 'from-[#00768a] to-cyan-400',
@@ -63,7 +64,8 @@ const CATEGORY_META: Record<string, CategoryStyle> = {
   'Acne Therapy': {
     icon: Sparkles,
     dot: 'bg-rose-500',
-    pill: 'bg-gradient-to-r from-rose-500 to-pink-500 text-white border-transparent shadow-md shadow-rose-300/50',
+    pill: 'bg-rose-600 hover:bg-rose-700 text-white border-transparent shadow-md shadow-rose-300/50' , 
+    solid: 'bg-rose-600 hover:bg-rose-700',
     chip: 'bg-rose-50 text-rose-700 border-rose-200',
     bar: 'from-rose-500 via-pink-400 to-rose-300',
     tile: 'from-rose-500 to-pink-400',
@@ -74,7 +76,8 @@ const CATEGORY_META: Record<string, CategoryStyle> = {
   'Antifungals': {
     icon: Bug,
     dot: 'bg-amber-500',
-    pill: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-transparent shadow-md shadow-amber-300/50',
+    pill: 'bg-amber-600 hover:bg-amber-700 text-white border-transparent shadow-md shadow-amber-300/50' , 
+    solid: 'bg-amber-600 hover:bg-amber-700',
     chip: 'bg-amber-50 text-amber-700 border-amber-200',
     bar: 'from-amber-500 via-orange-400 to-amber-300',
     tile: 'from-amber-500 to-orange-400',
@@ -85,7 +88,8 @@ const CATEGORY_META: Record<string, CategoryStyle> = {
   'Corticosteroids & Anti-inflammatory': {
     icon: Activity,
     dot: 'bg-violet-500',
-    pill: 'bg-gradient-to-r from-violet-500 to-purple-500 text-white border-transparent shadow-md shadow-violet-300/50',
+    pill: 'bg-violet-600 hover:bg-violet-700 text-white border-transparent shadow-md shadow-violet-300/50' , 
+    solid: 'bg-violet-600 hover:bg-violet-700',
     chip: 'bg-violet-50 text-violet-700 border-violet-200',
     bar: 'from-violet-500 via-purple-400 to-violet-300',
     tile: 'from-violet-500 to-purple-400',
@@ -96,7 +100,8 @@ const CATEGORY_META: Record<string, CategoryStyle> = {
   'Antihistamines & Allergy': {
     icon: Wind,
     dot: 'bg-sky-500',
-    pill: 'bg-gradient-to-r from-sky-500 to-blue-500 text-white border-transparent shadow-md shadow-sky-300/50',
+    pill: 'bg-sky-600 hover:bg-sky-700 text-white border-transparent shadow-md shadow-sky-300/50' , 
+    solid: 'bg-sky-600 hover:bg-sky-700',
     chip: 'bg-sky-50 text-sky-700 border-sky-200',
     bar: 'from-sky-500 via-blue-400 to-sky-300',
     tile: 'from-sky-500 to-blue-400',
@@ -107,7 +112,8 @@ const CATEGORY_META: Record<string, CategoryStyle> = {
   'Trichology & Hair': {
     icon: Flower2,
     dot: 'bg-emerald-500',
-    pill: 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-transparent shadow-md shadow-emerald-300/50',
+    pill: 'bg-emerald-600 hover:bg-emerald-700 text-white border-transparent shadow-md shadow-emerald-300/50' , 
+    solid: 'bg-emerald-600 hover:bg-emerald-700',
     chip: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     bar: 'from-emerald-500 via-teal-400 to-emerald-300',
     tile: 'from-emerald-500 to-teal-400',
@@ -118,7 +124,8 @@ const CATEGORY_META: Record<string, CategoryStyle> = {
   'Immunomodulators': {
     icon: Dna,
     dot: 'bg-indigo-500',
-    pill: 'bg-gradient-to-r from-indigo-500 to-blue-600 text-white border-transparent shadow-md shadow-indigo-300/50',
+    pill: 'bg-indigo-600 hover:bg-indigo-700 text-white border-transparent shadow-md shadow-indigo-300/50' , 
+    solid: 'bg-indigo-600 hover:bg-indigo-700',
     chip: 'bg-indigo-50 text-indigo-700 border-indigo-200',
     bar: 'from-indigo-500 via-blue-400 to-indigo-300',
     tile: 'from-indigo-500 to-blue-400',
@@ -129,7 +136,8 @@ const CATEGORY_META: Record<string, CategoryStyle> = {
   'Antibacterials & Scabicides': {
     icon: Syringe,
     dot: 'bg-cyan-500',
-    pill: 'bg-gradient-to-r from-cyan-500 to-teal-500 text-white border-transparent shadow-md shadow-cyan-300/50',
+    pill: 'bg-cyan-700 hover:bg-cyan-800 text-white border-transparent shadow-md shadow-cyan-300/50' , 
+    solid: 'bg-cyan-700 hover:bg-cyan-800',
     chip: 'bg-cyan-50 text-cyan-700 border-cyan-200',
     bar: 'from-cyan-500 via-teal-400 to-cyan-300',
     tile: 'from-cyan-500 to-teal-400',
@@ -155,20 +163,6 @@ export default function PrescribingInformationPortal() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeProductModal, setActiveProductModal] = useState<PrescribingInfoProduct | null>(null);
-  const [downloadToast, setDownloadToast] = useState<string | null>(null);
-
-  const handleDownloadPI = async (prod: any) => {
-    try {
-      setDownloadToast(`Generating Official PI PDF: ${prod.brandName}...`);
-      await generatePrescribingInfoPDF(prod);
-      setDownloadToast(`✓ Downloaded ${prod.brandName} Prescribing Information (Valid PDF)`);
-      setTimeout(() => setDownloadToast(null), 3500);
-    } catch (err) {
-      console.error(err);
-      setDownloadToast(`✓ Download completed for ${prod.brandName}`);
-      setTimeout(() => setDownloadToast(null), 3000);
-    }
-  };
 
   React.useEffect(() => {
     fetch('/api/db/prescribing')
@@ -241,7 +235,7 @@ export default function PrescribingInformationPortal() {
           }}
         />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[164px] relative z-10">
           {/* Breadcrumb */}
           <nav className="inline-flex items-center gap-2 text-xs font-medium text-slate-500 mb-6 flex-wrap px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-md border border-white/80 shadow-sm">
             <Link href="/" className="hover:text-teal-700 transition">Home</Link>
@@ -332,7 +326,7 @@ export default function PrescribingInformationPortal() {
             </div>
 
             {/* Category Filter Pills */}
-            <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar text-xs font-semibold">
+            <div className="flex items-center gap-2 overflow-x-auto py-1 no-scrollbar text-[13px] font-bold">
               <span className="text-slate-400 text-[11px] uppercase tracking-wider font-bold shrink-0">Filter:</span>
               {categories.map((cat) => {
                 const meta = getMeta(cat);
@@ -342,7 +336,7 @@ export default function PrescribingInformationPortal() {
                   <button
                     key={cat}
                     onClick={() => setSelectedCategory(cat)}
-                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full whitespace-nowrap border transition ${
+                    className={`btn-fx inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full whitespace-nowrap border transition ${
                       active
                         ? meta.pill
                         : `bg-white/80 backdrop-blur-md text-slate-600 border-slate-200 ${meta.soft} hover:shadow-sm`
@@ -364,7 +358,7 @@ export default function PrescribingInformationPortal() {
       {/* ========================================================= */}
       {/* 2. PRODUCT CARDS GRID                                     */}
       {/* ========================================================= */}
-      <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[164px]">
         <div className="flex items-center justify-between mb-6">
           <span className="inline-flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider">
             <span className="w-2 h-2 rounded-full bg-gradient-to-r from-[#00768a] to-cyan-500" />
@@ -448,7 +442,7 @@ export default function PrescribingInformationPortal() {
                 <div className="px-5 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
                   <button
                     onClick={() => setActiveProductModal(prod)}
-                    className={`flex-1 py-2 rounded-lg bg-gradient-to-r ${meta.bar} text-white font-bold text-xs uppercase tracking-wider transition-all text-center flex items-center justify-center gap-1.5 shadow-md hover:brightness-105 active:scale-95`}
+                    className={`btn-fx flex-1 py-2.5 rounded-lg ${meta.solid} text-white font-bold text-sm uppercase tracking-wider text-center flex items-center justify-center gap-1.5 shadow-md hover:shadow-lg`}
                   >
                     <span>View PI</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -457,18 +451,20 @@ export default function PrescribingInformationPortal() {
                   <Link
                     href={`/products/${prod.id}`}
                     title="Full Clinical Monograph & Differential Diagnoses"
-                    className="py-2 px-3 rounded-lg bg-slate-100 hover:bg-[#00768a] text-slate-700 hover:text-white font-bold text-xs transition flex items-center gap-1"
+                    className="btn-fx group/mono py-2.5 px-3.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md shadow-indigo-200/60 hover:shadow-lg flex items-center gap-1"
                   >
                     <span>Monograph</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-3 h-3 group-hover/mono:translate-x-0.5 transition-transform duration-300" />
                   </Link>
 
                   <button
-                    onClick={() => handleDownloadPI(prod)}
-                    title="Download Official Prescribing Info PDF"
-                    className="p-2 rounded-lg bg-teal-50 hover:bg-teal-100 text-[#00768a] border border-teal-200 transition cursor-pointer"
+                    onClick={async () => {
+                      await generatePrescribingInfoPDF(prod);
+                    }}
+                    title="Download Official PI PDF"
+                    className="btn-fx group/pdf p-2.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white shadow-md shadow-rose-200/60 hover:shadow-lg cursor-pointer"
                   >
-                    <FileDown className="w-4 h-4 text-[#00768a]" />
+                    <FileDown className="w-5 h-5 group-hover/pdf:translate-y-0.5 transition-transform duration-300" />
                   </button>
                 </div>
               </div>
@@ -485,7 +481,7 @@ export default function PrescribingInformationPortal() {
             <p className="text-xs text-slate-500 mt-1">Try a different brand name, active ingredient, or reset the category filter.</p>
             <button
               onClick={() => { setSearchQuery(''); setSelectedCategory('All'); }}
-              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-[#00768a] to-cyan-500 text-white text-xs font-bold uppercase tracking-wider shadow-md active:scale-95 transition"
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-sm font-bold uppercase tracking-wider shadow-md transition btn-fx"
             >
               Reset Search
             </button>
@@ -651,20 +647,24 @@ export default function PrescribingInformationPortal() {
             </div>
 
             {/* Modal Bottom Footer */}
-            <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3 text-sm">
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleDownloadPI(activeProductModal)}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white font-bold transition shadow-xs cursor-pointer"
+                  type="button"
+                  onClick={async () => {
+                    if (activeProductModal) await generatePrescribingInfoPDF(activeProductModal);
+                  }}
+                  className="btn-fx group/pdf inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md shadow-emerald-200/60 hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300 cursor-pointer"
                 >
-                  <FileDown className="w-4 h-4 text-white" />
-                  <span>Download PDF</span>
+                  <FileDown className="w-4 h-4 group-hover/pdf:translate-y-0.5 transition-transform duration-300" />
+                  <span>Download Official PI PDF</span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => window.print()}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold transition"
+                  className="btn-fx group/print inline-flex items-center gap-2 px-3.5 py-2.5 rounded-lg bg-slate-600 hover:bg-slate-700 text-white font-bold shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300 cursor-pointer"
                 >
-                  <Printer className="w-4 h-4 text-[#00768a]" />
+                  <Printer className="w-4 h-4 group-hover/print:-translate-y-0.5 transition-transform duration-300" />
                   <span>Print</span>
                 </button>
               </div>
@@ -672,29 +672,21 @@ export default function PrescribingInformationPortal() {
               <div className="flex items-center gap-2.5">
                 <Link
                   href={`/products/${activeProductModal.id}`}
-                  className="px-4 py-2 rounded-lg bg-teal-50 hover:bg-teal-100 text-[#006070] border border-teal-200 font-bold transition flex items-center gap-1.5"
+                  className="btn-fx group/full px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md shadow-indigo-200/60 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-1.5"
                 >
                   <span>Explore Full Monograph</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5 group-hover/full:translate-x-0.5 transition-transform duration-300" />
                 </Link>
 
                 <button
                   onClick={() => setActiveProductModal(null)}
-                  className={`px-5 py-2 rounded-lg bg-gradient-to-r ${modalMeta.bar} text-white font-bold shadow-md hover:brightness-105 transition`}
+                  className={`btn-fx px-5 py-2.5 rounded-lg ${modalMeta.solid} text-white font-bold shadow-md hover:shadow-lg transition`}
                 >
                   Close
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* DOWNLOAD TOAST NOTIFICATION */}
-      {downloadToast && (
-        <div className="fixed bottom-6 right-6 z-[99999] bg-[#003d4d] text-white px-5 py-3 rounded-2xl shadow-2xl border border-teal-400 flex items-center gap-3 animate-fade-in">
-          <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span className="text-xs font-bold">{downloadToast}</span>
         </div>
       )}
 

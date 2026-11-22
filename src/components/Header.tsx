@@ -76,7 +76,7 @@ export default function Header({ header, theme }: HeaderProps) {
         }}
       >
         {/* Main Navbar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[164px] h-16 sm:h-20 flex items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 shrink-0">
             {header?.logoImageUrl ? (

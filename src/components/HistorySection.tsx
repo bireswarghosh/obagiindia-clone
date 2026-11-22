@@ -27,10 +27,10 @@ export default function HistorySection({ history, theme }: HistoryProps) {
   return (
     <section
       id="our-story"
-      className="py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-slate-50/50 border-b"
+      className="py-16 sm:py-24 px-5 sm:px-8 lg:px-[164px] bg-slate-50/50 border-b"
       style={{ borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)' }}
     >
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-[1440px] mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
           
           {/* Left Column: Badge, Title, Award Trophy Box & Story */}

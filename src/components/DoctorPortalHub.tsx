@@ -52,13 +52,13 @@ export default function DoctorPortalHub({ theme }: DoctorPortalHubProps) {
   return (
     <section
       id="clinical-resources"
-      className="py-20 sm:py-24 px-4 sm:px-6 lg:px-8 border-b"
+      className="py-20 sm:py-24 px-5 sm:px-8 lg:px-[164px] border-b"
       style={{
         backgroundColor: '#f1f8fa',
         borderColor: theme?.borderColor || 'rgba(0, 118, 138, 0.12)'
       }}
     >
-      <div className="max-w-7xl mx-auto space-y-12">
+      <div className="max-w-[1440px] mx-auto space-y-12">
         {/* Header matching Screen 7 */}
         <div className="text-center max-w-3xl mx-auto space-y-3">
           <span className="inline-block text-[10px] sm:text-xs font-black uppercase tracking-widest text-[#00768a] bg-teal-50 px-3.5 py-1 rounded-full border border-teal-200">

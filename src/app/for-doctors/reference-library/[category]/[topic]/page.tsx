@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import RyanHeader from '@/components/ryan/RyanHeader';
 import RyanFooter from '@/components/ryan/RyanFooter';
+import Snowfall from '@/components/ryan/Snowfall';
 import {
   SAMPLE_TOPIC_PAGES,
   REFERENCE_LIBRARY_CATEGORIES,
@@ -23,6 +24,7 @@ import {
   FileText,
   Stethoscope,
   Pill,
+  Sparkles,
   ExternalLink
 } from 'lucide-react';
 
@@ -89,6 +91,46 @@ export default function ReferenceLibraryTopicDetailPage() {
     }));
   };
 
+  const SECTIONS = [
+    { num: '01', label: 'Overview' },
+    { num: '02', label: 'Clinical Presentation' },
+    { num: '03', label: 'Common Causative Organisms' },
+    { num: '04', label: 'Risk Factors' },
+    { num: '05', label: 'Diagnostic Considerations' },
+    { num: '06', label: 'Differential Diagnosis' },
+    { num: '07', label: 'Management Principles' },
+    { num: '08', label: 'Topical Therapy' },
+    { num: '09', label: 'Systemic Therapy' },
+    { num: '10', label: 'Recurrence & Prevention' },
+    { num: '11', label: 'Professional References' },
+  ];
+
+  const [activeSec, setActiveSec] = useState('01');
+
+  React.useEffect(() => {
+    const obs = new IntersectionObserver(
+      entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) setActiveSec(e.target.id.replace('ref-sec-', ''));
+        });
+      },
+      { rootMargin: '-30% 0px -60% 0px' }
+    );
+    SECTIONS.forEach(s => {
+      const el = document.getElementById(`ref-sec-${s.num}`);
+      if (el) obs.observe(el);
+    });
+    return () => obs.disconnect();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topic.slug]);
+
+  const goToSection = (num: string) => {
+    setOpenSections(prev => ({ ...prev, [num]: true }));
+    setTimeout(() => {
+      document.getElementById(`ref-sec-${num}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 30);
+  };
+
   const expandAll = () => {
     setOpenSections({
       '01': true, '02': true, '03': true, '04': true, '05': true,
@@ -106,10 +148,11 @@ export default function ReferenceLibraryTopicDetailPage() {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans selection:bg-teal-100 selection:text-teal-900">
       <RyanHeader />
+      <Snowfall count={45} />
 
       {/* Breadcrumb & Actions Bar */}
       <section className="bg-white border-b border-teal-100/60 py-3">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between flex-wrap gap-3">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 flex items-center justify-between flex-wrap gap-3">
           <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 flex-wrap">
             <a href="#" className="hover:text-teal-700 transition">Home</a>
             <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
@@ -122,23 +165,28 @@ export default function ReferenceLibraryTopicDetailPage() {
 
           <button
             onClick={() => window.print()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 text-xs font-semibold transition"
+            className="btn-fx flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white border border-transparent text-xs font-bold shadow-md transition-all"
           >
-            <Printer className="w-3.5 h-3.5 text-[#00768a]" />
+            <Printer className="w-3.5 h-3.5" />
             <span>Print this page</span>
           </button>
         </div>
       </section>
 
       {/* Main Content Container */}
-      <main className="py-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <main className="py-10 max-w-[1600px] mx-auto px-4 sm:px-8 lg:px-12 space-y-8">
         
         {/* ========================================================= */}
         {/* TOPIC HEADER (Matching Right Screen in Nav Flow)          */}
         {/* ========================================================= */}
-        <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 shadow-sm flex flex-col md:flex-row items-start md:items-center gap-6">
+        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 text-white bg-[linear-gradient(135deg,#04202b_0%,#0e4f63_35%,#312e81_75%,#6d28d9_100%)] shadow-[0_30px_70px_-28px_rgba(0,37,48,0.7)] flex flex-col md:flex-row items-start md:items-center gap-6">
+          <div className="h-1.5 w-full absolute top-0 left-0 bg-gradient-to-r from-rose-400 via-amber-300 to-emerald-400" />
+          <div className="absolute -top-10 right-1/4 w-64 h-64 rounded-full bg-rose-500/20 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 left-1/3 w-72 h-72 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 right-10 w-56 h-56 rounded-full bg-amber-400/15 blur-3xl pointer-events-none" />
+
           {/* Lesion Photo */}
-          <div className="relative w-36 h-28 sm:w-44 sm:h-32 rounded-xl overflow-hidden shadow-xs border border-slate-200 shrink-0 bg-slate-100">
+          <div className="relative w-40 h-32 sm:w-48 sm:h-36 rounded-2xl overflow-hidden ring-2 ring-white/30 card-glow-anim shrink-0 bg-white/10">
             <Image
               src={topic.image}
               alt={topic.title}
@@ -149,67 +197,93 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* Title & Metadata */}
-          <div className="space-y-2 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2.5 py-0.5 rounded uppercase tracking-wider">
+          <div className="space-y-2.5 flex-1 relative z-10">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-fuchsia-100 bg-white/15 border border-white/25 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                <Sparkles className="w-3 h-3" />
                 Clinical Reference
+              </span>
+              <span className="text-[10px] font-bold text-teal-100 bg-teal-500/25 border border-teal-300/40 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                {topic.categoryName}
+              </span>
+              <span className="text-[10px] font-bold text-amber-100 bg-amber-500/25 border border-amber-300/40 px-2.5 py-1 rounded-full uppercase tracking-wider">
+                {topic.type}
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl font-extrabold text-[#003d4d] tracking-tight">
+            <h1 className="text-2xl sm:text-4xl font-black tracking-tight uppercase bg-gradient-to-r from-white via-cyan-100 to-emerald-200 bg-clip-text text-transparent drop-shadow-[0_2px_10px_rgba(0,0,0,0.25)]">
               {topic.title}
             </h1>
 
-            <div className="flex items-center gap-4 text-xs text-slate-600 flex-wrap">
-              <div>
-                <span className="font-semibold text-slate-400">Category: </span>
-                <span className="font-bold text-slate-800">{topic.categoryName}</span>
-              </div>
-              <span className="text-slate-300">•</span>
-              <div>
-                <span className="font-semibold text-slate-400">Type: </span>
-                <span className="font-bold text-[#00768a]">{topic.type}</span>
-              </div>
-            </div>
-
-            <p className="text-xs sm:text-sm text-slate-600 pt-1 leading-relaxed max-w-3xl">
+            <p className="text-xs sm:text-sm text-teal-50/90 pt-1 leading-relaxed max-w-3xl">
               {topic.quickSummary}
             </p>
           </div>
         </div>
 
         {/* Global Expand / Collapse Control */}
-        <div className="flex items-center justify-between px-1 text-xs font-semibold text-slate-500">
-          <span>Structured Clinical Reference (11 Sections)</span>
-          <div className="flex items-center gap-3">
-            <button onClick={expandAll} className="hover:text-[#00768a] transition">Expand All</button>
-            <span>•</span>
-            <button onClick={collapseAll} className="hover:text-[#00768a] transition">Collapse All</button>
+        <div className="flex flex-wrap items-center justify-between gap-3 px-1 text-xs font-bold text-slate-500">
+          <span className="inline-flex items-center gap-1.5">
+            <FileText className="w-3.5 h-3.5 text-indigo-500" />
+            Structured Clinical Reference (11 Sections)
+          </span>
+          <div className="flex items-center gap-2">
+            <button onClick={expandAll} className="btn-fx px-3 py-1.5 rounded-full bg-teal-600 hover:bg-teal-700 text-white font-bold shadow-sm transition-all">Expand All</button>
+            <button onClick={collapseAll} className="btn-fx px-3 py-1.5 rounded-full bg-white border border-slate-200 text-slate-600 hover:text-indigo-600 hover:border-indigo-300 font-bold shadow-sm transition-all">Collapse All</button>
           </div>
         </div>
 
         {/* ========================================================= */}
         {/* THE 11 CLINICAL ACCORDIONS (Exact Flow & Content)         */}
         {/* ========================================================= */}
-        <div className="space-y-3">
+        <div className="flex flex-col lg:flex-row lg:gap-6 lg:items-start">
+          {/* Animated section rail */}
+          <aside className="hidden lg:block lg:w-[220px] lg:flex-shrink-0 sticky top-24 self-start">
+            <div className="bg-white/95 backdrop-blur rounded-2xl border border-slate-200 shadow-[0_18px_40px_-22px_rgba(0,61,77,0.55)] p-3">
+              <div className="text-[10px] font-black uppercase tracking-widest text-slate-400 px-2 pt-1 pb-2.5 mb-1 border-b border-slate-100">
+                Sections
+              </div>
+              <div className="ref-timeline space-y-1.5 max-h-[calc(100vh-13rem)] overflow-y-auto pr-1 pt-2">
+              {SECTIONS.map(s => (
+                <a
+                  key={s.num}
+                  href={`#ref-sec-${s.num}`}
+                  onClick={(e) => { e.preventDefault(); goToSection(s.num); }}
+                  className={`mono-nav-item${activeSec === s.num ? ' active' : ''}`}
+                  aria-label={`Go to ${s.label}`}
+                >
+                  <span className="mono-nav-dot">
+                    {activeSec === s.num && (
+                      <span className="absolute inset-0 rounded-full animate-ping bg-[#00768a]/40" aria-hidden="true" />
+                    )}
+                    <span className="relative">{s.num}</span>
+                  </span>
+                  <span className="mono-nav-label">{s.label}</span>
+                </a>
+              ))}
+              </div>
+            </div>
+          </aside>
+
+          <div className="space-y-3 min-w-0 w-full lg:flex-1">
           
           {/* 01 | OVERVIEW */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-01" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('01')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">01</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">01</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Overview</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Overview</h3>
                   <p className="text-[11px] text-slate-500">Definition, clinical context and key points</p>
                 </div>
               </div>
               {openSections['01'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['01'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700 space-y-3 leading-relaxed">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700 space-y-3 leading-relaxed">
                 <p>{topic.overview.definition}</p>
                 <div className="p-3.5 rounded-lg bg-teal-50 border border-teal-200 text-[#004f5e]">
                   <span className="font-bold block text-xs uppercase tracking-wider mb-0.5">Clinical Pearl</span>
@@ -220,22 +294,22 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 02 | CLINICAL PRESENTATION */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-02" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('02')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">02</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">02</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Clinical Presentation</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Clinical Presentation</h3>
                   <p className="text-[11px] text-slate-500">Morphology, distribution and common patterns</p>
                 </div>
               </div>
               {openSections['02'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['02'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700 space-y-4 leading-relaxed">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700 space-y-4 leading-relaxed">
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="p-3.5 bg-white rounded-lg border border-slate-200">
                     <h4 className="font-bold text-xs text-[#004f5e] mb-2 uppercase">Typical Morphology</h4>
@@ -278,22 +352,22 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 03 | CAUSATIVE ORGANISMS */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-03" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('03')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">03</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">03</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Common Causative Organisms</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Common Causative Organisms</h3>
                   <p className="text-[11px] text-slate-500">Relevant dermatophytes and epidemiology</p>
                 </div>
               </div>
               {openSections['03'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['03'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700 space-y-2">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700 space-y-2">
                 <p>{topic.causativeOrganisms.description}</p>
                 <div className="flex flex-wrap gap-2 pt-1">
                   {topic.causativeOrganisms.organisms.map((org, i) => (
@@ -307,22 +381,22 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 04 | RISK FACTORS */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-04" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('04')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">04</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">04</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Risk Factors</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Risk Factors</h3>
                   <p className="text-[11px] text-slate-500">Environmental, host and lifestyle factors</p>
                 </div>
               </div>
               {openSections['04'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['04'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700">
                 <ul className="space-y-1.5">
                   {topic.riskFactors.map((rf, i) => (
                     <li key={i} className="flex items-start gap-2">
@@ -336,22 +410,22 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 05 | DIAGNOSTIC CONSIDERATIONS */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-05" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('05')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">05</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">05</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Diagnostic Considerations</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Diagnostic Considerations</h3>
                   <p className="text-[11px] text-slate-500">Clinical assessment and investigations</p>
                 </div>
               </div>
               {openSections['05'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['05'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700 space-y-3">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700 space-y-3">
                 <p>{topic.diagnosticConsiderations.clinicalAssessment}</p>
                 <div className="space-y-1.5 pt-1">
                   <h4 className="font-bold text-xs uppercase text-[#004f5e]">Recommended Investigations</h4>
@@ -367,22 +441,22 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 06 | DIFFERENTIAL DIAGNOSIS */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-06" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('06')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">06</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">06</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Differential Diagnosis</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Differential Diagnosis</h3>
                   <p className="text-[11px] text-slate-500">Conditions that may resemble the presentation</p>
                 </div>
               </div>
               {openSections['06'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['06'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {topic.differentialDiagnosis.map((diff, i) => (
                     <div key={i} className="p-3.5 rounded-xl bg-white border border-slate-200">
@@ -396,22 +470,22 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 07 | MANAGEMENT PRINCIPLES */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-07" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('07')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">07</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">07</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Management Principles</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Management Principles</h3>
                   <p className="text-[11px] text-slate-500">General approach and key considerations</p>
                 </div>
               </div>
               {openSections['07'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['07'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700">
                 <ul className="space-y-2">
                   {topic.managementPrinciples.map((mp, i) => (
                     <li key={i} className="flex items-start gap-2">
@@ -425,22 +499,22 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 08 | TOPICAL THERAPY */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-08" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('08')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">08</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">08</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Topical Therapy</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Topical Therapy</h3>
                   <p className="text-[11px] text-slate-500">When topical treatment is considered and therapeutic classes</p>
                 </div>
               </div>
               {openSections['08'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['08'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700 space-y-2">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700 space-y-2">
                 <p className="font-medium text-slate-800">{topic.topicalTherapy.indication}</p>
                 <ul className="space-y-1.5 pl-2">
                   {topic.topicalTherapy.agents.map((ag, i) => (
@@ -455,22 +529,22 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 09 | SYSTEMIC THERAPY */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-09" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('09')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">09</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">09</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Systemic Therapy</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Systemic Therapy</h3>
                   <p className="text-[11px] text-slate-500">Situations where systemic therapy may be considered</p>
                 </div>
               </div>
               {openSections['09'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['09'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700 space-y-2">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700 space-y-2">
                 <p className="font-medium text-slate-800">{topic.systemicTherapy.indication}</p>
                 <ul className="space-y-1.5 pl-2">
                   {topic.systemicTherapy.agents.map((ag, i) => (
@@ -485,22 +559,22 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 10 | RECURRENCE & PREVENTION */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-10" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('10')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">10</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">10</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Recurrence & Prevention</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Recurrence & Prevention</h3>
                   <p className="text-[11px] text-slate-500">Hygiene, adherence and preventive measures</p>
                 </div>
               </div>
               {openSections['10'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['10'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700">
+              <div className="p-5 border-t border-slate-100 ref-body bg-slate-50/50 text-sm sm:text-base text-slate-700">
                 <ul className="space-y-1.5">
                   {topic.recurrenceAndPrevention.map((rp, i) => (
                     <li key={i} className="flex items-start gap-2">
@@ -514,27 +588,34 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
           {/* 11 | PROFESSIONAL REFERENCES */}
-          <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+          <div id="ref-sec-11" className="ref-card scroll-mt-28 bg-white rounded-2xl border overflow-hidden">
             <button
               onClick={() => toggleSection('11')}
-              className="w-full p-4 flex items-center justify-between text-left hover:bg-slate-50 transition"
+              className="ref-head w-full p-4 sm:p-5 flex items-center justify-between text-left transition"
             >
               <div className="flex items-center gap-3">
-                <span className="font-mono font-bold text-sm text-[#00768a]">11</span>
+                <span className="ref-num inline-flex items-center justify-center w-8 h-8 rounded-full text-white text-[11px] font-black shadow-sm">11</span>
                 <div>
-                  <h3 className="font-bold text-sm sm:text-base text-slate-900">Professional References</h3>
+                  <h3 className="font-black text-sm sm:text-base text-slate-900">Professional References</h3>
                   <p className="text-[11px] text-slate-500">Guidelines, consensus documents and key literature</p>
                 </div>
               </div>
               {openSections['11'] ? <ChevronUp className="w-5 h-5 text-slate-400" /> : <ChevronDown className="w-5 h-5 text-slate-400" />}
             </button>
             {openSections['11'] && (
-              <div className="p-5 border-t border-slate-100 bg-slate-50/50 text-xs sm:text-sm text-slate-700">
-                <ul className="space-y-1.5 text-xs text-slate-600">
+              <div className="p-5 border-t border-slate-100 bg-gradient-to-br from-fuchsia-50/60 via-white to-pink-50/50">
+                <ul className="grid grid-cols-1 gap-2.5">
                   {topic.references.map((rf, i) => (
-                    <li key={i} className="flex items-start gap-1.5">
-                      <span className="font-bold">[{i + 1}]</span>
-                      <span>{rf}</span>
+                    <li
+                      key={i}
+                      className="group flex items-start gap-3 rounded-xl bg-white border border-pink-100 p-3 sm:p-3.5 shadow-[0_8px_20px_-14px_rgba(219,39,119,0.45)] hover:shadow-[0_16px_30px_-16px_rgba(219,39,119,0.55)] hover:border-pink-300 hover:-translate-y-0.5 transition-all duration-300"
+                    >
+                      <span className="shrink-0 inline-flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-br from-fuchsia-500 to-pink-500 text-white text-[11px] font-black shadow-sm group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      <span className="text-sm text-slate-700 leading-relaxed font-medium">
+                        {rf}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -543,54 +624,71 @@ export default function ReferenceLibraryTopicDetailPage() {
           </div>
 
         </div>
+        </div>
 
         {/* ========================================================= */}
         {/* RELATED THERAPEUTIC PORTFOLIO (Matching Panel 3 Bottom)   */}
         {/* ========================================================= */}
-        <section className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-5">
+        <section className="relative overflow-hidden bg-gradient-to-br from-white via-teal-50/40 to-indigo-50/40 rounded-2xl p-6 sm:p-8 border border-teal-100/80 shadow-[0_18px_42px_-24px_rgba(0,61,77,0.5)] space-y-5">
+          <div className="absolute -top-10 right-10 w-48 h-48 rounded-full bg-rose-300/15 blur-3xl pointer-events-none" />
           <div>
-            <h3 className="text-lg font-extrabold text-[#003d4d] uppercase tracking-tight">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-teal-700 bg-teal-50 border border-teal-200 px-2.5 py-1 rounded-full mb-2">
+              <Pill className="w-3 h-3" />
+              Therapeutic Portfolio
+            </span>
+            <h3 className="text-lg sm:text-xl font-black text-[#003d4d] uppercase tracking-tight">
               Related Therapeutic Portfolio
             </h3>
-            <p className="text-xs text-slate-500 mt-0.5">
+            <p className="text-sm text-slate-600 mt-0.5 font-medium">
               Explore relevant Ryan Dermaceutics products mapped to {topic.title}.
             </p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {topic.relatedProducts.map((prod, i) => (
+            {topic.relatedProducts.map((prod, i) => {
+              const accents = [
+                { bar: 'from-rose-400 to-pink-500', card: 'from-rose-50 via-white to-pink-50', border: 'border-rose-200/80', chip: 'text-rose-700 bg-rose-100 border-rose-200', title: 'group-hover:text-rose-600', link: 'bg-rose-600 hover:bg-rose-700', glow: 'hover:shadow-[0_20px_42px_-18px_rgba(244,63,94,0.55)]' },
+                { bar: 'from-indigo-400 to-violet-500', card: 'from-indigo-50 via-white to-violet-50', border: 'border-indigo-200/80', chip: 'text-indigo-700 bg-indigo-100 border-indigo-200', title: 'group-hover:text-indigo-600', link: 'bg-indigo-600 hover:bg-indigo-700', glow: 'hover:shadow-[0_20px_42px_-18px_rgba(99,102,241,0.55)]' },
+                { bar: 'from-emerald-400 to-teal-500', card: 'from-emerald-50 via-white to-teal-50', border: 'border-emerald-200/80', chip: 'text-emerald-700 bg-emerald-100 border-emerald-200', title: 'group-hover:text-emerald-600', link: 'bg-emerald-600 hover:bg-emerald-700', glow: 'hover:shadow-[0_20px_42px_-18px_rgba(16,185,129,0.55)]' },
+              ];
+              const a = accents[i % accents.length];
+              return (
               <div
                 key={i}
-                className="bg-slate-50/60 rounded-xl p-4 border border-slate-200 flex flex-col justify-between group hover:border-[#00768a] hover:bg-white transition"
+                className={`group relative overflow-hidden flex flex-col justify-between rounded-2xl bg-gradient-to-br ${a.card} border ${a.border} p-4 shadow-[0_10px_26px_-16px_rgba(0,61,77,0.45)] ${a.glow} hover:-translate-y-1.5 transition-all duration-300`}
               >
+                <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r ${a.bar}`} />
                 <div>
-                  <div className="relative h-28 w-full rounded-lg overflow-hidden mb-3 bg-white border border-slate-100">
+                  <div className="relative h-32 w-full rounded-xl overflow-hidden mb-3 bg-white/70 border border-white/80">
                     <Image
                       src={prod.image}
                       alt={prod.name}
                       fill
-                      className="object-contain p-2 group-hover:scale-105 transition-transform"
+                      className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                     />
                   </div>
 
-                  <h4 className="font-extrabold text-sm text-slate-900 group-hover:text-[#00768a] transition-colors">
+                  <span className={`inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full border mb-1.5 ${a.chip}`}>
+                    {prod.form}
+                  </span>
+                  <h4 className={`font-black text-base leading-snug text-slate-900 ${a.title} transition-colors`}>
                     {prod.name}
                   </h4>
-                  <p className="text-xs text-[#006070] font-medium mt-0.5">{prod.generic}</p>
-                  <p className="text-[11px] text-slate-400 mt-0.5">{prod.form}</p>
+                  <p className="text-sm text-slate-600 font-semibold mt-1 leading-snug">{prod.generic}</p>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-slate-200">
+                <div className="mt-4 pt-3 border-t border-white/80">
                   <a
                     href="/for-doctors/prescribing-information"
-                    className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00768a] hover:text-[#004f5e]"
+                    className={`btn-fx inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${a.link} text-white text-xs font-black shadow-sm transition-all`}
                   >
                     View Details
                     <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </a>
                 </div>
               </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 

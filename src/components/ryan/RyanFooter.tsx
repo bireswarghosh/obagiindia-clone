@@ -5,10 +5,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Linkedin, Youtube, Instagram, Mail, ArrowUpRight } from 'lucide-react';
 
+function FooterColumn({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <h4 className="text-[13px] font-black text-white uppercase tracking-wider mb-3">{title}</h4>
+      <div>{children}</div>
+    </div>
+  );
+}
+
 export default function RyanFooter() {
   return (
     <footer className="bg-[#081b24] text-slate-300 text-xs border-t border-teal-950">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[164px] py-12 lg:py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 lg:gap-8">
           
           {/* Logo & Division Info */}
@@ -27,55 +36,69 @@ export default function RyanFooter() {
                 </div>
               </div>
             </Link>
-            <p className="text-slate-400 text-[12px] leading-relaxed pt-1">
+            <p className="text-slate-400 text-[13px] leading-relaxed pt-1">
               Committed to advancing dermatological therapeutics through scientific rigor, high-quality formulations, and trusted clinician partnership.
             </p>
           </div>
 
 
           {/* Quick Links */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Quick Links</h4>
-            <ul className="space-y-2 text-[12.5px] text-slate-400">
+          <FooterColumn title="Quick Links">
+            <ul className="space-y-2 text-[13.5px] text-slate-400 pb-1">
               <li><Link href="/" className="hover:text-teal-300 transition">Home</Link></li>
               <li><Link href="/about" className="hover:text-teal-300 transition">About Ryan</Link></li>
               <li><Link href="/products" className="hover:text-teal-300 transition">Products Catalog</Link></li>
               <li><Link href="/#therapeutic-areas" className="hover:text-teal-300 transition">Therapeutic Areas</Link></li>
               <li><Link href="/#contact" className="hover:text-teal-300 transition">Contact & Enquiries</Link></li>
             </ul>
-          </div>
+          </FooterColumn>
 
           {/* For Doctors */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">For Doctors</h4>
-            <ul className="space-y-2 text-[12.5px] text-slate-400">
+          <FooterColumn title="For Doctors">
+            <ul className="space-y-2 text-[13.5px] text-slate-400 pb-1">
               <li>
-                <Link href="/for-doctors/therapeutic-resources" className="hover:text-teal-300 transition text-teal-200 font-medium">
+                <Link href="/for-doctors/product-monographs" className="hover:text-teal-300 transition text-teal-200 font-medium">
+                  Product Monographs
+                </Link>
+              </li>
+              <li>
+                <Link href="/batch-analysis-report" className="hover:text-teal-300 transition text-emerald-300 font-medium">
+                  Batch Analysis & COA Portal
+                </Link>
+              </li>
+              <li>
+                <Link href="/for-doctors/prescribing-information" className="hover:text-teal-300 transition">
+                  Prescribing Information
+                </Link>
+              </li>
+              <li>
+                <Link href="/for-doctors/therapeutic-resources" className="hover:text-teal-300 transition">
                   Therapeutic Resources
                 </Link>
               </li>
-              <li><Link href="/products" className="hover:text-teal-300 transition">Product Monographs (53)</Link></li>
-              <li><Link href="/for-doctors/prescribing-information" className="hover:text-teal-300 transition">Prescribing Information</Link></li>
-              <li><Link href="/for-doctors/reference-library" className="hover:text-teal-300 transition">Dermatology Reference Library</Link></li>
               <li>
-                <Link href="/for-doctors/medical-information" className="hover:text-teal-300 transition text-teal-200 font-medium">
+                <Link href="/for-doctors/reference-library" className="hover:text-teal-300 transition">
+                  Dermatology Reference Library
+                </Link>
+              </li>
+              <li>
+                <Link href="/for-doctors/medical-information" className="hover:text-teal-300 transition">
                   Medical Information Service
                 </Link>
               </li>
             </ul>
-          </div>
+          </FooterColumn>
 
           {/* Therapeutic Areas */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-white uppercase tracking-wider">Therapeutic Areas</h4>
-            <ul className="space-y-2 text-[12.5px] text-slate-400">
+          <FooterColumn title="Therapeutic Areas">
+            <ul className="space-y-2 text-[13.5px] text-slate-400 pb-1">
               <li><Link href="/products?area=Acne" className="hover:text-teal-300 transition">Acne & Acne Management</Link></li>
               <li><Link href="/products?area=Antifungal" className="hover:text-teal-300 transition">Antifungal Solutions</Link></li>
               <li><Link href="/products?area=Corticosteroids" className="hover:text-teal-300 transition">Corticosteroid Potencies</Link></li>
               <li><Link href="/products?area=Hair" className="hover:text-teal-300 transition">Hair & Scalp Health</Link></li>
               <li><Link href="/products?area=Allergy" className="hover:text-teal-300 transition">Allergy & Pruritus</Link></li>
             </ul>
-          </div>
+          </FooterColumn>
 
           {/* Connect With Us */}
           <div className="space-y-3">
@@ -109,20 +132,20 @@ export default function RyanFooter() {
                 <Instagram className="w-4 h-4" />
               </a>
             </div>
-            <div className="pt-2 text-[11.5px] text-slate-400">
+            <div className="pt-2 text-[12.5px] text-slate-400">
               <div>Medical Affairs Enquiry:</div>
               <a href="mailto:medinfo@ryandermaceutics.com" className="text-teal-300 hover:underline inline-flex items-center gap-1 font-mono mt-0.5">
                 medinfo@ryandermaceutics.com
               </a>
             </div>
-            <div className="pt-1 text-[11px] text-slate-400">
-              A Specialized Division of <strong>Ryan Dermaceutics Pvt. Ltd.</strong>
+            <div className="pt-1 text-[12px] text-slate-400">
+              A Specialized Division of <strong>Ryan Dermaceutics Private Limited</strong>
             </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-400">
+        <div className="mt-12 pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-slate-400">
           <div>
             © 2026 Ryan Dermaceutics. All rights reserved.
           </div>

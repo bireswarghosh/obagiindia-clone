@@ -55,7 +55,7 @@ export default function RyanHeader() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-teal-100/90 shadow-xs transition-all">
       {/* Main Navigation Bar */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[164px]">
         <div className="flex items-center justify-between h-20">
           
           {/* Official Brand Logo */}

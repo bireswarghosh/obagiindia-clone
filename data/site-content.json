@@ -26,15 +26,15 @@
   },
   "seo": {
     "metaTitle": "Ryan Dermaceutics | Science That Understands Skin",
-    "metaDescription": "Ryan Dermaceutics, a specialized dermatology division of Ethics Medinova Pvt. Ltd., delivers evidence-based topical, oral, and trichological formulations.",
-    "keywords": "Ryan Dermaceutics, Ethics Medinova, Dermatology India, Tressicle, Tenorium, Blismin, Kefin, Tofaplast, Topical Dermatology, Oral Dermatology",
+    "metaDescription": "Ryan Dermaceutics, a specialized dermatology division of Ryan Dermaceutics, delivers evidence-based topical, oral, and trichological formulations.",
+    "keywords": "Ryan Dermaceutics, Ryan Dermaceutics, Dermatology India, Tressicle, Tenorium, Blismin, Kefin, Tofaplast, Topical Dermatology, Oral Dermatology",
     "ogImage": "/ryan/home/home_client_image_7.png",
     "canonicalUrl": "https://obagiindia.vercel.app/"
   },
   "header": {
     "logoText": "RYAN DERMACEUTICS",
     "logoImageUrl": "/ryan/ryan-logo.png",
-    "broughtByText": "A Specialized Division of Ethics Medinova Pvt. Ltd.",
+    "broughtByText": "A Specialized Division of Ryan Dermaceutics Pvt. Ltd.",
     "broughtByLogoUrl": "",
     "broughtByLinkUrl": "https://ethicsmedinova.com/",
     "searchEnabled": true,
@@ -278,10 +278,10 @@
   },
   "footer": {
     "brandName": "RYAN DERMACEUTICS",
-    "tagline": "A Specialized Division of Ethics Medinova Private Limited",
+    "tagline": "A Specialized Division of Ryan Dermaceutics Private Limited",
     "description": "Delivering evidence-based dermatology and trichology formulations manufactured in WHO-GMP compliant facilities to serve healthcare practitioners across India.",
     "complianceText": "Products manufactured under WHO-GMP compliance. Prescriptions are subject to applicable Schedule H / Rx drug laws in India.",
-    "copyrightText": "© 2026 Ryan Dermaceutics (Ethics Medinova Pvt. Ltd.). All Rights Reserved.",
+    "copyrightText": "© 2026 Ryan Dermaceutics (Ryan Dermaceutics Pvt. Ltd.). All Rights Reserved.",
     "askAiEnabled": true,
     "quickLinks": [
       {
@@ -676,10 +676,10 @@
       ]
     },
     "ethicsMedinova": {
-      "subtitle": "PART OF ETHICS MEDINOVA",
+      "subtitle": "RYAN DERMACEUTICS HEALTHCARE",
       "title": "A STRONG FOUNDATION",
-      "description": "Ryan Dermaceutics is a specialized dermatology division of Ethics Medinova Private Limited, a growing pharmaceutical marketing company committed to quality, integrity and long-term value creation in healthcare.",
-      "ctaText": "ABOUT ETHICS MEDINOVA",
+      "description": "Ryan Dermaceutics is a specialized dermatology division of Ryan Dermaceutics Private Limited, a growing pharmaceutical marketing company committed to quality, integrity and long-term value creation in healthcare.",
+      "ctaText": "ABOUT RYAN DERMACEUTICS",
       "ctaLink": "#ethics-details",
       "buildingImage": "/ryan/about/ethics_building.png",
       "badges": [
@@ -863,7 +863,7 @@
     "seo": {
       "metaTitle": "About Ryan Dermaceutics | A Specialized Dermatology Division",
       "metaDescription": "Ryan Dermaceutics is dedicated to building a comprehensive portfolio of topical, oral and supportive dermatological solutions backed by WHO-GMP manufacturing.",
-      "keywords": "Ryan Dermaceutics, dermatology division, Ethics Medinova, topical dermatology, oral dermatology, WHO-GMP, skin health, scalp care",
+      "keywords": "Ryan Dermaceutics, dermatology division, Ryan Dermaceutics, topical dermatology, oral dermatology, WHO-GMP, skin health, scalp care",
       "ogImage": "/ryan/about/about_hero_collage.png",
       "canonicalUrl": "https://obagiindia.vercel.app/about"
     }

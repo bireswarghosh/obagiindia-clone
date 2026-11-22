@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import RyanHeader from '@/components/ryan/RyanHeader';
 import RyanFooter from '@/components/ryan/RyanFooter';
+import { generateClinicalResourcePDF } from '@/lib/pdf-generator';
 import {
   BookOpen,
   FileText,
@@ -24,14 +25,8 @@ import {
   Stethoscope,
   Microscope,
   FileDown,
-  Eye,
-  Building2,
-  FlaskConical,
-  FileCheck2,
-  ShieldCheck,
+  Eye
 } from 'lucide-react';
-import { generateClinicalResourcePDF, generateBatchCOAPDF, BatchCOA } from '@/lib/pdf-generator';
-import { RYAN_BATCH_RECORDS } from '@/data/ryan-batches-data';
 
 // ==========================================
 // DATA DEFINITIONS & PORTFOLIO MAPPING
@@ -542,31 +537,36 @@ export default function TherapeuticResourcesPage() {
   const [downloadSearch, setDownloadSearch] = useState('');
   const [downloadCategory, setDownloadCategory] = useState<string>('All');
   const [downloadToast, setDownloadToast] = useState<string | null>(null);
-  const [activeBatchModal, setActiveBatchModal] = useState<BatchCOA | null>(null);
+  const [previewDoc, setPreviewDoc] = useState<DownloadDocument | null>(null);
+
+  // Auto-tour: highlight guide cards one-by-one in a loop (starts after 15s)
+  const [tourIdx, setTourIdx] = useState<number | null>(null);
+  const [tourHold, setTourHold] = useState(false);
+  React.useEffect(() => {
+    if (tourHold) return;
+    let interval: ReturnType<typeof setInterval> | undefined;
+    const start = setTimeout(() => {
+      setTourIdx(0);
+      interval = setInterval(() => {
+        setTourIdx(prev => (prev === null ? 0 : (prev + 1) % Math.max(guidesList.length, 1)));
+      }, 2500);
+    }, 15000);
+    return () => {
+      clearTimeout(start);
+      if (interval) clearInterval(interval);
+    };
+  }, [tourHold, guidesList.length]);
 
   const handleDownloadFile = async (doc: DownloadDocument) => {
     try {
-      setDownloadToast(`Generating Official Vector PDF: ${doc.title}...`);
+      setDownloadToast(`Preparing download for: ${doc.title}...`);
       await generateClinicalResourcePDF(doc);
-      setDownloadToast(`✓ Downloaded ${doc.filename} (Valid PDF)`);
+      setDownloadToast(`✓ Downloaded ${doc.filename}`);
       setTimeout(() => setDownloadToast(null), 3500);
     } catch (err) {
-      console.error(err);
-      setDownloadToast(`✓ Download initiated for ${doc.filename}`);
-      setTimeout(() => setDownloadToast(null), 3000);
-    }
-  };
-
-  const handleDownloadCOA = async (batch: BatchCOA) => {
-    try {
-      setDownloadToast(`Generating Official COA PDF: ${batch.batchNumber}...`);
-      await generateBatchCOAPDF(batch);
-      setDownloadToast(`✓ Downloaded COA ${batch.batchNumber} (Valid PDF)`);
+      console.error('Failed to generate resource PDF:', err);
+      setDownloadToast(`Error downloading ${doc.filename}`);
       setTimeout(() => setDownloadToast(null), 3500);
-    } catch (err) {
-      console.error(err);
-      setDownloadToast(`✓ Download initiated for ${batch.batchNumber}`);
-      setTimeout(() => setDownloadToast(null), 3000);
     }
   };
 
@@ -618,7 +618,7 @@ export default function TherapeuticResourcesPage() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-teal-200/20 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-cyan-200/20 rounded-full blur-3xl pointer-events-none -ml-20 -mb-20" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[64px] relative z-10">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-6">
             <a href="#" className="hover:text-teal-700 transition">Home</a>
@@ -630,7 +630,7 @@ export default function TherapeuticResourcesPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             {/* Left Content */}
-            <div className="lg:col-span-7 space-y-4">
+            <div className="lg:col-span-6 space-y-4">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-100/80 border border-teal-200 text-[#006070] text-xs font-bold uppercase tracking-widest">
                 <Sparkles className="w-3.5 h-3.5 text-[#00768a]" />
                 FOR DOCTORS
@@ -663,7 +663,7 @@ export default function TherapeuticResourcesPage() {
             </div>
 
             {/* Right Graphic Banner (Authentic Client Artwork) */}
-            <div className="lg:col-span-5 relative">
+            <div className="lg:col-span-6 relative">
               <div className="relative mx-auto max-w-md lg:max-w-none rounded-2xl overflow-hidden shadow-2xl border-2 border-white/80 bg-white group">
                 <div className="relative h-64 sm:h-72 w-full overflow-hidden">
                   <Image
@@ -694,42 +694,52 @@ export default function TherapeuticResourcesPage() {
       {/* ========================================================= */}
       {/* 2. TOP JUMP ANCHOR NAVIGATION BAR */}
       {/* ========================================================= */}
-      <section className="bg-white border-b border-teal-100 shadow-xs sticky top-20 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-start lg:justify-center gap-2 sm:gap-4 overflow-x-auto py-3 no-scrollbar text-xs font-semibold text-slate-700">
+      <section className="bg-white/95 backdrop-blur border-y border-slate-200/80 shadow-sm sticky top-20 z-40">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[64px]">
+          <div className="flex items-center justify-start lg:justify-center gap-2 sm:gap-2.5 overflow-x-auto py-3 no-scrollbar text-xs font-black">
             <a
               href="#guides"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg bg-teal-50 hover:bg-teal-100/70 text-[#006070] border border-teal-100 whitespace-nowrap transition"
+              className="group inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white text-slate-800 border border-slate-200 whitespace-nowrap shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-50/60 transition-all"
             >
-              <BookOpen className="w-4 h-4 text-[#00768a]" />
+              <span className="w-7 h-7 rounded-full bg-gradient-to-br from-rose-400 to-pink-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                <BookOpen className="w-3.5 h-3.5" />
+              </span>
               Therapeutic Guides
             </a>
             <a
               href="#insights"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-[#006070] whitespace-nowrap transition"
+              className="group inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white text-slate-800 border border-slate-200 whitespace-nowrap shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-indigo-200 hover:bg-indigo-50/60 transition-all"
             >
-              <FileText className="w-4 h-4 text-[#00768a]" />
+              <span className="w-7 h-7 rounded-full bg-gradient-to-br from-indigo-400 to-violet-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                <FileText className="w-3.5 h-3.5" />
+              </span>
               Clinical Insights
             </a>
             <a
               href="#monographs"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-[#006070] whitespace-nowrap transition"
+              className="group inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white text-slate-800 border border-slate-200 whitespace-nowrap shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-violet-200 hover:bg-violet-50/60 transition-all"
             >
-              <Book className="w-4 h-4 text-[#00768a]" />
+              <span className="w-7 h-7 rounded-full bg-gradient-to-br from-violet-400 to-purple-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                <Book className="w-3.5 h-3.5" />
+              </span>
               Product Monographs
             </a>
             <a
               href="#prescribing"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-[#006070] whitespace-nowrap transition"
+              className="group inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white text-slate-800 border border-slate-200 whitespace-nowrap shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-50/60 transition-all"
             >
-              <Pill className="w-4 h-4 text-[#00768a]" />
+              <span className="w-7 h-7 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                <Pill className="w-3.5 h-3.5" />
+              </span>
               Prescribing Information
             </a>
             <a
               href="/for-doctors/reference-library"
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-[#006070] whitespace-nowrap transition"
+              className="group inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white text-slate-800 border border-slate-200 whitespace-nowrap shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-fuchsia-200 hover:bg-fuchsia-50/60 transition-all"
             >
-              <Library className="w-4 h-4 text-[#00768a]" />
+              <span className="w-7 h-7 rounded-full bg-gradient-to-br from-fuchsia-400 to-purple-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                <Library className="w-3.5 h-3.5" />
+              </span>
               Reference Library
             </a>
             <button
@@ -739,9 +749,11 @@ export default function TherapeuticResourcesPage() {
                 if (el) el.scrollIntoView({ behavior: 'smooth' });
                 else setDownloadCentreOpen(true);
               }}
-              className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg hover:bg-teal-50 text-slate-700 hover:text-[#006070] whitespace-nowrap transition cursor-pointer"
+              className="group inline-flex items-center gap-2.5 pl-1.5 pr-4 py-1.5 rounded-full bg-white text-slate-800 border border-slate-200 whitespace-nowrap shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50/60 transition-all cursor-pointer"
             >
-              <Download className="w-4 h-4 text-[#00768a]" />
+              <span className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                <Download className="w-3.5 h-3.5" />
+              </span>
               Download Centre
             </button>
           </div>
@@ -751,10 +763,14 @@ export default function TherapeuticResourcesPage() {
       {/* ========================================================= */}
       {/* 3. SECTION: DERMATOLOGY THERAPEUTIC GUIDES */}
       {/* ========================================================= */}
-      <section id="guides" className="py-14 lg:py-18 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="guides" className="py-14 lg:py-18 max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[64px]">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#003d4d] tracking-tight uppercase">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-rose-700 bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full mb-2">
+              <BookOpen className="w-3 h-3" />
+              Clinical Guides
+            </span>
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#003d4d] tracking-tight uppercase">
               Dermatology Therapeutic Guides
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
@@ -762,8 +778,8 @@ export default function TherapeuticResourcesPage() {
             </p>
           </div>
           <a 
-            href={`/for-doctors/therapeutic-resources/guides/${THERAPEUTIC_GUIDES[0].slug}`}
-            className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#00768a] hover:text-[#004f5e] group"
+            href="#guides-grid"
+            className="btn-fx inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black uppercase tracking-wider text-white bg-rose-600 hover:bg-rose-700 shadow-md shadow-rose-200 hover:shadow-lg hover:-translate-y-0.5 group transition-all"
           >
             View All Guides
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -771,12 +787,27 @@ export default function TherapeuticResourcesPage() {
         </div>
 
         {/* 6 Grid Cards Matching Mockup */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5">
-          {guidesList.map((guide) => (
+        <div
+          id="guides-grid"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 sm:gap-5 scroll-mt-32"
+          onMouseEnter={() => { setTourHold(true); setTourIdx(null); }}
+          onMouseLeave={() => setTourHold(false)}
+        >
+          {guidesList.map((guide, idx) => {
+            const guideAccents = [
+              { bar: 'from-rose-400 to-pink-500', border: 'border-rose-200/80', hover: 'hover:shadow-[0_18px_38px_-14px_rgba(244,63,94,0.45)] hover:border-rose-300', title: 'group-hover:text-rose-600', link: 'text-rose-600' },
+              { bar: 'from-amber-400 to-orange-500', border: 'border-amber-200/80', hover: 'hover:shadow-[0_18px_38px_-14px_rgba(245,158,11,0.45)] hover:border-amber-300', title: 'group-hover:text-amber-600', link: 'text-amber-600' },
+              { bar: 'from-violet-400 to-purple-500', border: 'border-violet-200/80', hover: 'hover:shadow-[0_18px_38px_-14px_rgba(139,92,246,0.45)] hover:border-violet-300', title: 'group-hover:text-violet-600', link: 'text-violet-600' },
+              { bar: 'from-sky-400 to-blue-500', border: 'border-sky-200/80', hover: 'hover:shadow-[0_18px_38px_-14px_rgba(14,165,233,0.45)] hover:border-sky-300', title: 'group-hover:text-sky-600', link: 'text-sky-600' },
+              { bar: 'from-emerald-400 to-teal-500', border: 'border-emerald-200/80', hover: 'hover:shadow-[0_18px_38px_-14px_rgba(16,185,129,0.45)] hover:border-emerald-300', title: 'group-hover:text-emerald-600', link: 'text-emerald-600' },
+              { bar: 'from-cyan-400 to-indigo-500', border: 'border-cyan-200/80', hover: 'hover:shadow-[0_18px_38px_-14px_rgba(6,182,212,0.45)] hover:border-cyan-300', title: 'group-hover:text-cyan-600', link: 'text-cyan-600' },
+            ];
+            const a = guideAccents[idx % guideAccents.length];
+            return (
             <a
               key={guide.id}
               href={`/for-doctors/therapeutic-resources/guides/${guide.slug}`}
-              className="bg-white rounded-xl overflow-hidden border border-slate-200/80 shadow-xs hover:shadow-xl hover:border-teal-300 transition-all duration-300 flex flex-col group cursor-pointer"
+              className={`guide-card bg-white rounded-xl overflow-hidden border ${a.border} shadow-sm ${a.hover} hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer ${tourIdx === idx ? 'tour-active' : ''}`}
             >
               {/* Card Thumbnail */}
               <div className="relative h-32 w-full overflow-hidden bg-slate-100">
@@ -791,11 +822,12 @@ export default function TherapeuticResourcesPage() {
                   Clinical Guide
                 </span>
               </div>
+              <div className={`h-1 w-full bg-gradient-to-r ${a.bar}`} />
 
               {/* Card Content */}
               <div className="p-3.5 flex-1 flex flex-col justify-between">
                 <div>
-                  <h3 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-[#00768a] transition-colors leading-snug">
+                  <h3 className={`font-black text-xs sm:text-sm text-slate-900 ${a.title} transition-colors leading-snug`}>
                     {guide.title}
                   </h3>
                   <p className="text-[11px] text-slate-500 line-clamp-3 mt-1.5 leading-relaxed">
@@ -804,14 +836,15 @@ export default function TherapeuticResourcesPage() {
                 </div>
 
                 <div className="pt-3 mt-3 border-t border-slate-100">
-                  <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#00768a] group-hover:text-[#004f5e]">
+                  <span className={`tour-link inline-flex items-center gap-1 text-[11px] font-black ${a.link}`}>
                     VIEW GUIDE
                     <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                   </span>
                 </div>
               </div>
             </a>
-          ))}
+            );
+          })}
         </div>
       </section>
 
@@ -819,10 +852,14 @@ export default function TherapeuticResourcesPage() {
       {/* 4. SECTION: CLINICAL INSIGHTS */}
       {/* ========================================================= */}
       <section id="insights" className="py-14 bg-gradient-to-b from-white via-teal-50/20 to-white border-y border-teal-100/60">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[64px]">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
             <div>
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-[#003d4d] tracking-tight uppercase">
+              <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full mb-2">
+                <FileText className="w-3 h-3" />
+                Expert Insights
+              </span>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#003d4d] tracking-tight uppercase">
                 Clinical Insights
               </h2>
               <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-2xl">
@@ -830,8 +867,8 @@ export default function TherapeuticResourcesPage() {
               </p>
             </div>
             <a 
-              href={`/for-doctors/therapeutic-resources/insights/${insightsList[0]?.slug || 'understanding-acne'}`}
-              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#00768a] hover:text-[#004f5e] group"
+              href="#insights-grid"
+              className="btn-fx inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-black uppercase tracking-wider text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-200 hover:shadow-lg hover:-translate-y-0.5 group transition-all"
             >
               View All Articles
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -839,12 +876,19 @@ export default function TherapeuticResourcesPage() {
           </div>
 
           {/* 6 Article Cards Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {insightsList.map((article) => (
+          <div id="insights-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 scroll-mt-32">
+            {insightsList.map((article, idx) => {
+              const insightAccents = [
+                { bar: 'from-rose-400 to-pink-500', border: 'border-rose-200/80', hover: 'hover:shadow-[0_18px_38px_-14px_rgba(244,63,94,0.45)] hover:border-rose-300', meta: 'text-rose-600', title: 'group-hover:text-rose-600', link: 'text-rose-600' },
+                { bar: 'from-indigo-400 to-violet-500', border: 'border-indigo-200/80', hover: 'hover:shadow-[0_18px_38px_-14px_rgba(99,102,241,0.45)] hover:border-indigo-300', meta: 'text-indigo-600', title: 'group-hover:text-indigo-600', link: 'text-indigo-600' },
+                { bar: 'from-amber-400 to-orange-500', border: 'border-amber-200/80', hover: 'hover:shadow-[0_18px_38px_-14px_rgba(245,158,11,0.45)] hover:border-amber-300', meta: 'text-amber-600', title: 'group-hover:text-amber-600', link: 'text-amber-600' },
+              ];
+              const a = insightAccents[idx % insightAccents.length];
+              return (
               <a
                 key={article.id}
                 href={`/for-doctors/therapeutic-resources/insights/${article.slug}`}
-                className="bg-white rounded-xl overflow-hidden border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-teal-300 transition-all duration-300 flex flex-col group cursor-pointer"
+                className={`bg-white rounded-xl overflow-hidden border ${a.border} shadow-sm ${a.hover} hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer`}
               >
                 <div className="relative h-36 w-full overflow-hidden bg-slate-100">
                   <Image
@@ -859,16 +903,17 @@ export default function TherapeuticResourcesPage() {
                     </span>
                   </div>
                 </div>
+                <div className={`h-1 w-full bg-gradient-to-r ${a.bar}`} />
 
                 <div className="p-4 flex-1 flex flex-col justify-between">
                   <div>
-                    <div className="flex items-center gap-2 text-[10px] font-semibold text-teal-700 mb-1.5">
+                    <div className={`flex items-center gap-2 text-[10px] font-bold ${a.meta} mb-1.5`}>
                       <span>{article.date}</span>
                       <span>•</span>
                       <span>{article.category}</span>
                     </div>
 
-                    <h3 className="font-bold text-xs sm:text-sm text-slate-900 group-hover:text-[#00768a] transition-colors line-clamp-2 leading-snug">
+                    <h3 className={`font-black text-xs sm:text-sm text-slate-900 ${a.title} transition-colors line-clamp-2 leading-snug`}>
                       {article.title}
                     </h3>
 
@@ -878,14 +923,15 @@ export default function TherapeuticResourcesPage() {
                   </div>
 
                   <div className="pt-3 mt-3 border-t border-slate-100">
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-[#00768a] group-hover:text-[#004f5e]">
+                    <span className={`inline-flex items-center gap-1 text-[11px] font-black ${a.link}`}>
                       READ ARTICLE
                       <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
                     </span>
                   </div>
                 </div>
               </a>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -893,13 +939,16 @@ export default function TherapeuticResourcesPage() {
       {/* ========================================================= */}
       {/* 5. SECTION: 4 RESOURCE CARDS (Mandated by Client Docx)     */}
       {/* ========================================================= */}
-      <section className="py-14 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-14 max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[64px]">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <span className="text-xs font-bold text-[#00768a] uppercase tracking-widest">DOCTORS REPOSITORY</span>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-[#003d4d] tracking-tight uppercase mt-1">
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-violet-700 bg-gradient-to-r from-violet-50 to-fuchsia-50 border border-violet-200 px-3 py-1 rounded-full mb-2">
+            <Library className="w-3 h-3 text-violet-500" />
+            Doctors Repository
+          </span>
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#003d4d] tracking-tight uppercase mt-1">
             Essential Professional Resources
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 mt-1">
             Access compliant product documentation, prescribing guidelines, and clinical reference modules.
           </p>
         </div>
@@ -907,22 +956,23 @@ export default function TherapeuticResourcesPage() {
         {/* 4 Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Card 1: Product Monographs */}
-          <div id="monographs" className="bg-white rounded-xl p-5 border border-slate-200/90 shadow-sm hover:shadow-lg hover:border-teal-400 transition-all flex flex-col justify-between group">
+          <div id="monographs" className="scroll-mt-36 rounded-xl p-5 bg-gradient-to-br from-violet-50 via-white to-purple-50 border border-violet-200/80 shadow-[0_10px_26px_-14px_rgba(139,92,246,0.5)] hover:shadow-[0_20px_40px_-16px_rgba(139,92,246,0.55)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-violet-400 to-purple-500" />
             <div>
-              <div className="w-12 h-12 rounded-lg bg-teal-50 border border-teal-100 text-[#00768a] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-500 text-white flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform">
                 <FileText className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-sm text-slate-900 group-hover:text-[#00768a] transition-colors">
+              <h3 className="font-black text-sm text-violet-950 group-hover:text-violet-700 transition-colors">
                 PRODUCT MONOGRAPHS
               </h3>
-              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                 Download detailed product monographs with composition, indications, dosage and safety information.
               </p>
             </div>
-            <div className="pt-4 mt-4 border-t border-slate-100">
+            <div className="pt-4 mt-4 border-t border-violet-100">
               <a
                 href="/for-doctors/prescribing-information"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00768a] hover:text-[#004f5e]"
+                className="inline-flex items-center gap-1.5 text-xs font-black text-violet-600 hover:text-violet-800"
               >
                 SEARCH MONOGRAPHS
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -931,22 +981,23 @@ export default function TherapeuticResourcesPage() {
           </div>
 
           {/* Card 2: Prescribing Information */}
-          <div id="prescribing" className="bg-white rounded-xl p-5 border border-slate-200/90 shadow-sm hover:shadow-lg hover:border-teal-400 transition-all flex flex-col justify-between group">
+          <div id="prescribing" className="scroll-mt-36 rounded-xl p-5 bg-gradient-to-br from-sky-50 via-white to-cyan-50 border border-sky-200/80 shadow-[0_10px_26px_-14px_rgba(14,165,233,0.5)] hover:shadow-[0_20px_40px_-16px_rgba(14,165,233,0.55)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-sky-400 to-cyan-500" />
             <div>
-              <div className="w-12 h-12 rounded-lg bg-cyan-50 border border-cyan-100 text-[#00768a] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform">
                 <Pill className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-sm text-slate-900 group-hover:text-[#00768a] transition-colors">
+              <h3 className="font-black text-sm text-sky-950 group-hover:text-sky-700 transition-colors">
                 PRESCRIBING INFORMATION
               </h3>
-              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                 Access prescribing information for our dermatology products including key safety and regulatory details.
               </p>
             </div>
-            <div className="pt-4 mt-4 border-t border-slate-100">
+            <div className="pt-4 mt-4 border-t border-sky-100">
               <a
                 href="/for-doctors/prescribing-information"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00768a] hover:text-[#004f5e]"
+                className="inline-flex items-center gap-1.5 text-xs font-black text-sky-600 hover:text-sky-800"
               >
                 VIEW PRESCRIBING INFO
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -955,23 +1006,25 @@ export default function TherapeuticResourcesPage() {
           </div>
 
           {/* Card 3: Dermatology Reference Library (Client Special Addition) */}
-          <div className="bg-gradient-to-br from-teal-900 to-[#004f5e] rounded-xl p-5 text-white shadow-md hover:shadow-xl transition-all flex flex-col justify-between group">
+          <div className="rounded-xl p-5 text-white bg-[linear-gradient(135deg,#1e1b4b_0%,#4338ca_55%,#7c3aed_100%)] shadow-[0_16px_36px_-16px_rgba(79,70,229,0.7)] hover:shadow-[0_24px_48px_-18px_rgba(124,58,237,0.8)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+            <div className="absolute -top-8 -right-8 w-28 h-28 rounded-full bg-fuchsia-400/30 blur-2xl pointer-events-none" />
+            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-fuchsia-400 via-violet-300 to-cyan-300" />
             <div>
-              <div className="w-12 h-12 rounded-lg bg-white/10 border border-white/20 text-teal-200 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-white/15 border border-white/25 text-white flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform">
                 <Library className="w-6 h-6" />
               </div>
-              <span className="text-[10px] font-bold text-teal-300 uppercase tracking-widest bg-white/10 px-2 py-0.5 rounded">NEW MODULE</span>
-              <h3 className="font-bold text-sm text-white mt-2">
+              <span className="text-[10px] font-black text-fuchsia-100 uppercase tracking-widest bg-white/15 px-2 py-0.5 rounded">NEW MODULE</span>
+              <h3 className="font-black text-sm text-white mt-2">
                 REFERENCE LIBRARY
               </h3>
-              <p className="text-xs text-teal-100/80 mt-2 leading-relaxed">
+              <p className="text-xs text-violet-100/85 mt-2 leading-relaxed">
                 Explore structured professional references covering common dermatological conditions and therapeutic classes.
               </p>
             </div>
-            <div className="pt-4 mt-4 border-t border-white/10">
+            <div className="pt-4 mt-4 border-t border-white/15">
               <a
                 href="/for-doctors/reference-library"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-teal-200 hover:text-white"
+                className="inline-flex items-center gap-1.5 text-xs font-black text-fuchsia-200 hover:text-white"
               >
                 EXPLORE LIBRARY
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -980,23 +1033,24 @@ export default function TherapeuticResourcesPage() {
           </div>
 
           {/* Card 4: Download Centre */}
-          <div id="download" className="bg-white rounded-xl p-5 border border-slate-200/90 shadow-sm hover:shadow-lg hover:border-teal-400 transition-all flex flex-col justify-between group">
+          <div id="download" className="rounded-xl p-5 bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200/80 shadow-[0_10px_26px_-14px_rgba(16,185,129,0.5)] hover:shadow-[0_20px_40px_-16px_rgba(16,185,129,0.55)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden">
+            <div className="absolute top-0 left-0 h-1 w-full bg-gradient-to-r from-emerald-400 to-teal-500" />
             <div>
-              <div className="w-12 h-12 rounded-lg bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white flex items-center justify-center mb-4 shadow-md group-hover:scale-105 transition-transform">
                 <Download className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-sm text-slate-900 group-hover:text-emerald-700 transition-colors">
+              <h3 className="font-black text-sm text-emerald-950 group-hover:text-emerald-700 transition-colors">
                 DOWNLOAD CENTRE
               </h3>
-              <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+              <p className="text-xs text-slate-600 mt-2 leading-relaxed">
                 Download product literature, clinical visual aids, brochures and educational materials for your practice.
               </p>
             </div>
-            <div className="pt-4 mt-4 border-t border-slate-100">
+            <div className="pt-4 mt-4 border-t border-emerald-100">
               <button
                 type="button"
                 onClick={() => setDownloadCentreOpen(true)}
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-[#00768a] hover:text-[#004f5e] cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-black text-emerald-600 hover:text-emerald-800 cursor-pointer"
               >
                 VISIT DOWNLOAD CENTRE
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -1009,8 +1063,8 @@ export default function TherapeuticResourcesPage() {
       {/* ========================================================= */}
       {/* 6.5 DEDICATED DOWNLOAD CENTRE & CLINICAL MATERIALS SECTION */}
       {/* ========================================================= */}
-      <section id="download-centre" className="py-14 lg:py-18 bg-gradient-to-b from-[#f0f9fa] via-white to-[#f8fafc] border-t border-b border-teal-100/90">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="download-centre" className="scroll-mt-24 py-14 lg:py-18 bg-gradient-to-b from-[#f0f9fa] via-white to-[#f8fafc] border-t border-b border-teal-100/90">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-[64px]">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold uppercase tracking-wider mb-2">
@@ -1040,15 +1094,15 @@ export default function TherapeuticResourcesPage() {
 
           {/* Category Filter Pills */}
           <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-6 text-xs font-semibold no-scrollbar">
-            {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets', 'Batch Analysis (COA)'].map((cat) => (
+            {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets'].map((cat) => (
               <button
                 key={cat}
                 type="button"
                 onClick={() => setDownloadCategory(cat)}
                 className={`px-3.5 py-1.5 rounded-full border transition whitespace-nowrap cursor-pointer ${
                   downloadCategory === cat
-                    ? 'bg-[#00768a] text-white border-[#00768a] shadow-xs font-bold'
-                    : 'bg-white text-slate-600 border-slate-200 hover:border-teal-300 hover:text-[#00768a]'
+                    ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-transparent shadow-md font-bold'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-300 hover:text-emerald-700 hover:shadow-sm'
                 }`}
               >
                 {cat}
@@ -1056,173 +1110,74 @@ export default function TherapeuticResourcesPage() {
             ))}
           </div>
 
-          {/* If Batch Analysis (COA) is selected, show Batch Analysis View */}
-          {downloadCategory === 'Batch Analysis (COA)' ? (
-            <div className="space-y-4 animate-fade-in">
-              <div className="p-4 rounded-2xl bg-teal-50 border border-teal-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <ShieldCheck className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <div>
-                    <h4 className="font-bold text-xs sm:text-sm text-[#003d4d]">Batch-wise Certificate of Analysis (COA)</h4>
-                    <p className="text-[11px] text-slate-600">Search and download official WHO-GMP analytical release certificates for Ryan Dermaceutics formulations.</p>
-                  </div>
-                </div>
-                <Link
-                  href="/for-doctors/batch-analysis-report"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#00768a] text-white text-xs font-bold whitespace-nowrap shadow-xs hover:bg-[#005f70] transition"
-                >
-                  <span>Open Full Portal</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-
-              {/* Batches Table (Desktop) */}
-              <div className="hidden md:block bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#003d4d] text-white text-[10px] uppercase font-bold tracking-wider">
-                    <tr>
-                      <th className="py-3 px-4">Product Name</th>
-                      <th className="py-3 px-4">Batch Number</th>
-                      <th className="py-3 px-4">Mfg / Exp Date</th>
-                      <th className="py-3 px-4">Release Status</th>
-                      <th className="py-3 px-4 text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {RYAN_BATCH_RECORDS.filter(b => 
-                      !downloadSearch.trim() ||
-                      b.brandName.toLowerCase().includes(downloadSearch.toLowerCase()) ||
-                      b.batchNumber.toLowerCase().includes(downloadSearch.toLowerCase()) ||
-                      b.genericName.toLowerCase().includes(downloadSearch.toLowerCase())
-                    ).map((batch) => (
-                      <tr key={batch.batchNumber} className="hover:bg-teal-50/20">
-                        <td className="py-3 px-4">
-                          <span className="font-extrabold text-[#003d4d]">{batch.brandName}</span>
-                          <span className="text-[11px] font-normal text-slate-500 block">{batch.genericName}</span>
-                        </td>
-                        <td className="py-3 px-4 font-mono font-bold text-slate-800">
-                          {batch.batchNumber}
-                        </td>
-                        <td className="py-3 px-4 text-slate-600 text-[11px]">
-                          {batch.mfgDate} — {batch.expDate}
-                        </td>
-                        <td className="py-3 px-4">
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            <CheckCircle className="w-3 h-3 text-emerald-600" />
-                            Approved
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-right space-x-2">
-                          <button
-                            type="button"
-                            onClick={() => setActiveBatchModal(batch)}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-teal-50 text-[#006070] text-xs font-bold hover:bg-teal-100 border border-teal-200 cursor-pointer"
-                          >
-                            <Eye className="w-3 h-3" />
-                            <span>View</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleDownloadCOA(batch)}
-                            className="inline-flex items-center gap-1 px-3 py-1 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs cursor-pointer active:scale-95"
-                          >
-                            <Download className="w-3 h-3" />
-                            <span>COA PDF</span>
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Batches Mobile Cards */}
-              <div className="md:hidden space-y-2.5">
-                {RYAN_BATCH_RECORDS.filter(b => 
-                  !downloadSearch.trim() ||
-                  b.brandName.toLowerCase().includes(downloadSearch.toLowerCase()) ||
-                  b.batchNumber.toLowerCase().includes(downloadSearch.toLowerCase())
-                ).map((batch) => (
-                  <div key={batch.batchNumber} className="bg-white rounded-xl p-3.5 border border-slate-200 space-y-2.5">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h5 className="font-bold text-xs text-[#003d4d]">{batch.brandName}</h5>
-                        <p className="text-[11px] text-slate-500">{batch.genericName}</p>
-                      </div>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-slate-100 text-slate-700">
-                        {batch.batchNumber}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
-                      <button
-                        type="button"
-                        onClick={() => setActiveBatchModal(batch)}
-                        className="flex-1 py-1.5 rounded-lg bg-teal-50 text-[#006070] text-xs font-bold border border-teal-200 flex items-center justify-center gap-1"
-                      >
-                        <Eye className="w-3 h-3" />
-                        <span>View</span>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDownloadCOA(batch)}
-                        className="flex-1 py-1.5 rounded-lg bg-[#00768a] text-white text-xs font-bold flex items-center justify-center gap-1 shadow-xs"
-                      >
-                        <Download className="w-3 h-3" />
-                        <span>COA PDF</span>
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            /* Documents Grid */
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {DOWNLOAD_DOCUMENTS.filter(d => {
-                const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
-                const matchesQ = !downloadSearch.trim() ||
-                  d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
-                  d.description.toLowerCase().includes(downloadSearch.toLowerCase());
-                return matchesCat && matchesQ;
-              }).map((doc) => (
-                <div
-                  key={doc.id}
-                  className="bg-white rounded-2xl p-5 border border-slate-200 shadow-2xs hover:shadow-lg hover:border-teal-300 transition-all flex flex-col justify-between group"
-                >
-                  <div>
-                    <div className="flex items-center justify-between gap-2 mb-3">
-                      <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-teal-50 text-[#006070] border border-teal-100">
-                        {doc.category}
-                      </span>
-                      <span className="text-[10px] font-semibold text-slate-400">
-                        {doc.format} • {doc.size}
-                      </span>
-                    </div>
-                    <h3 className="font-bold text-sm text-[#003d4d] group-hover:text-[#00768a] transition-colors leading-snug">
-                      {doc.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-2 leading-relaxed line-clamp-3">
-                      {doc.description}
-                    </p>
-                  </div>
-
-                  <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-2">
-                    <span className="text-[10px] text-slate-400 font-medium">
-                      Updated {doc.date}
+          {/* Documents Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {DOWNLOAD_DOCUMENTS.filter(d => {
+              const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
+              const matchesQ = !downloadSearch.trim() ||
+                d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                d.description.toLowerCase().includes(downloadSearch.toLowerCase());
+              return matchesCat && matchesQ;
+            }).map((doc, idx) => {
+              const docAccents = [
+                { card: 'from-rose-50 via-white to-pink-50 border-rose-200/80 hover:shadow-[0_20px_40px_-16px_rgba(244,63,94,0.5)]', bar: 'from-rose-400 to-pink-500', solid: 'bg-rose-600 hover:bg-rose-700', badge: 'bg-rose-100 text-rose-700 border-rose-200', title: 'group-hover:text-rose-600' },
+                { card: 'from-indigo-50 via-white to-violet-50 border-indigo-200/80 hover:shadow-[0_20px_40px_-16px_rgba(99,102,241,0.5)]', bar: 'from-indigo-400 to-violet-500', solid: 'bg-indigo-600 hover:bg-indigo-700', badge: 'bg-indigo-100 text-indigo-700 border-indigo-200', title: 'group-hover:text-indigo-600' },
+                { card: 'from-amber-50 via-white to-orange-50 border-amber-200/80 hover:shadow-[0_20px_40px_-16px_rgba(245,158,11,0.5)]', bar: 'from-amber-400 to-orange-500', solid: 'bg-amber-600 hover:bg-amber-700', badge: 'bg-amber-100 text-amber-700 border-amber-200', title: 'group-hover:text-amber-600' },
+                { card: 'from-emerald-50 via-white to-teal-50 border-emerald-200/80 hover:shadow-[0_20px_40px_-16px_rgba(16,185,129,0.5)]', bar: 'from-emerald-400 to-teal-500', solid: 'bg-emerald-600 hover:bg-emerald-700', badge: 'bg-emerald-100 text-emerald-700 border-emerald-200', title: 'group-hover:text-emerald-600' },
+                { card: 'from-sky-50 via-white to-cyan-50 border-sky-200/80 hover:shadow-[0_20px_40px_-16px_rgba(14,165,233,0.5)]', bar: 'from-sky-400 to-cyan-500', solid: 'bg-sky-600 hover:bg-sky-700', badge: 'bg-sky-100 text-sky-700 border-sky-200', title: 'group-hover:text-sky-600' },
+                { card: 'from-fuchsia-50 via-white to-purple-50 border-fuchsia-200/80 hover:shadow-[0_20px_40px_-16px_rgba(217,70,239,0.5)]', bar: 'from-fuchsia-400 to-purple-500', solid: 'bg-fuchsia-600 hover:bg-fuchsia-700', badge: 'bg-fuchsia-100 text-fuchsia-700 border-fuchsia-200', title: 'group-hover:text-fuchsia-600' },
+              ];
+              const a = docAccents[idx % docAccents.length];
+              return (
+              <div
+                key={doc.id}
+                className={`rounded-2xl p-5 bg-gradient-to-br ${a.card} border shadow-[0_10px_28px_-16px_rgba(0,61,77,0.5)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between group relative overflow-hidden`}
+              >
+                <div className={`absolute top-0 left-0 h-1 w-full bg-gradient-to-r ${a.bar}`} />
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <span className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${a.badge}`}>
+                      {doc.category}
                     </span>
+                    <span className="text-[10px] font-semibold text-slate-500">
+                      {doc.format} • {doc.size}
+                    </span>
+                  </div>
+                  <h3 className={`font-black text-sm text-[#003d4d] ${a.title} transition-colors leading-snug`}>
+                    {doc.title}
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed line-clamp-3">
+                    {doc.description}
+                  </p>
+                </div>
+
+                <div className="pt-4 mt-4 border-t border-slate-200/70 flex items-center justify-between gap-2">
+                  <span className="text-[10px] text-slate-500 font-medium">
+                    Updated {doc.date}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewDoc(doc)}
+                      className="btn-fx inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 text-xs font-bold transition shadow-sm active:scale-95 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      View
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleDownloadFile(doc)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs active:scale-95 cursor-pointer"
+                      className={`btn-fx inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg ${a.solid} text-white text-xs font-bold transition shadow-md active:scale-95 cursor-pointer`}
                     >
                       <Download className="w-3.5 h-3.5" />
-                      Download PDF
+                      Download
                     </button>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+              );
+            })}
+          </div>
         </div>
       </section>
 
@@ -1481,6 +1436,26 @@ export default function TherapeuticResourcesPage() {
 
             {/* Modal Body */}
             <div className="p-5 overflow-y-auto space-y-5">
+              {/* Batch-wise COA Quick Link Banner */}
+              <div className="p-3.5 rounded-xl bg-gradient-to-r from-teal-50 via-emerald-50 to-teal-50 border border-teal-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#00768a] text-white flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <div className="text-xs font-bold text-slate-800 uppercase tracking-wide">Batch-wise Certificates of Analysis (COA)</div>
+                    <div className="text-[11px] text-slate-600">Access and download verified laboratory batch release reports for all formulations.</div>
+                  </div>
+                </div>
+                <Link
+                  href="/batch-analysis-report"
+                  className="btn-fx inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold shrink-0 self-start sm:self-auto cursor-pointer"
+                >
+                  <span>Batch COA Portal</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+
               {/* Search & Category Filter */}
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="flex-1 relative">
@@ -1497,7 +1472,7 @@ export default function TherapeuticResourcesPage() {
 
               {/* Filter Pills */}
               <div className="flex items-center gap-1.5 overflow-x-auto pb-2 text-xs font-semibold no-scrollbar">
-                {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets', 'Batch Analysis (COA)'].map((cat) => (
+                {['All', 'Product Monographs', 'Visual Aids', 'Prescribing Protocols', 'Patient Leaflets'].map((cat) => (
                   <button
                     key={cat}
                     type="button"
@@ -1511,101 +1486,66 @@ export default function TherapeuticResourcesPage() {
                     {cat}
                   </button>
                 ))}
+                <Link
+                  href="/batch-analysis-report"
+                  className="px-3 py-1 rounded-full border border-emerald-300 bg-emerald-50 text-emerald-800 hover:bg-emerald-100 text-[11px] transition whitespace-nowrap font-bold inline-flex items-center gap-1 shrink-0"
+                >
+                  <span>Batch COA Portal</span>
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
               </div>
 
-              {/* Document List or Batch List */}
-              {downloadCategory === 'Batch Analysis (COA)' ? (
-                <div className="space-y-3">
-                  <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl text-xs flex items-center justify-between">
-                    <span className="font-bold text-[#004f5e]">Official WHO-GMP Certificates of Analysis (COA)</span>
-                    <Link href="/for-doctors/batch-analysis-report" className="text-teal-700 underline font-semibold flex items-center gap-1">
-                      Full Screen View <ExternalLink className="w-3 h-3" />
-                    </Link>
-                  </div>
-                  {RYAN_BATCH_RECORDS.filter(b => 
-                    !downloadSearch.trim() ||
-                    b.brandName.toLowerCase().includes(downloadSearch.toLowerCase()) ||
-                    b.batchNumber.toLowerCase().includes(downloadSearch.toLowerCase()) ||
-                    b.genericName.toLowerCase().includes(downloadSearch.toLowerCase())
-                  ).map((batch) => (
-                    <div
-                      key={batch.batchNumber}
-                      className="p-3.5 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-extrabold text-sm text-[#003d4d]">{batch.brandName}</span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-slate-100 text-slate-700 font-bold">
-                            {batch.batchNumber}
-                          </span>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-0.5">{batch.genericName}</p>
-                        <span className="text-[10px] text-slate-400 mt-0.5 block">
-                          Mfg: {batch.mfgDate} • Exp: {batch.expDate} • Status: WHO-GMP Approved
+              {/* Document List */}
+              <div className="space-y-3">
+                {DOWNLOAD_DOCUMENTS.filter(d => {
+                  const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
+                  const matchesQ = !downloadSearch.trim() ||
+                    d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
+                    d.description.toLowerCase().includes(downloadSearch.toLowerCase());
+                  return matchesCat && matchesQ;
+                }).map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="p-4 rounded-xl border border-slate-200 hover:border-teal-300 bg-white hover:bg-teal-50/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs"
+                  >
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-teal-100 text-[#006070]">
+                          {doc.category}
+                        </span>
+                        <span className="text-[10px] font-semibold text-slate-400">
+                          {doc.format} • {doc.size}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <button
-                          type="button"
-                          onClick={() => setActiveBatchModal(batch)}
-                          className="px-3 py-1.5 rounded-lg bg-teal-50 hover:bg-teal-100 text-[#006070] text-xs font-bold border border-teal-200 transition"
-                        >
-                          View
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDownloadCOA(batch)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold shadow-xs transition"
-                        >
-                          <Download className="w-3.5 h-3.5" />
-                          COA PDF
-                        </button>
-                      </div>
+                      <h4 className="font-bold text-sm text-[#003d4d] leading-snug">
+                        {doc.title}
+                      </h4>
+                      <p className="text-xs text-slate-500 line-clamp-2">
+                        {doc.description}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {DOWNLOAD_DOCUMENTS.filter(d => {
-                    const matchesCat = downloadCategory === 'All' || d.category === downloadCategory;
-                    const matchesQ = !downloadSearch.trim() ||
-                      d.title.toLowerCase().includes(downloadSearch.toLowerCase()) ||
-                      d.description.toLowerCase().includes(downloadSearch.toLowerCase());
-                    return matchesCat && matchesQ;
-                  }).map((doc) => (
-                    <div
-                      key={doc.id}
-                      className="p-4 rounded-xl border border-slate-200 hover:border-teal-300 bg-white hover:bg-teal-50/20 transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs"
-                    >
-                      <div className="space-y-1 flex-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-teal-100 text-[#006070]">
-                            {doc.category}
-                          </span>
-                          <span className="text-[10px] font-semibold text-slate-400">
-                            {doc.format} • {doc.size}
-                          </span>
-                        </div>
-                        <h4 className="font-bold text-sm text-[#003d4d] leading-snug">
-                          {doc.title}
-                        </h4>
-                        <p className="text-xs text-slate-500 line-clamp-2">
-                          {doc.description}
-                        </p>
-                      </div>
 
+                    <div className="flex items-center gap-2 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDoc(doc)}
+                        className="btn-fx inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-200 text-slate-700 hover:border-indigo-300 hover:text-indigo-600 text-xs font-bold transition shadow-sm active:scale-95 cursor-pointer"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        View
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleDownloadFile(doc)}
-                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs active:scale-95 shrink-0 cursor-pointer"
+                        className="btn-fx inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 hover:brightness-110 text-white text-xs font-bold transition shadow-md active:scale-95 shrink-0 cursor-pointer"
                       >
                         <Download className="w-3.5 h-3.5" />
-                        Download PDF
+                        Download
                       </button>
                     </div>
-                  ))}
-                </div>
-              )}
+                  </div>
+                ))}
+              </div>
             </div>
 
             {/* Modal Footer */}
@@ -1625,119 +1565,102 @@ export default function TherapeuticResourcesPage() {
         </div>
       )}
 
-      {/* D. ACTIVE BATCH COA MODAL */}
-      {activeBatchModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-fade-in border border-teal-100">
-            <div className="p-6 bg-gradient-to-r from-[#003d4d] via-[#006070] to-[#00768a] text-white flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <span className="text-[10px] font-bold tracking-widest text-teal-200 uppercase">
-                  OFFICIAL CERTIFICATE OF ANALYSIS (COA)
-                </span>
-                <h3 className="text-xl sm:text-2xl font-black">{activeBatchModal.brandName}</h3>
-                <p className="text-xs text-teal-100/90 font-mono">
-                  Batch No: {activeBatchModal.batchNumber} • AR: {activeBatchModal.arNumber}
-                </p>
+      {/* D. PDF PREVIEW MODAL (View before download) */}
+      {previewDoc && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 overflow-y-auto"
+          onClick={(e) => { if (e.target === e.currentTarget) setPreviewDoc(null); }}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full max-h-[92vh] flex flex-col overflow-hidden animate-fade-in border border-indigo-100">
+            {/* Preview Header */}
+            <div className="p-5 sm:p-6 bg-gradient-to-r from-indigo-600 via-violet-600 to-fuchsia-600 text-white flex items-start justify-between gap-4">
+              <div className="space-y-1.5">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 border border-white/25 px-2.5 py-1 rounded-full">
+                    {previewDoc.category}
+                  </span>
+                  <span className="text-[10px] font-bold text-indigo-100">
+                    {previewDoc.format} • {previewDoc.size} • {previewDoc.date}
+                  </span>
+                </div>
+                <h3 className="text-base sm:text-xl font-black leading-snug">{previewDoc.title}</h3>
+                <p className="text-[11px] text-indigo-100/90 font-mono truncate">{previewDoc.filename}</p>
               </div>
               <button
-                onClick={() => setActiveBatchModal(null)}
-                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition cursor-pointer"
+                onClick={() => setPreviewDoc(null)}
+                className="p-1.5 rounded-full bg-white/15 hover:bg-white/25 text-white transition shrink-0"
+                aria-label="Close preview"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-6 overflow-y-auto space-y-6 text-xs text-slate-700">
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200">
-                <div>
-                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Generic Name</span>
-                  <span className="font-bold text-slate-800">{activeBatchModal.genericName}</span>
+            {/* PDF-style page preview */}
+            <div className="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-6">
+              <div className="bg-white rounded-xl shadow-lg border border-slate-200 max-w-2xl mx-auto p-6 sm:p-8 space-y-5">
+                <div className="text-center border-b border-slate-200 pb-4">
+                  <div className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-600">
+                    Ryan Dermaceutics • Clinical Practice Document
+                  </div>
+                  <h4 className="text-lg sm:text-xl font-black text-slate-900 mt-1 leading-snug">
+                    {previewDoc.title}
+                  </h4>
+                  <div className="text-[11px] text-slate-500 mt-1 font-mono">
+                    {previewDoc.filename} • {previewDoc.format} • {previewDoc.size}
+                  </div>
                 </div>
                 <div>
-                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Dosage Form</span>
-                  <span className="font-bold text-slate-800">{activeBatchModal.dosageForm}</span>
+                  <div className="text-[11px] font-black uppercase tracking-widest text-indigo-700 mb-1.5">
+                    Document Overview
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {previewDoc.description}
+                  </p>
                 </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Batch Size</span>
-                  <span className="font-bold text-slate-800">{activeBatchModal.batchSize}</span>
+                <div className="rounded-xl bg-indigo-50/60 border border-indigo-100 p-4">
+                  <div className="text-[11px] font-black uppercase tracking-widest text-indigo-700 mb-1.5">
+                    Clinical Specifications & Protocol
+                  </div>
+                  <p className="text-sm text-slate-700 leading-relaxed">
+                    {previewDoc.details}
+                  </p>
                 </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Mfg. Date</span>
-                  <span className="font-bold text-slate-800">{activeBatchModal.mfgDate}</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+                  {[
+                    ['Category', previewDoc.category],
+                    ['Format', previewDoc.format],
+                    ['Size', previewDoc.size],
+                    ['Issued', previewDoc.date],
+                  ].map(([k, v]) => (
+                    <div key={k} className="rounded-lg bg-slate-50 border border-slate-200 p-2.5">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">{k}</div>
+                      <div className="text-xs font-bold text-slate-800 mt-0.5 truncate">{v}</div>
+                    </div>
+                  ))}
                 </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Exp. Date</span>
-                  <span className="font-bold text-slate-800">{activeBatchModal.expDate}</span>
-                </div>
-                <div>
-                  <span className="text-slate-400 block text-[10px] font-bold uppercase">Release Status</span>
-                  <span className="font-bold text-emerald-700">WHO-GMP APPROVED</span>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-extrabold text-sm text-[#003d4d] uppercase tracking-wider mb-2">
-                  Analytical Parameters &amp; Test Results
-                </h4>
-                <div className="rounded-xl border border-slate-200 overflow-hidden">
-                  <table className="w-full text-left text-xs">
-                    <thead className="bg-[#003d4d] text-white text-[10px] uppercase font-bold">
-                      <tr>
-                        <th className="py-2.5 px-3">Test Parameter</th>
-                        <th className="py-2.5 px-3">Official Specification</th>
-                        <th className="py-2.5 px-3">Observed Result</th>
-                        <th className="py-2.5 px-3">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100">
-                      {activeBatchModal.tests.map((t, idx) => (
-                        <tr key={idx} className={idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                          <td className="py-2.5 px-3 font-semibold text-slate-800">{t.parameter}</td>
-                          <td className="py-2.5 px-3 text-slate-600">{t.specification}</td>
-                          <td className="py-2.5 px-3 font-mono font-bold text-slate-800">{t.result}</td>
-                          <td className="py-2.5 px-3">
-                            <span className="text-emerald-700 font-black text-[10px] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                              COMPLIES
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 space-y-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 block">
-                  ANALYTICAL CONCLUSION &amp; RELEASE SIGN-OFF
-                </span>
-                <p className="text-xs text-emerald-950 font-medium leading-relaxed">
-                  The batch of <strong>{activeBatchModal.productName}</strong> referred to above has been tested in accordance with official finished product pharmacopoeial monographs and complies with WHO-GMP approved release specifications.
+                <p className="text-center text-[10px] text-slate-400 font-medium">
+                  Full document downloads as a PDF file • WHO-GMP validated clinical documentation
                 </p>
               </div>
             </div>
 
-            <div className="p-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-              <span className="text-[11px] text-slate-400 font-medium">
-                Ryan Dermaceutics Analytical Quality Laboratory
-              </span>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleDownloadCOA(activeBatchModal)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-xs cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download Signed COA (PDF)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveBatchModal(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition cursor-pointer"
-                >
-                  Close
-                </button>
-              </div>
+            {/* Preview Footer */}
+            <div className="p-4 bg-slate-50 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <button
+                type="button"
+                onClick={() => setPreviewDoc(null)}
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition cursor-pointer"
+              >
+                Close Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => { if (previewDoc) handleDownloadFile(previewDoc); }}
+                className="btn-fx inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-500 via-violet-500 to-fuchsia-500 hover:brightness-110 text-white text-xs font-black transition shadow-md cursor-pointer"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download PDF
+              </button>
             </div>
           </div>
         </div>

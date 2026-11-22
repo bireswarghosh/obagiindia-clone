@@ -12,7 +12,7 @@ interface FooterProps {
 
 export default function Footer({ footer, theme }: FooterProps) {
   const brandName = footer?.brandName || footer?.logoText || 'RYAN DERMACEUTICS';
-  const tagline = footer?.tagline || 'A Specialized Dermatology Healthcare Division';
+  const tagline = footer?.tagline || 'A Specialized Dermatology Division of Ryan Dermaceutics Private Limited';
   const copyright = footer?.copyrightText || footer?.copyright || '© 2026 Ryan Dermaceutics Private Limited. All Rights Reserved.';
 
   const quickLinks = (footer?.quickLinks && footer.quickLinks.length > 0) ? footer.quickLinks : [
@@ -26,8 +26,8 @@ export default function Footer({ footer, theme }: FooterProps) {
   ];
 
   return (
-    <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 px-4 sm:px-6 lg:px-8 border-t border-slate-800">
-      <div className="max-w-7xl mx-auto space-y-12">
+    <footer className="bg-slate-900 text-slate-300 pt-16 pb-12 px-5 sm:px-8 lg:px-[164px] border-t border-slate-800">
+      <div className="max-w-[1440px] mx-auto space-y-12">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 sm:gap-12 pb-12 border-b border-slate-800">
           
           {/* Brand Info */}
@@ -101,7 +101,7 @@ export default function Footer({ footer, theme }: FooterProps) {
         <div className="text-center text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p>{copyright}</p>
           <p className="text-[11px] text-slate-600">
-            A Specialized Dermatology Division • Ryan Dermaceutics
+            A Specialized Dermatology Division of Ryan Dermaceutics Private Limited
           </p>
         </div>
       </div>

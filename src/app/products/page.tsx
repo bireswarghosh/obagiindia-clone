@@ -19,48 +19,45 @@ import {
   Filter, 
   ChevronDown, 
   Download, 
-  ArrowRight, 
-  FileText, 
-  ShieldCheck, 
-  Sparkles, 
-  CheckCircle2, 
-  Pill, 
+  ArrowRight,
+  FileText,
+  ShieldCheck,
+  Sparkles,
+  CheckCircle2,
+  Check,
+  Pill,
   Layers, 
   SlidersHorizontal,
   LayoutGrid,
+  GitBranch as GitBranchIcon,
   List as ListIcon,
   Stethoscope,
   Activity,
-  ChevronRight,
-  CheckCircle,
-  FileCheck2,
-  Eye,
-  Building2
+  ChevronRight
 } from 'lucide-react';
-import { generateProductMonographPDF } from '@/lib/pdf-generator';
 
 /* ------------------------------------------------------------------ */
 /* Category Color Palette for Eye-Catching, Vibrant Highlighting       */
 /* ------------------------------------------------------------------ */
-const CATEGORY_COLORS: Record<string, { badge: string; bg: string; border: string }> = {
-  'Acne': { badge: 'bg-rose-100 text-rose-800 border-rose-200', bg: 'hover:border-rose-300', border: 'border-rose-100' },
-  'Acne Therapy': { badge: 'bg-rose-100 text-rose-800 border-rose-200', bg: 'hover:border-rose-300', border: 'border-rose-100' },
-  'Antifungal': { badge: 'bg-amber-100 text-amber-900 border-amber-200', bg: 'hover:border-amber-300', border: 'border-amber-100' },
-  'Antifungals': { badge: 'bg-amber-100 text-amber-900 border-amber-200', bg: 'hover:border-amber-300', border: 'border-amber-100' },
-  'Corticosteroid': { badge: 'bg-violet-100 text-violet-800 border-violet-200', bg: 'hover:border-violet-300', border: 'border-violet-100' },
-  'Corticosteroids & Anti-inflammatory': { badge: 'bg-violet-100 text-violet-800 border-violet-200', bg: 'hover:border-violet-300', border: 'border-violet-100' },
-  'Allergy & Antihistamine': { badge: 'bg-sky-100 text-sky-800 border-sky-200', bg: 'hover:border-sky-300', border: 'border-sky-100' },
-  'Antihistamines & Allergy': { badge: 'bg-sky-100 text-sky-800 border-sky-200', bg: 'hover:border-sky-300', border: 'border-sky-100' },
-  'Trichology': { badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bg: 'hover:border-emerald-300', border: 'border-emerald-100' },
-  'Trichology & Hair': { badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bg: 'hover:border-emerald-300', border: 'border-emerald-100' },
-  'Immunomodulator': { badge: 'bg-indigo-100 text-indigo-800 border-indigo-200', bg: 'hover:border-indigo-300', border: 'border-indigo-100' },
-  'Immunomodulators': { badge: 'bg-indigo-100 text-indigo-800 border-indigo-200', bg: 'hover:border-indigo-300', border: 'border-indigo-100' },
-  'Antibacterials & Scabicides': { badge: 'bg-cyan-100 text-cyan-800 border-cyan-200', bg: 'hover:border-cyan-300', border: 'border-cyan-100' },
-  'Cleansers & Emollients': { badge: 'bg-teal-100 text-teal-800 border-teal-200', bg: 'hover:border-teal-300', border: 'border-teal-100' },
+const CATEGORY_COLORS: Record<string, { badge: string; bg: string; border: string; cover: string; text: string; btn: string }> = {
+  'Acne': { badge: 'bg-rose-100 text-rose-800 border-rose-200', bg: 'hover:border-rose-300', border: 'border-rose-100', cover: 'from-rose-100 via-rose-50 to-white', text: 'group-hover:text-rose-700', btn: 'bg-rose-600 hover:bg-rose-700' },
+  'Acne Therapy': { badge: 'bg-rose-100 text-rose-800 border-rose-200', bg: 'hover:border-rose-300', border: 'border-rose-100', cover: 'from-rose-100 via-rose-50 to-white', text: 'group-hover:text-rose-700', btn: 'bg-rose-600 hover:bg-rose-700' },
+  'Antifungal': { badge: 'bg-amber-100 text-amber-900 border-amber-200', bg: 'hover:border-amber-300', border: 'border-amber-100', cover: 'from-amber-100 via-amber-50 to-white', text: 'group-hover:text-amber-700', btn: 'bg-amber-600 hover:bg-amber-700' },
+  'Antifungals': { badge: 'bg-amber-100 text-amber-900 border-amber-200', bg: 'hover:border-amber-300', border: 'border-amber-100', cover: 'from-amber-100 via-amber-50 to-white', text: 'group-hover:text-amber-700', btn: 'bg-amber-600 hover:bg-amber-700' },
+  'Corticosteroid': { badge: 'bg-violet-100 text-violet-800 border-violet-200', bg: 'hover:border-violet-300', border: 'border-violet-100', cover: 'from-violet-100 via-violet-50 to-white', text: 'group-hover:text-violet-700', btn: 'bg-violet-600 hover:bg-violet-700' },
+  'Corticosteroids & Anti-inflammatory': { badge: 'bg-violet-100 text-violet-800 border-violet-200', bg: 'hover:border-violet-300', border: 'border-violet-100', cover: 'from-violet-100 via-violet-50 to-white', text: 'group-hover:text-violet-700', btn: 'bg-violet-600 hover:bg-violet-700' },
+  'Allergy & Antihistamine': { badge: 'bg-sky-100 text-sky-800 border-sky-200', bg: 'hover:border-sky-300', border: 'border-sky-100', cover: 'from-sky-100 via-sky-50 to-white', text: 'group-hover:text-sky-700', btn: 'bg-sky-600 hover:bg-sky-700' },
+  'Antihistamines & Allergy': { badge: 'bg-sky-100 text-sky-800 border-sky-200', bg: 'hover:border-sky-300', border: 'border-sky-100', cover: 'from-sky-100 via-sky-50 to-white', text: 'group-hover:text-sky-700', btn: 'bg-sky-600 hover:bg-sky-700' },
+  'Trichology': { badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bg: 'hover:border-emerald-300', border: 'border-emerald-100', cover: 'from-emerald-100 via-emerald-50 to-white', text: 'group-hover:text-emerald-700', btn: 'bg-emerald-600 hover:bg-emerald-700' },
+  'Trichology & Hair': { badge: 'bg-emerald-100 text-emerald-800 border-emerald-200', bg: 'hover:border-emerald-300', border: 'border-emerald-100', cover: 'from-emerald-100 via-emerald-50 to-white', text: 'group-hover:text-emerald-700', btn: 'bg-emerald-600 hover:bg-emerald-700' },
+  'Immunomodulator': { badge: 'bg-indigo-100 text-indigo-800 border-indigo-200', bg: 'hover:border-indigo-300', border: 'border-indigo-100', cover: 'from-indigo-100 via-indigo-50 to-white', text: 'group-hover:text-indigo-700', btn: 'bg-indigo-600 hover:bg-indigo-700' },
+  'Immunomodulators': { badge: 'bg-indigo-100 text-indigo-800 border-indigo-200', bg: 'hover:border-indigo-300', border: 'border-indigo-100', cover: 'from-indigo-100 via-indigo-50 to-white', text: 'group-hover:text-indigo-700', btn: 'bg-indigo-600 hover:bg-indigo-700' },
+  'Antibacterials & Scabicides': { badge: 'bg-cyan-100 text-cyan-800 border-cyan-200', bg: 'hover:border-cyan-300', border: 'border-cyan-100', cover: 'from-cyan-100 via-cyan-50 to-white', text: 'group-hover:text-cyan-700', btn: 'bg-cyan-700 hover:bg-cyan-800' },
+  'Cleansers & Emollients': { badge: 'bg-teal-100 text-teal-800 border-teal-200', bg: 'hover:border-teal-300', border: 'border-teal-100', cover: 'from-teal-100 via-teal-50 to-white', text: 'group-hover:text-teal-700', btn: 'bg-teal-700 hover:bg-teal-800' },
 };
 
 const getCategoryColor = (category: string) => {
-  return CATEGORY_COLORS[category] || { badge: 'bg-teal-100 text-[#006070] border-teal-200', bg: 'hover:border-teal-300', border: 'border-teal-100' };
+  return CATEGORY_COLORS[category] || { badge: 'bg-teal-100 text-[#006070] border-teal-200', bg: 'hover:border-teal-300', border: 'border-teal-100', cover: 'from-teal-100 via-teal-50 to-white', text: 'group-hover:text-teal-700', btn: 'bg-teal-700 hover:bg-teal-800' };
 };
 
 export default function ProductsPage() {
@@ -73,6 +70,26 @@ export default function ProductsPage() {
   const [productsList, setProductsList] = useState(RYAN_PRODUCTS);
   const [currentPage, setCurrentPage] = useState(1);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    const mq = window.matchMedia('(max-width: 639.5px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+  const [heroSlide, setHeroSlide] = useState(0);
+  const heroSlides = [
+    { src: '/ryan/portfolio-packshots.jpg', label: 'COMPLETE DERMATOLOGY RANGE', caption: 'Topical, Oral, Hair & Scalp Solutions' },
+    { src: '/ryan/library/area-skincare.jpg', label: 'PRESCRIPTION FORMULATIONS', caption: 'Creams, Gels, Lotions & Cleansers' },
+    { src: '/ryan/library/area-hair.jpg', label: 'HAIR & SCALP THERAPY', caption: 'Evidence-Based Trichology Solutions' },
+  ];
+  useEffect(() => {
+    const timer = setInterval(() => setHeroSlide(prev => (prev + 1) % 3), 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     fetch('/api/db/products')
@@ -103,17 +120,13 @@ export default function ProductsPage() {
       .catch(() => {});
   }, []);
 
-  // Main category tab selection matching 3-category portfolio structure
-  const [activeMainCategory, setActiveMainCategory] = useState<'therapeutic' | 'route' | 'dosage'>('therapeutic');
-  const [downloadToast, setDownloadToast] = useState<string | null>(null);
-
   const PAGE_SIZE = 16;
 
   // Accordion open states
   const [openSections, setOpenSections] = useState({
     therapeutic: true,
-    route: true,
-    dosage: true
+    dosage: true,
+    route: false
   });
 
   useEffect(() => {
@@ -153,23 +166,10 @@ export default function ProductsPage() {
   };
 
   const toggleRoute = (route: string) => {
-    setSelectedRoutes(prev => 
+    setSelectedRoutes(prev =>
       prev.includes(route) ? prev.filter(r => r !== route) : [...prev, route]
     );
     setCurrentPage(1);
-  };
-
-  const handleDownloadMonograph = async (product: any) => {
-    try {
-      setDownloadToast(`Generating Official PDF: ${product.brandName}...`);
-      await generateProductMonographPDF(product);
-      setDownloadToast(`✓ Downloaded ${product.brandName} Monograph PDF`);
-      setTimeout(() => setDownloadToast(null), 3500);
-    } catch (err) {
-      console.error(err);
-      setDownloadToast(`✓ Download initiated for ${product.brandName}`);
-      setTimeout(() => setDownloadToast(null), 3000);
-    }
   };
 
   const clearAllFilters = () => {
@@ -268,8 +268,8 @@ export default function ProductsPage() {
         <div className="absolute top-0 right-0 w-96 h-96 bg-cyan-400/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-10 w-80 h-80 bg-teal-300/10 rounded-full blur-2xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-16 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-center gap-8">
             <div className="max-w-3xl space-y-3.5">
               <div className="flex flex-wrap items-center gap-2 text-xs">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 text-white font-extrabold tracking-wider uppercase text-[10px] shadow-sm">
@@ -319,20 +319,51 @@ export default function ProductsPage() {
               </div>
             </div>
 
-            {/* Right Graphic Banner */}
-            <div className="hidden lg:block relative w-84 h-48 rounded-3xl overflow-hidden shadow-2xl border-2 border-white/30 bg-white/5 backdrop-blur-md group shrink-0">
-              <Image 
-                src="/ryan/portfolio-packshots.jpg" 
-                alt="Ryan Dermaceutics Products Portfolio" 
-                fill 
-                className="object-cover object-center group-hover:scale-105 transition-transform duration-700" 
-                priority
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#003d4d]/90 via-transparent to-transparent flex items-end p-5">
+            {/* Right Graphic Banner — image slider */}
+            <div className="relative w-full h-60 lg:h-80 rounded-3xl overflow-hidden shadow-2xl border-2 border-white/30 bg-white/5 backdrop-blur-md">
+              {heroSlides.map((slide, i) => (
+                <Image
+                  key={slide.src}
+                  src={slide.src}
+                  alt={slide.caption}
+                  fill
+                  priority={i === 0}
+                  sizes="(max-width: 1024px) 100vw, 336px"
+                  className={`object-cover object-center transition-all duration-700 ${heroSlide === i ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
+                />
+              ))}
+              <div className="absolute inset-0 bg-gradient-to-t from-[#003d4d]/90 via-transparent to-transparent flex items-end p-5 pointer-events-none">
                 <div className="text-white">
-                  <div className="text-xs font-bold text-teal-300 uppercase tracking-wider">Complete Dermatology Range</div>
-                  <div className="text-sm font-semibold text-white">Topical, Oral, Hair & Scalp Solutions</div>
+                  <div className="text-[10px] font-black text-teal-300 uppercase tracking-wider">{heroSlides[heroSlide].label}</div>
+                  <div className="text-sm font-bold text-white">{heroSlides[heroSlide].caption}</div>
                 </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHeroSlide(p => (p - 1 + 3) % 3)}
+                aria-label="Previous image"
+                className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 text-[#00768a] flex items-center justify-center shadow-md active:scale-90 transition"
+              >
+                <ChevronRight className="w-4 h-4 rotate-180" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setHeroSlide(p => (p + 1) % 3)}
+                aria-label="Next image"
+                className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 text-[#00768a] flex items-center justify-center shadow-md active:scale-90 transition"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <div className="absolute bottom-3 right-4 flex gap-1.5">
+                {heroSlides.map((s, i) => (
+                  <button
+                    key={s.src}
+                    type="button"
+                    onClick={() => setHeroSlide(i)}
+                    aria-label={`Go to image ${i + 1}`}
+                    className={`h-1.5 rounded-full transition-all ${heroSlide === i ? 'w-5 bg-teal-300' : 'w-1.5 bg-white/60'}`}
+                  />
+                ))}
               </div>
             </div>
           </div>
@@ -342,209 +373,312 @@ export default function ProductsPage() {
       {/* ========================================================= */}
       {/* 2. MAIN CATALOG LAYOUT (Sidebar + Products Grid)          */}
       {/* ========================================================= */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-[300px_minmax(0,1fr)] xl:grid-cols-[340px_minmax(0,1fr)] gap-8">
+      <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-16 py-8 lg:py-12">
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-7">
           
-          {/* Mobile Filters toggle button */}
-          <div className="lg:hidden mb-2">
+          {/* Mobile filter toggle (mobile DOM only) */}
+          {mounted && isMobile && (
             <button
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white border border-teal-200 text-xs font-bold text-slate-800 shadow-2xs cursor-pointer active:scale-98"
-              aria-expanded={filtersOpen}
+              type="button"
+              onClick={() => setFiltersOpen(true)}
+              className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-fuchsia-500 via-violet-500 to-indigo-500 text-white text-sm font-black shadow-md active:scale-95 transition-all"
             >
-              {filtersOpen ? <X className="w-4 h-4" /> : <Filter className="w-4 h-4 text-[#00768a]" />}
-              {filtersOpen ? 'Hide Filters' : 'Filter Products'}
+              <Filter className="w-4 h-4" />
+              Filters
               {hasActiveFilters && (
-                <span className="ml-1 px-2 py-0.5 rounded-full bg-[#00768a] text-white text-[10px] font-black">
-                  Active
+                <span className="px-2 py-0.5 rounded-full bg-white/25 text-[10px] font-black">
+                  {selectedTherapeuticAreas.length + selectedDosageForms.length + selectedRoutes.length}
                 </span>
               )}
             </button>
-          </div>
+          )}
 
           {/* ======================================================= */}
-          {/* LEFT SIDEBAR: FILTERS                                    */}
+          {/* FILTERS — in-flow sidebar (left column on md+)            */}
           {/* ======================================================= */}
-          <aside className={`space-y-6 min-w-0 ${filtersOpen ? 'block' : 'hidden'} lg:block`}>
-            <div className="bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 shadow-2xs lg:sticky lg:top-24 space-y-6">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <aside
+            className={`min-w-0 ${filtersOpen ? 'block' : 'hidden'} sm:block sm:w-60 xl:w-[260px] sm:shrink-0 sm:sticky sm:top-24 sm:self-start max-sm:fixed max-sm:inset-0 max-sm:z-[100] max-sm:bg-[#002530]/60 max-sm:p-4 max-sm:pt-24 max-sm:overflow-y-auto max-sm:backdrop-blur-[2px]`}
+            aria-label="Product filters"
+          >
+            {/* Mobile popup header (mobile DOM only) */}
+            {mounted && isMobile && (
+              <div className="flex items-center justify-between mb-3 px-1">
+                <span className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wider text-[#003d4d]">
+                  <SlidersHorizontal className="w-4 h-4 text-[#00768a]" />
+                  Filters
+                </span>
+                <button
+                  onClick={() => setFiltersOpen(false)}
+                  className="p-2 rounded-full bg-white border border-slate-200 text-slate-500 hover:text-[#00768a] active:scale-90 transition"
+                  aria-label="Close filters"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <div className="bg-white rounded-2xl border border-slate-200/90 shadow-[0_18px_40px_-22px_rgba(0,61,77,0.55)] overflow-hidden max-sm:mx-auto max-sm:w-full max-sm:max-w-md">
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                 <div className="flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4 text-[#00768a]" />
                   <h2 className="font-extrabold text-sm uppercase tracking-wider text-[#003d4d]">
                     Filter Portfolio
                   </h2>
                 </div>
-                {hasActiveFilters && (
-                  <button
-                    onClick={clearAllFilters}
-                    className="text-xs font-bold text-[#00768a] hover:underline cursor-pointer"
-                  >
-                    Reset
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  disabled={!hasActiveFilters}
+                  className={`text-[11px] font-bold transition ${
+                    hasActiveFilters ? 'text-[#00768a] hover:underline cursor-pointer' : 'text-slate-300 cursor-default'
+                  }`}
+                >
+                  Reset
+                </button>
               </div>
 
-              {/* Search Bar in Sidebar */}
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                  placeholder="Search brand, generic..."
-                  className="w-full pl-9 pr-8 py-2 rounded-xl border border-teal-200 text-xs text-slate-800 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00768a]"
-                />
-                <Search className="w-4 h-4 text-teal-600 absolute left-3 top-1/2 -translate-y-1/2" />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
+              {/* Search */}
+              <div className="px-5 py-4 border-b border-slate-100">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                    placeholder="Search brand, generic..."
+                    className="w-full pl-9 pr-8 py-2.5 rounded-full border border-slate-200 text-xs text-slate-800 placeholder-slate-400 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#00768a]/25 focus:border-[#00768a] transition"
+                  />
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
 
-              {/* Filter 1: Therapeutic Category */}
-              <div className="space-y-2.5">
+              {/* Product Category */}
+              <div className="border-b border-teal-100/70">
                 <button
                   type="button"
                   onClick={() => toggleSection('therapeutic')}
-                  className="w-full flex items-center justify-between font-bold text-xs uppercase tracking-wider text-[#003d4d] cursor-pointer"
+                  className="w-full flex items-center justify-between gap-2 px-5 py-3.5 bg-gradient-to-r from-teal-50 via-white to-white hover:from-teal-100/70 transition-colors"
+                  aria-expanded={openSections.therapeutic}
                 >
-                  <span>Therapeutic Area</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${openSections.therapeutic ? 'rotate-180' : ''}`} />
+                  <span className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-teal-500 to-cyan-500 text-white flex items-center justify-center shadow-sm">
+                      <SlidersHorizontal className="w-3.5 h-3.5" />
+                    </span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.14em] text-teal-800">
+                      Product Category
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-teal-700 bg-teal-100 px-2 py-0.5 rounded-full">
+                      {THERAPEUTIC_AREAS.length}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-teal-600 transition-transform ${openSections.therapeutic ? 'rotate-180' : ''}`} />
+                  </span>
                 </button>
-
                 {openSections.therapeutic && (
-                  <div className="space-y-1 pt-1">
-                    {THERAPEUTIC_AREAS.map(area => {
-                      const isSelected = selectedTherapeuticAreas.includes(area);
-                      const count = counts.therapeuticCounts[area] || 0;
-                      return (
-                        <button
-                          key={area}
-                          type="button"
-                          onClick={() => toggleTherapeutic(area)}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition cursor-pointer text-left ${
+                <div className="px-5 pb-4 pt-2">
+                <div className="filter-chain space-y-1">
+                  {THERAPEUTIC_AREAS.map(area => {
+                    const isSelected = selectedTherapeuticAreas.includes(area);
+                    const count = counts.therapeuticCounts[area] || 0;
+                    const accent = getCategoryColor(area);
+                    return (
+                      <button
+                        key={area}
+                        type="button"
+                        onClick={() => toggleTherapeutic(area)}
+                        className={`group flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-xs border transition ${
+                          isSelected
+                            ? `${accent.badge} font-bold shadow-sm`
+                            : 'border-transparent hover:bg-slate-50'
+                        }`}
+                      >
+                        <span
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
                             isSelected
-                              ? 'bg-[#00768a] text-white font-bold shadow-2xs'
-                              : 'text-slate-700 hover:bg-slate-50'
+                              ? 'border-transparent bg-current'
+                              : 'border-slate-300 bg-white group-hover:border-[#00768a]'
                           }`}
                         >
-                          <span className="truncate">{area}</span>
-                          <span className={`text-[10px] ml-1.5 ${isSelected ? 'text-teal-100 font-bold' : 'text-slate-400'}`}>
-                            {count}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                          {isSelected && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
+                        </span>
+                        <span className={`flex-1 truncate ${isSelected ? 'font-bold' : 'text-slate-700'}`}>
+                          {area}
+                        </span>
+                        <span className={`text-[10px] ${isSelected ? 'font-bold' : 'text-slate-400'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                </div>
                 )}
               </div>
 
-              {/* Filter 2: Route of Administration (Topical & Oral) */}
-              <div className="pt-3 border-t border-slate-100 space-y-2.5">
-                <button
-                  type="button"
-                  onClick={() => toggleSection('route')}
-                  className="w-full flex items-center justify-between font-bold text-xs uppercase tracking-wider text-[#003d4d] cursor-pointer"
-                >
-                  <span>Route of Administration</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${openSections.route ? 'rotate-180' : ''}`} />
-                </button>
-
-                {openSections.route && (
-                  <div className="space-y-1.5 pt-1">
-                    {ROUTES.map(r => {
-                      const isSelected = selectedRoutes.includes(r.name);
-                      const count = counts.routeCounts[r.name] || 0;
-                      return (
-                        <div key={r.name} className="space-y-1">
-                          <button
-                            type="button"
-                            onClick={() => toggleRoute(r.name)}
-                            className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition cursor-pointer text-left ${
-                              isSelected
-                                ? 'bg-[#00768a] text-white font-bold shadow-2xs'
-                                : 'text-slate-800 font-semibold hover:bg-slate-50'
-                            }`}
-                          >
-                            <span>{r.name}</span>
-                            <span className={`text-[10px] ml-1.5 ${isSelected ? 'text-teal-100 font-bold' : 'text-slate-400'}`}>
-                              {count}
-                            </span>
-                          </button>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* Filter 3: Dosage Form */}
-              <div className="pt-3 border-t border-slate-100 space-y-2.5">
+              {/* Dosage Form */}
+              <div className="border-b border-violet-100/70">
                 <button
                   type="button"
                   onClick={() => toggleSection('dosage')}
-                  className="w-full flex items-center justify-between font-bold text-xs uppercase tracking-wider text-[#003d4d] cursor-pointer"
+                  className="w-full flex items-center justify-between gap-2 px-5 py-3.5 bg-gradient-to-r from-violet-50 via-white to-white hover:from-violet-100/70 transition-colors"
+                  aria-expanded={openSections.dosage}
                 >
-                  <span>Dosage Form</span>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform ${openSections.dosage ? 'rotate-180' : ''}`} />
+                  <span className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-violet-500 to-purple-500 text-white flex items-center justify-center shadow-sm">
+                      <Layers className="w-3.5 h-3.5" />
+                    </span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.14em] text-violet-800">
+                      Filter by Dosage Form
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-violet-700 bg-violet-100 px-2 py-0.5 rounded-full">
+                      {DOSAGE_FORMS.length}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-violet-600 transition-transform ${openSections.dosage ? 'rotate-180' : ''}`} />
+                  </span>
                 </button>
-
                 {openSections.dosage && (
-                  <div className="space-y-1 pt-1">
-                    {DOSAGE_FORMS.map(form => {
-                      const isSelected = selectedDosageForms.includes(form);
-                      const count = counts.dosageCounts[form] || 0;
-                      return (
-                        <button
-                          key={form}
-                          type="button"
-                          onClick={() => toggleDosageForm(form)}
-                          className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs transition cursor-pointer text-left ${
+                <div className="px-5 pb-4 pt-2">
+                <div className="filter-chain space-y-1">
+                  {DOSAGE_FORMS.map(form => {
+                    const isSelected = selectedDosageForms.includes(form);
+                    const count = counts.dosageCounts[form] || 0;
+                    return (
+                      <button
+                        key={form}
+                        type="button"
+                        onClick={() => toggleDosageForm(form)}
+                        className={`group flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-xs transition ${
+                          isSelected ? 'bg-teal-50/80' : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <span
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
                             isSelected
-                              ? 'bg-[#00768a] text-white font-bold shadow-2xs'
-                              : 'text-slate-700 hover:bg-slate-50'
+                              ? 'border-[#00768a] bg-[#00768a] text-white'
+                              : 'border-slate-300 bg-white group-hover:border-[#00768a]'
                           }`}
                         >
-                          <span>{form}</span>
-                          <span className={`text-[10px] ml-1.5 ${isSelected ? 'text-teal-100 font-bold' : 'text-slate-400'}`}>
-                            {count}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
+                          {isSelected && <Check className="h-2.5 w-2.5" strokeWidth={3} />}
+                        </span>
+                        <span className={`flex-1 truncate ${isSelected ? 'font-bold text-[#006070]' : 'text-slate-700'}`}>
+                          {form}
+                        </span>
+                        <span className={`text-[10px] ${isSelected ? 'font-bold text-[#00768a]' : 'text-slate-400'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                </div>
                 )}
               </div>
 
-              {/* Doctor Monograph & Batch Analysis Quick Link */}
-              <div className="pt-4 border-t border-slate-100 space-y-2">
+              {/* Route */}
+              <div className="border-b border-sky-100/70">
+                <button
+                  type="button"
+                  onClick={() => toggleSection('route')}
+                  className="w-full flex items-center justify-between gap-2 px-5 py-3.5 bg-gradient-to-r from-sky-50 via-white to-white hover:from-sky-100/70 transition-colors"
+                  aria-expanded={openSections.route}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-lg bg-gradient-to-br from-sky-500 to-blue-500 text-white flex items-center justify-center shadow-sm">
+                      <GitBranchIcon className="w-3.5 h-3.5" />
+                    </span>
+                    <span className="text-[11px] font-black uppercase tracking-[0.14em] text-sky-800">
+                      Filter by Route
+                    </span>
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-[10px] font-black text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full">
+                      {ROUTES.length}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-sky-600 transition-transform ${openSections.route ? 'rotate-180' : ''}`} />
+                  </span>
+                </button>
+                {openSections.route && (
+                <div className="px-5 pb-4 pt-2">
+                <div className="filter-chain space-y-1">
+                  {ROUTES.map(r => {
+                    const route = r.name;
+                    const isSelected = selectedRoutes.includes(route);
+                    const count = counts.routeCounts[route] || 0;
+                    return (
+                      <button
+                        key={route}
+                        type="button"
+                        onClick={() => toggleRoute(route)}
+                        className={`group flex w-full items-center gap-2.5 rounded-lg px-2 py-1.5 text-left text-xs transition ${
+                          isSelected ? 'bg-teal-50/80' : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <span
+                          className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border transition ${
+                            isSelected
+                              ? 'border-[#00768a] bg-[#00768a] text-white'
+                              : 'border-slate-300 bg-white group-hover:border-[#00768a]'
+                          }`}
+                        >
+                          {isSelected && <Check className="h-2.5 w-2.5" strokeWidth={3} />}
+                        </span>
+                        <span className={`flex-1 truncate ${isSelected ? 'font-bold text-[#006070]' : 'text-slate-700'}`}>
+                          {route}
+                        </span>
+                        <span className={`text-[10px] ${isSelected ? 'font-bold text-[#00768a]' : 'text-slate-400'}`}>
+                          {count}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+                </div>
+                )}
+              </div>
+
+              {/* Doctor Monograph Quick Link */}
+              <div className="px-5 py-4">
                 <div className="p-3.5 rounded-xl bg-teal-50/80 border border-teal-100 text-center space-y-1.5">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-[#006070] block">
                     HEALTHCARE PRACTITIONERS
                   </span>
                   <p className="text-[11px] text-slate-600 leading-tight">
-                    Official clinical monographs &amp; WHO-GMP release documentation:
+                    Access complete 19-section clinical product monographs:
                   </p>
-                  <div className="pt-1 flex flex-col gap-1.5 text-[11px] font-bold">
-                    <Link
-                      href="/for-doctors/product-monographs"
-                      className="inline-flex items-center justify-center gap-1 text-[#00768a] hover:underline"
-                    >
-                      <span>Product Monographs Portal</span>
-                      <ArrowRight className="w-3 h-3" />
-                    </Link>
-                    <Link
-                      href="/for-doctors/batch-analysis-report"
-                      className="inline-flex items-center justify-center gap-1 text-emerald-700 hover:underline"
-                    >
-                      <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                      <span>Batch Analysis (COA)</span>
-                    </Link>
-                  </div>
+                  <Link
+                    href="/for-doctors/product-monographs"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#00768a] hover:underline pt-1"
+                  >
+                    <span>View Product Monographs</span>
+                    <ArrowRight className="w-3 h-3" />
+                  </Link>
                 </div>
+              </div>
+
+              {/* Apply */}
+              <div className="bg-white border-t border-slate-100 p-4">
+                <button
+                  type="button"
+                  onClick={() => { setCurrentPage(1); setFiltersOpen(false); }}
+                  className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#00768a] to-[#004f5e] px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-teal-900/20 hover:brightness-110 active:scale-[0.98] transition-all"
+                >
+                  Apply Filters
+                  {hasActiveFilters && (
+                    <span className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-black">
+                      {selectedTherapeuticAreas.length + selectedDosageForms.length + selectedRoutes.length}
+                    </span>
+                  )}
+                </button>
               </div>
             </div>
           </aside>
@@ -552,248 +686,7 @@ export default function ProductsPage() {
           {/* ======================================================= */}
           {/* RIGHT MAIN: PRODUCTS LISTING & CONTROLS                */}
           {/* ======================================================= */}
-          <main className="min-w-0 space-y-6">
-            {/* ======================================================= */}
-            {/* 3 MAIN CATEGORIES PRIMARY SELECTOR                      */}
-            {/* Structurally divided into 3 categories + sub-categories */}
-            {/* ======================================================= */}
-            <div className="bg-white rounded-2xl border border-teal-200/90 p-4 sm:p-5 shadow-xs space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-slate-100">
-                <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <h2 className="text-xs font-black uppercase tracking-wider text-[#003d4d]">
-                    3 Categories Portfolio Navigation (Therapeutic • Route • Form)
-                  </h2>
-                </div>
-                <span className="text-[11px] text-slate-500 font-medium">
-                  Select a category to view official sub-categories &amp; formulations
-                </span>
-              </div>
-
-              {/* 3 Main Category Tabs */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Category 1 */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveMainCategory('therapeutic');
-                  }}
-                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                    activeMainCategory === 'therapeutic'
-                      ? 'bg-gradient-to-r from-[#003d4d] via-[#006070] to-[#00768a] text-white border-transparent shadow-md'
-                      : 'bg-slate-50 hover:bg-teal-50/70 text-slate-700 border-slate-200 hover:border-teal-200'
-                  }`}
-                >
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest block opacity-75">Category 01</span>
-                    <h3 className="text-xs sm:text-sm font-black mt-0.5">Therapeutic Area</h3>
-                  </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                    activeMainCategory === 'therapeutic' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-600'
-                  }`}>
-                    10 Areas
-                  </span>
-                </button>
-
-                {/* Category 2 */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveMainCategory('route');
-                  }}
-                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                    activeMainCategory === 'route'
-                      ? 'bg-gradient-to-r from-[#003d4d] via-[#006070] to-[#00768a] text-white border-transparent shadow-md'
-                      : 'bg-slate-50 hover:bg-teal-50/70 text-slate-700 border-slate-200 hover:border-teal-200'
-                  }`}
-                >
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest block opacity-75">Category 02</span>
-                    <h3 className="text-xs sm:text-sm font-black mt-0.5">Route of Admin</h3>
-                  </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                    activeMainCategory === 'route' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-600'
-                  }`}>
-                    Topical &amp; Oral
-                  </span>
-                </button>
-
-                {/* Category 3 */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveMainCategory('dosage');
-                  }}
-                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-center justify-between ${
-                    activeMainCategory === 'dosage'
-                      ? 'bg-gradient-to-r from-[#003d4d] via-[#006070] to-[#00768a] text-white border-transparent shadow-md'
-                      : 'bg-slate-50 hover:bg-teal-50/70 text-slate-700 border-slate-200 hover:border-teal-200'
-                  }`}
-                >
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest block opacity-75">Category 03</span>
-                    <h3 className="text-xs sm:text-sm font-black mt-0.5">Dosage Form</h3>
-                  </div>
-                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
-                    activeMainCategory === 'dosage' ? 'bg-white/20 text-white' : 'bg-slate-200/80 text-slate-600'
-                  }`}>
-                    12 Forms
-                  </span>
-                </button>
-              </div>
-
-              {/* Sub-Categories Horizontal Pills Bar according to active category */}
-              <div className="pt-2">
-                {activeMainCategory === 'therapeutic' && (
-                  <div className="space-y-1.5 animate-fade-in">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Filter by Therapeutic Sub-Category:
-                    </span>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedTherapeuticAreas([])}
-                        className={`px-3 py-1 rounded-full text-xs transition cursor-pointer ${
-                          selectedTherapeuticAreas.length === 0
-                            ? 'bg-[#00768a] text-white font-bold shadow-xs'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                        }`}
-                      >
-                        All Areas ({productsList.length})
-                      </button>
-                      {THERAPEUTIC_AREAS.map((area) => {
-                        const isSel = selectedTherapeuticAreas.includes(area);
-                        const cnt = counts.therapeuticCounts[area] || 0;
-                        return (
-                          <button
-                            key={area}
-                            type="button"
-                            onClick={() => toggleTherapeutic(area)}
-                            className={`px-3 py-1 rounded-full text-xs transition cursor-pointer flex items-center gap-1.5 ${
-                              isSel
-                                ? 'bg-[#00768a] text-white font-bold shadow-xs'
-                                : 'bg-slate-100 hover:bg-teal-50 text-slate-700 border border-transparent hover:border-teal-200'
-                            }`}
-                          >
-                            <span>{area}</span>
-                            <span className={`text-[10px] ${isSel ? 'text-teal-100' : 'text-slate-400'}`}>({cnt})</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {activeMainCategory === 'route' && (
-                  <div className="space-y-3 animate-fade-in">
-                    {/* Topical Stream */}
-                    <div className="p-3 rounded-xl bg-teal-50/50 border border-teal-100 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-black uppercase tracking-wider text-[#004f5e]">
-                          Topical Sub-Categories (Creams, Ointments, Gels, Solutions, Shampoos)
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => toggleRoute('Topical')}
-                          className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold transition cursor-pointer ${
-                            selectedRoutes.includes('Topical') ? 'bg-[#00768a] text-white' : 'bg-white text-[#00768a] border border-teal-200'
-                          }`}
-                        >
-                          {selectedRoutes.includes('Topical') ? '✓ Filtered: Topical' : 'Select All Topical'}
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                        {ROUTES[0].subcategories.map((sub) => (
-                          <span
-                            key={sub}
-                            onClick={() => {
-                              setSelectedRoutes(['Topical']);
-                              setSearchQuery(sub);
-                            }}
-                            className="px-2.5 py-1 rounded-lg bg-white border border-teal-100 text-[#004f5e] text-[11px] font-semibold hover:border-teal-400 hover:bg-teal-50 transition cursor-pointer"
-                          >
-                            • {sub}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Oral Stream */}
-                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-black uppercase tracking-wider text-slate-800">
-                          Oral / Systemic Sub-Categories (Tablets, Capsules, Softgels, Syrups)
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => toggleRoute('Oral / Systematic')}
-                          className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold transition cursor-pointer ${
-                            selectedRoutes.includes('Oral / Systematic') ? 'bg-[#00768a] text-white' : 'bg-white text-slate-700 border border-slate-300'
-                          }`}
-                        >
-                          {selectedRoutes.includes('Oral / Systematic') ? '✓ Filtered: Oral' : 'Select All Oral'}
-                        </button>
-                      </div>
-                      <div className="flex items-center gap-1.5 flex-wrap pt-1">
-                        {ROUTES[1].subcategories.map((sub) => (
-                          <span
-                            key={sub}
-                            onClick={() => {
-                              setSelectedRoutes(['Oral / Systematic']);
-                              setSearchQuery(sub);
-                            }}
-                            className="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-[11px] font-semibold hover:border-teal-400 hover:bg-teal-50 transition cursor-pointer"
-                          >
-                            • {sub}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeMainCategory === 'dosage' && (
-                  <div className="space-y-1.5 animate-fade-in">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                      Filter by Dosage Form:
-                    </span>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedDosageForms([])}
-                        className={`px-3 py-1 rounded-full text-xs transition cursor-pointer ${
-                          selectedDosageForms.length === 0
-                            ? 'bg-[#00768a] text-white font-bold shadow-xs'
-                            : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                        }`}
-                      >
-                        All Dosage Forms
-                      </button>
-                      {DOSAGE_FORMS.map((form) => {
-                        const isSel = selectedDosageForms.includes(form);
-                        const cnt = counts.dosageCounts[form] || 0;
-                        return (
-                          <button
-                            key={form}
-                            type="button"
-                            onClick={() => toggleDosageForm(form)}
-                            className={`px-3 py-1 rounded-full text-xs transition cursor-pointer flex items-center gap-1.5 ${
-                              isSel
-                                ? 'bg-[#00768a] text-white font-bold shadow-xs'
-                                : 'bg-slate-100 hover:bg-teal-50 text-slate-700 border border-transparent hover:border-teal-200'
-                            }`}
-                          >
-                            <span>{form}</span>
-                            <span className={`text-[10px] ${isSel ? 'text-teal-100' : 'text-slate-400'}`}>({cnt})</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
+          <main className="min-w-0 w-full md:flex-1 space-y-6">
             {/* Top Toolbar */}
             <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -859,32 +752,34 @@ export default function ProductsPage() {
                 </button>
               </div>
             ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2.5 sm:gap-4">
                 {pagedProducts.map((product) => {
                   const colors = getCategoryColor(product.therapeuticArea);
                   return (
                     <div
                       key={product.id}
-                      className={`bg-white rounded-2xl border border-slate-200/90 ${colors.bg} shadow-2xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group`}
+                      className={`group relative bg-white rounded-2xl border ${colors.border} shadow-[0_10px_30px_-10px_rgba(0,61,77,0.22)] hover:shadow-[0_24px_50px_-12px_rgba(0,118,138,0.38)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden`}
                     >
-                      <div className="p-5">
-                        {/* Category & Dosage Badge */}
-                        <div className="flex items-center justify-between gap-2 mb-3">
-                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${colors.badge}`}>
+                      {/* Full-bleed packshot cover — runs from card edge down to the title */}
+                      <div className={`relative w-full h-40 sm:h-44 overflow-hidden bg-gradient-to-br ${colors.cover} flex items-center justify-center p-5`}>
+                        <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/40 blur-2xl pointer-events-none" />
+                        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-white via-white/60 to-transparent pointer-events-none" />
+                        <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2 z-10">
+                          <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${colors.badge} shadow-sm`}>
                             {product.therapeuticArea}
                           </span>
-                          <span className="text-[10px] font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md">
+                          <span className="text-[10px] font-semibold text-slate-600 bg-white/85 backdrop-blur px-2 py-0.5 rounded-md border border-white/70 shadow-sm">
                             {product.dosageForm}
                           </span>
                         </div>
-
-                        {/* High-Res Product Packshot */}
-                        <div className="relative h-44 w-full rounded-xl overflow-hidden mb-3.5 bg-gradient-to-b from-slate-50 via-teal-50/10 to-slate-50/60 border border-slate-100 flex items-center justify-center p-3">
+                        <div className="relative z-10 scale-110 group-hover:scale-125 transition-transform duration-500">
                           <ProductPackshot product={product as any} />
                         </div>
+                      </div>
 
+                      <div className="p-4 sm:p-5">
                         {/* Title & Generic Composition */}
-                        <h3 className="font-black text-base text-[#003d4d] group-hover:text-[#00768a] transition-colors leading-tight">
+                        <h3 className={`font-black text-sm sm:text-[15px] text-[#003d4d] ${colors.text} transition-colors leading-tight`}>
                           {product.brandName}
                         </h3>
                         <p className="text-xs font-semibold text-slate-500 mt-1 leading-tight line-clamp-1">
@@ -904,37 +799,14 @@ export default function ProductsPage() {
                       </div>
 
                       {/* Card Footer Actions */}
-                      <div className="p-3.5 bg-slate-50/80 border-t border-slate-100 flex flex-col gap-2">
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/products/${product.slug}`}
-                            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-2xs active:scale-98"
-                          >
-                            <span>View Product Details</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </Link>
-                          <button
-                            type="button"
-                            onClick={() => handleDownloadMonograph(product)}
-                            title="Download Official Monograph PDF"
-                            className="p-2 rounded-xl bg-white hover:bg-teal-50 border border-teal-200 text-[#00768a] transition cursor-pointer"
-                          >
-                            <Download className="w-4 h-4" />
-                          </button>
-                        </div>
-                        <div className="flex items-center justify-between text-[10px] text-slate-500 pt-1 border-t border-slate-200/60">
-                          <span className="font-medium text-emerald-700 flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3 text-emerald-600" />
-                            WHO-GMP Quality
-                          </span>
-                          <Link
-                            href={`/for-doctors/batch-analysis-report?q=${encodeURIComponent(product.brandName)}`}
-                            className="text-teal-700 hover:underline font-semibold flex items-center gap-1"
-                          >
-                            <FileCheck2 className="w-3 h-3 text-[#00768a]" />
-                            <span>COA Release</span>
-                          </Link>
-                        </div>
+                      <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between gap-2">
+                        <Link
+                          href={`/products/${product.slug}`}
+                          className={`w-full inline-flex items-center justify-center gap-1 py-2 px-2 rounded-xl ${colors.btn} text-white text-[11px] sm:text-xs font-bold transition shadow-2xs active:scale-98`}
+                        >
+                          <span>View Product Details</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </Link>
                       </div>
                     </div>
                   );
@@ -975,19 +847,11 @@ export default function ProductsPage() {
                       <div className="flex items-center gap-2 shrink-0">
                         <Link
                           href={`/products/${product.slug}`}
-                          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#00768a] hover:bg-[#005f70] text-white text-xs font-bold transition shadow-2xs"
+                          className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl ${colors.btn} text-white text-xs font-bold transition shadow-2xs`}
                         >
                           <span>Details</span>
                           <ArrowRight className="w-3.5 h-3.5" />
                         </Link>
-                        <button
-                          type="button"
-                          onClick={() => handleDownloadMonograph(product)}
-                          title="Download Official Monograph PDF"
-                          className="p-2 rounded-xl bg-white hover:bg-teal-50 border border-teal-200 text-[#00768a] transition cursor-pointer"
-                        >
-                          <Download className="w-4 h-4" />
-                        </button>
                       </div>
                     </div>
                   );
@@ -1025,7 +889,7 @@ export default function ProductsPage() {
       {/* 3. PARTNERSHIP & HEALTHCARE CALLOUT BANNER               */}
       {/* ========================================================= */}
       <section className="bg-gradient-to-r from-teal-50 via-cyan-50/60 to-white border-t border-teal-100 py-12 lg:py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-4">
+        <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-16 text-center space-y-4">
           <span className="text-xs font-black tracking-widest text-[#006070] uppercase block">
             COLLABORATE WITH RYAN DERMACEUTICS
           </span>
@@ -1053,14 +917,6 @@ export default function ProductsPage() {
           </div>
         </div>
       </section>
-
-      {/* DOWNLOAD TOAST NOTIFICATION */}
-      {downloadToast && (
-        <div className="fixed bottom-6 right-6 z-[99999] bg-[#003d4d] text-white px-5 py-3 rounded-2xl shadow-2xl border border-teal-400 flex items-center gap-3 animate-fade-in">
-          <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0" />
-          <span className="text-xs font-bold">{downloadToast}</span>
-        </div>
-      )}
 
       <RyanFooter />
     </div>
